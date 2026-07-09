@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Fluency in 4 Weeks — Deputy CAIO Learning Dashboard</title>
+<style>
+  :root{
+    --crimson:#990000; --crimson-dark:#7a0000; --ink:#1c1f23; --muted:#5c6470;
+    --bg:#f7f6f4; --card:#ffffff; --line:#e3e0db; --gold:#f5b800;
+    --green:#0e7a3c; --tag-bg:#f0ece6;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:Georgia,'Times New Roman',serif; background:var(--bg); color:var(--ink); line-height:1.55;}
+  .sans{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;}
+  header{background:var(--crimson); color:#fff; padding:28px 32px 22px;}
+  header h1{font-size:1.7rem; font-weight:700; letter-spacing:-.01em;}
+  header p{opacity:.92; margin-top:6px; font-size:1rem; max-width:900px;}
+  .progress-wrap{background:var(--crimson-dark); padding:12px 32px; color:#fff; display:flex; align-items:center; gap:16px; flex-wrap:wrap;}
+  .pbar{flex:1; min-width:200px; height:10px; background:rgba(255,255,255,.25); border-radius:5px; overflow:hidden;}
+  .pbar-fill{height:100%; background:var(--gold); width:0%; transition:width .3s;}
+  .ptext{font-size:.85rem; white-space:nowrap;}
+  nav{display:flex; gap:0; background:var(--card); border-bottom:2px solid var(--line); padding:0 24px; overflow-x:auto; position:sticky; top:0; z-index:5;}
+  nav button{border:none; background:none; padding:14px 18px; font-size:.92rem; cursor:pointer; color:var(--muted); border-bottom:3px solid transparent; white-space:nowrap;}
+  nav button.active{color:var(--crimson); border-bottom-color:var(--crimson); font-weight:600;}
+  nav button:hover{color:var(--crimson);}
+  main{max-width:1080px; margin:0 auto; padding:28px 24px 80px;}
+  .panel{display:none;} .panel.active{display:block;}
+  h2{font-size:1.35rem; margin-bottom:6px; color:var(--crimson);}
+  h3{font-size:1.05rem; margin:22px 0 10px;}
+  .lede{color:var(--muted); margin-bottom:18px; max-width:820px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px 20px; margin-bottom:14px;}
+  .session{display:flex; gap:14px; align-items:flex-start;}
+  .session input[type=checkbox]{margin-top:5px; width:17px; height:17px; accent-color:var(--crimson); cursor:pointer; flex-shrink:0;}
+  .session.done .s-title{text-decoration:line-through; color:var(--muted);}
+  .s-title{font-weight:600;}
+  .s-title a{color:var(--crimson); text-decoration:none; border-bottom:1px dotted var(--crimson);}
+  .s-title a:hover{border-bottom-style:solid;}
+  .s-note{color:var(--muted); font-size:.92rem; margin-top:3px;}
+  .meta{display:flex; gap:8px; margin-top:7px; flex-wrap:wrap;}
+  .tag{font-size:.72rem; padding:2px 9px; border-radius:20px; background:var(--tag-bg); color:#4a4438; text-transform:uppercase; letter-spacing:.05em;}
+  .tag.time{background:#fdf3d0; color:#7a5c00;}
+  .tag.video{background:#e8eef8; color:#1f4e96;} .tag.reading{background:#eaf4ea; color:#1f6b33;}
+  .tag.course{background:#f3e8f6; color:#6b2e7d;} .tag.hands-on{background:#fdeaea; color:#8f1d1d;}
+  .tag.exercise{background:#fff0e0; color:#8a4b00;} .tag.skim{background:#eef1f4; color:#4a5561;}
+  .week-head{display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px; margin-bottom:4px;}
+  .hours{font-size:.85rem; color:var(--muted);}
+  .goalbox{background:#fbf7ee; border-left:4px solid var(--gold); padding:12px 16px; border-radius:0 8px 8px 0; margin:12px 0 18px; font-size:.95rem;}
+  .deliverable{background:#f3f7f3; border-left:4px solid var(--green); padding:12px 16px; border-radius:0 8px 8px 0; margin-top:18px; font-size:.95rem;}
+  .deliverable strong{color:var(--green);}
+  #gsearch{width:100%; padding:11px 14px; border:1px solid var(--line); border-radius:8px; font-size:1rem; margin-bottom:16px; font-family:inherit;}
+  .gcat{margin:26px 0 4px; font-size:.8rem; text-transform:uppercase; letter-spacing:.1em; color:var(--crimson); font-weight:700; border-bottom:2px solid var(--line); padding-bottom:6px;}
+  .term{padding:13px 4px; border-bottom:1px solid var(--line);}
+  .term dt{font-weight:700; margin-bottom:3px;}
+  .term dd{color:#333a42; font-size:.95rem;}
+  .term .also{font-size:.83rem; color:var(--muted); font-style:italic;}
+  .tipnum{display:inline-block; background:var(--crimson); color:#fff; border-radius:50%; width:26px; height:26px; text-align:center; line-height:26px; font-size:.85rem; margin-right:10px; flex-shrink:0; font-weight:700;}
+  .tip{display:flex; align-items:flex-start; margin-bottom:14px;}
+  .footer-note{margin-top:40px; font-size:.85rem; color:var(--muted); border-top:1px solid var(--line); padding-top:14px;}
+  @media (max-width:640px){ header{padding:20px;} main{padding:20px 14px 60px;} }
+</style>
+</head>
+<body>
+<header class="sans">
+  <h1>AI Fluency in Four Weeks</h1>
+  <p>A 32-hour curriculum for the incoming Deputy Chief AI Innovation Officer — from neurons to diffusion to governance, built entirely from free resources.</p>
+</header>
+<div class="progress-wrap sans">
+  <div class="pbar"><div class="pbar-fill" id="pfill"></div></div>
+  <div class="ptext" id="ptext">0 of 0 sessions complete</div>
+</div>
+<nav class="sans" id="nav"></nav>
+<main id="main"></main>
+
+<script>
+/* ---------- GLOSSARY ---------- */
+const GLOSSARY = [
+["Foundations: How Neural Networks Compute","",""],
+["Neural network","A function built from layers of simple units, each computing a weighted sum of its inputs and passing the result through a nonlinearity. Stacked deep enough and trained on enough data, these layers learn hierarchies of features — edges become shapes become faces; letters become words become meaning. Every system discussed below is some arrangement of this one idea."],
+["Parameters (weights)","The adjustable numbers inside a neural network — the knobs training turns. When a vendor says their model has 70 billion parameters, they mean 70 billion of these numbers. Parameter count is a rough (and increasingly unreliable) proxy for capability."],
+["Loss function","A single number measuring how wrong the model's current output is compared to the desired output. All of training is the attempt to push this number down. Choosing what to measure as loss is choosing what the model will learn to care about."],
+["Gradient descent","The optimization algorithm behind essentially all modern AI: compute which direction of change to each parameter would reduce the loss, then nudge every parameter slightly in that direction. Repeat billions of times."],
+["Backpropagation","The algorithm that makes gradient descent tractable — an efficient application of the calculus chain rule that computes, in one backward pass through the network, how much each of billions of parameters contributed to the error."],
+["Training vs. inference","Training is the expensive, one-time process of setting the parameters (months, thousands of GPUs). Inference is running the finished model to answer a query (milliseconds to minutes). Vendors' costs, latency promises, and privacy claims all hinge on which one they're talking about."],
+["Tokenization","Text is split into 'tokens' — chunks of roughly 3–4 characters — and each is mapped to an integer before the model ever sees it. Explains many quirks: why models miscount letters in words, why some languages cost more per API call, and why pricing is quoted per token."],
+["Embedding","The representation of a token, sentence, or document as a long list of numbers (a vector) positioned so that similar meanings land near each other in space. Embeddings are the currency of modern AI — they're how search, RAG, and recommendation systems compare meaning rather than keywords."],
+["Transformer","The neural network architecture (from Google's 2017 paper 'Attention Is All You Need') behind virtually every frontier model. Its key trick, attention, lets it process all tokens in a sequence in parallel and learn which words should inform which others. The 'T' in GPT."],
+["Attention","The mechanism at the heart of transformers: every token computes how relevant every other token in the context is to it, and pulls in information accordingly. It's why models handle 'it' referring to something ten sentences back. Its cost grows with the square of sequence length — the root of context-window limits."],
+["Context window","The maximum amount of text (in tokens) a model can consider at once — its working memory. Everything outside the window effectively doesn't exist for the model. Vendor claims about huge context windows deserve scrutiny: retrieval quality often degrades in the middle of very long contexts."],
+["Compute (FLOPs) & GPUs","Training is measured in floating-point operations (FLOPs); the hardware is GPUs or custom accelerators (TPUs, etc.). Compute — not algorithms — has been the dominant driver of capability gains, which is why AI strategy is inseparable from hardware, energy, and budget conversations."],
+
+["Training & Alignment: How Models Are Made","",""],
+["Pretraining","Phase one of building an LLM: train the network on trillions of tokens of internet text with one simple objective — predict the next token. This is where nearly all the compute goes and where the model absorbs its knowledge of language, facts, and reasoning patterns."],
+["Self-supervised learning","Learning from data that supplies its own labels — no human annotation required. Next-token prediction is self-supervised: the 'right answer' is just the text that actually comes next. This is what unlocked training on internet-scale data."],
+["Next-token prediction","The deceptively simple objective underlying LLMs: given text so far, predict the probability of every possible next token. Getting extremely good at this turns out to require modeling grammar, facts, logic, and even theory of mind — which is why the objective produces such general capability."],
+["Scaling laws","The empirical finding that model capability improves smoothly and predictably as you increase compute, data, and parameters together. Scaling laws are why labs bet billions on bigger training runs — and the debate about whether they're flattening is the central strategic question in AI."],
+["Emergent capabilities","Abilities that appear (or appear to appear) somewhat abruptly at scale rather than gradually — e.g., multi-step arithmetic or translation. Contested territory: some researchers argue emergence is partly an artifact of how we measure. Useful skeptical lens for vendor claims."],
+["Supervised fine-tuning (SFT)","Phase two: take the pretrained model and train it further on curated examples of high-quality question-answer conversations, teaching it to behave like an assistant rather than an autocomplete engine."],
+["RLHF","Reinforcement Learning from Human Feedback — phase three. Humans rank pairs of model outputs; those rankings train a 'reward model' that scores responses automatically; the LLM is then optimized against that score. RLHF is why ChatGPT feels helpful and polite — and the source of failure modes like sycophancy and reward gaming."],
+["Reward model","A separate neural network trained to predict which of two responses a human would prefer, used as a scalable stand-in for human judgment during RLHF. When models learn to exploit gaps between the reward model and what humans actually want, that's 'reward hacking.'"],
+["Constitutional AI / RLAIF","Anthropic's approach of replacing much of the human feedback in RLHF with AI feedback guided by an explicit written 'constitution' of principles. More broadly, RLAIF (RL from AI Feedback) uses models to supervise models — increasingly standard as capabilities outpace what humans can cheaply evaluate."],
+["Reasoning models & test-time compute","A post-2024 shift: instead of only making training bigger, let the model 'think longer' at inference — generating extended internal chains of reasoning before answering (OpenAI's o-series, DeepSeek-R1, Claude's extended thinking). Trained with reinforcement learning on problems with checkable answers. Changed the economics: capability now scales with inference spend too."],
+["Chain of thought (CoT)","Prompting or training a model to produce intermediate reasoning steps before its final answer, which markedly improves performance on multi-step problems. The visible 'thinking' of reasoning models — though research cautions the stated chain doesn't always reflect the actual computation."],
+["Mixture of experts (MoE)","An architecture where only a fraction of the model's parameters activate for any given token — a routing network picks which 'experts' to consult. How modern models get huge total capacity while keeping inference cost manageable. When a vendor cites total vs. active parameters, this is why."],
+["Distillation","Training a small, cheap model to imitate the outputs of a large, expensive one — retaining much of the capability at a fraction of the inference cost. Ubiquitous in production, and a live controversy when done across company lines against terms of service."],
+["Quantization","Compressing a model by storing its parameters at lower numerical precision (e.g., 4-bit instead of 16-bit), shrinking memory and cost with modest quality loss. Why capable models can now run on a laptop — relevant to any on-premises or privacy-driven deployment conversation."],
+
+["Generative Media: Diffusion & Beyond","",""],
+["Generative vs. discriminative","Discriminative models classify or predict labels for existing data (is this email spam?). Generative models learn the underlying distribution of the data well enough to produce new samples from it (write an email; paint an image). The entire current wave is generative."],
+["Diffusion model","The technology behind most AI image, video, and audio generation (Stable Diffusion, Midjourney, Sora). Training: take real images and progressively corrupt them with noise, teaching the network to reverse each small step. Generation: start from pure random noise and iteratively denoise, with a text prompt steering each step toward matching imagery. Intuition: a sculptor who has learned to see the statue inside the static."],
+["Latent space","A compressed, learned representation where each point corresponds to a possible output and nearby points correspond to similar outputs. Modern 'latent diffusion' runs the denoising process in this compact space rather than on raw pixels — the efficiency breakthrough that made Stable Diffusion feasible."],
+["VAE (variational autoencoder)","A network that learns to compress data into latent space and reconstruct it. In image generators, the VAE is the translator: it shrinks images into latents for diffusion to work on, then decodes the finished latent back into pixels."],
+["CLIP / multimodal embeddings","A model trained on millions of image-caption pairs to place images and text into the same embedding space, so 'a photo of a dog' and an actual dog photo land near each other. This shared space is how text prompts steer image generation and how models 'see.'"],
+["GAN (generative adversarial network)","The pre-diffusion generation technique: a generator network tries to fool a discriminator network that judges real vs. fake, and they improve in competition. Largely superseded by diffusion for images, but the term still circulates and the adversarial idea recurs across ML."],
+["Autoregressive generation","Generating output one token at a time, each conditioned on everything so far — how LLMs write. Contrast with diffusion, which refines a whole canvas at once. The two paradigms are now cross-pollinating (diffusion-based text models, autoregressive image models), a genuine research frontier."],
+["World model","A model that learns the dynamics of an environment — how scenes evolve, how objects interact — well enough to simulate it. Video generators like Sora and interactive systems like DeepMind's Genie are argued to be early world models; the term signals ambitions beyond media generation toward robotics and planning."],
+["Multimodal model","A single model that natively handles multiple data types — text, images, audio, video — in and/or out. The frontier default: GPT-5-class and Claude and Gemini models all accept images; increasingly they generate across modalities too."],
+
+["Applied Systems: What Vendors Are Actually Selling","",""],
+["Foundation model","A large model pretrained on broad data and adapted to many downstream tasks — the 'platform' layer of the AI economy. Most vendor products are thin-to-thick layers built atop a handful of foundation models, a fact worth surfacing in any procurement conversation."],
+["System prompt / prompt engineering","The system prompt is hidden instruction text that configures a model's behavior for an application; prompt engineering is the craft of writing inputs that elicit reliable outputs. Much commercial 'secret sauce' is, at bottom, a well-tuned system prompt over someone else's foundation model."],
+["Hallucination","A model confidently generating false information — fabricated citations, invented facts. Not a bug to be patched but a structural property of next-token prediction: the model outputs what is plausible, not what is verified. Mitigations (RAG, citations, abstention training) reduce but do not eliminate it."],
+["RAG (retrieval-augmented generation)","Instead of relying on what the model memorized in training, first retrieve relevant documents (via embedding search over your own content) and put them in the context window, then have the model answer from those. The standard pattern for grounding AI in institutional knowledge — course catalogs, policy libraries, research corpora."],
+["Vector database","A database optimized for storing embeddings and finding nearest neighbors fast — the retrieval engine under RAG. When a vendor says 'we index your documents,' they typically mean: chunk, embed, store here."],
+["AI agent","A model given tools, memory, and a loop: it plans, acts (calls APIs, searches, writes files), observes results, and iterates toward a goal with reduced human intervention. The dominant product paradigm of 2025–26 — and the one deserving the most governance scrutiny, since agents act rather than merely advise."],
+["Tool use / function calling","The mechanism that lets a model invoke external software — search engines, databases, calendars, code execution — by emitting structured calls that an orchestration layer executes. The bridge from 'chatbot' to 'agent.'"],
+["MCP (Model Context Protocol)","An open standard (originated by Anthropic, since widely adopted) for connecting AI models to external tools and data sources — a universal adapter so every integration doesn't have to be custom-built. Expect it in vendor architecture diagrams."],
+["Fine-tune vs. RAG vs. prompt","The practical decision hierarchy for adapting AI to your institution: prompting is cheapest and usually sufficient; RAG adds your knowledge without retraining; fine-tuning changes model behavior itself and is warranted least often. A vendor leading with fine-tuning should be asked why the cheaper rungs don't suffice."],
+["Evals & benchmarks","Structured tests of model capability (MMLU, HLE, SWE-bench) or head-to-head human preference rankings (LMArena). Essential but gameable: training data contamination, teaching-to-the-test, and benchmark saturation are chronic. 'Which evals, run by whom, on what version?' is a strong vendor question."],
+
+["Governance, Safety & Policy","",""],
+["Alignment","The problem of ensuring AI systems reliably pursue the objectives and values their operators intend — spanning today's practical work (RLHF, refusal training) and longer-horizon concerns about highly capable systems. The organizing concept of AI safety research."],
+["Interpretability","Research into what is actually happening inside a model's billions of parameters — identifying internal features and circuits that correspond to concepts. Anthropic's work here (dictionary learning, circuit tracing) is the field's most public thread. Matters for policy: you cannot fully audit what you cannot inspect."],
+["Red teaming","Systematically attacking a model or AI application to surface harmful behaviors, jailbreaks, data leaks, and failure modes before deployment. Now an expected line item in responsible deployment — ask vendors who red-teams their product and how often."],
+["Model card / system card","Structured documentation accompanying a model release: intended uses, training data description, evaluation results, limitations, safety testing. The AI analogue of a nutrition label; its presence and quality is a fast signal of vendor maturity."],
+["NIST AI RMF","The U.S. National Institute of Standards and Technology's voluntary AI Risk Management Framework, organized around four functions: Govern, Map, Measure, Manage. The most common shared vocabulary for AI risk programs in U.S. institutions, including universities."],
+["ISO/IEC 42001","The international management-system standard for AI (the ISO 9001 of AI governance): certifiable organizational processes for responsible AI development and deployment. Increasingly cited in procurement; a reasonable thing to ask vendors whether they hold or track."],
+["EU AI Act","The world's first comprehensive AI law, phasing in through 2025–27: risk-tiered obligations from banned practices to high-risk system requirements (which include AI in education and admissions). Relevant even in Indiana — it shapes global vendor behavior the way GDPR did."],
+["Open weights vs. closed","Open-weight models (Llama, DeepSeek, Mistral) publish their parameters for anyone to download, run, and modify; closed models (GPT, Claude, Gemini) are accessible only through APIs. The tradeoff — control, cost, and privacy vs. capability, support, and liability — is a recurring university decision."],
+["Data provenance & training data","Where a model's training data came from, whether it was licensed, and whether your institution's data will be used for future training. The last question belongs in every contract: 'Is our data used to train your models, and can we opt out in writing?'"]
+];
+
+/* ---------- WEEKS ---------- */
+const WEEKS = [
+{
+title:"Week 1 — The Machinery: Neural Nets, Transformers, LLMs",
+hours:"~8 hours",
+goal:"By Friday you can explain, unaided, how a transformer turns tokens into predictions — and why 'it's just autocomplete' is both true and deeply misleading.",
+sessions:[
+{t:"3Blue1Brown — Neural networks, chapters 1–4", u:"https://www.3blue1brown.com/topics/neural-networks", type:"video", time:"75 min", n:"The best visual explanation of networks, gradient descent, and backpropagation ever made. Watch chapters 1–4 (skip the calculus appendix)."},
+{t:"3Blue1Brown — Large Language Models explained briefly", u:"https://www.youtube.com/watch?v=LPZh9BOjkQs", type:"video", time:"10 min", n:"The 8-minute overview that frames everything else this month."},
+{t:"3Blue1Brown — Transformers & Attention (chapters 5–7)", u:"https://www.3blue1brown.com/lessons/gpt", type:"video", time:"75 min", n:"How GPT actually works: embeddings, attention, MLP layers. The single highest-value 75 minutes of the month. Rewatch the attention chapter if needed."},
+{t:"Karpathy — Intro to Large Language Models", u:"https://www.youtube.com/watch?v=zjkBMFhNj_g", type:"video", time:"60 min", n:"OpenAI co-founder's famous general-audience talk: what an LLM is as an artifact (two files!), how it's trained, where it's going."},
+{t:"Jay Alammar — The Illustrated Transformer", u:"https://jalammar.github.io/illustrated-transformer/", type:"reading", time:"60 min", n:"The canonical visual walkthrough. Read after the 3B1B videos — it will consolidate rather than introduce."},
+{t:"Hands-on: play with a tokenizer", u:"https://tiktokenizer.vercel.app/", type:"hands-on", time:"30 min", n:"Paste text, watch it become tokens. Try numbers, Spanish, code, your own name. You will never be confused by per-token pricing again."},
+{t:"Glossary: self-test the Foundations section", u:"", type:"exercise", time:"45 min", n:"Cover the definitions in the Glossary tab; recall each aloud before revealing. Flag misses for Week 2 review."},
+{t:"Feynman memo #1: 'How ChatGPT works' for a dean", u:"", type:"exercise", time:"75 min", n:"Write one page explaining transformers/LLMs to a non-technical dean, no jargon uncited. Writing it is the learning; the memo is a byproduct you can actually reuse."}
+],
+deliv:"One-page 'How LLMs work' memo, written for a non-technical university leader."
+},
+{
+title:"Week 2 — The Making Of: Pretraining, RLHF, Reasoning Models",
+hours:"~8 hours",
+goal:"You can narrate the full lifecycle of a frontier model — pretraining → SFT → RLHF → reasoning RL — and hold your own when a researcher mentions scaling laws or a vendor says 'aligned.'",
+sessions:[
+{t:"Karpathy — Deep Dive into LLMs like ChatGPT", u:"https://www.youtube.com/watch?v=7xTGNNLPyMI", type:"video", time:"3.5 hrs", n:"The centerpiece of the month: the entire training stack, hallucinations, RLHF and its failure modes, and mental models for using LLMs. Split across 2–3 sittings; take notes on the three training phases."},
+{t:"Hugging Face — Illustrating RLHF", u:"https://huggingface.co/blog/rlhf", type:"reading", time:"45 min", n:"The standard visual explainer of reward models and preference training. Read after Karpathy for reinforcement."},
+{t:"Anthropic — Constitutional AI (overview)", u:"https://www.anthropic.com/research/constitutional-ai-harmlessness-from-ai-feedback", type:"skim", time:"30 min", n:"Read the summary, not the paper: how AI feedback plus explicit principles substitutes for human labeling."},
+{t:"Sebastian Raschka — Understanding Reasoning LLMs", u:"https://magazine.sebastianraschka.com/p/understanding-reasoning-llms", type:"reading", time:"60 min", n:"The clearest account of the test-time-compute era: how o1/R1-style models are trained to 'think.' This is the most 2026-relevant hour of the week."},
+{t:"Anthropic — Tracing the thoughts of a language model", u:"https://www.anthropic.com/research/tracing-thoughts-language-model", type:"reading", time:"45 min", n:"Interpretability made vivid: what researchers actually find when they look inside. Excellent conference conversation material."},
+{t:"Epoch AI — Trends in AI (data explorer)", u:"https://epoch.ai/trends", type:"skim", time:"30 min", n:"Browse the compute and scaling charts. Ten minutes here gives you the quantitative backbone for any 'where is this going' discussion."},
+{t:"Glossary self-test: Training & Alignment section + Week 1 misses", u:"", type:"exercise", time:"30 min", n:"Spaced repetition pass — re-test last week's flagged terms first."},
+{t:"Feynman memo #2: 'What RLHF is and why it fails' for faculty senate", u:"", type:"exercise", time:"60 min", n:"One page: the three training phases, plus one honest paragraph on sycophancy and reward hacking. Different audience than memo #1 — that's deliberate."}
+],
+deliv:"One-page memo on how models are trained and aligned, including known failure modes."
+},
+{
+title:"Week 3 — Generative Media: Diffusion, Latent Space, World Models",
+hours:"~8 hours",
+goal:"'Diffusion' stops being a buzzword: you can explain denoising, latent space, and how text steers image generation — and speak credibly about video generation and world models.",
+sessions:[
+{t:"Computerphile — How AI Image Generators Work (Stable Diffusion)", u:"https://www.youtube.com/watch?v=1CIpzeNxIhU", type:"video", time:"20 min", n:"The gentlest correct introduction to diffusion. Start the week here."},
+{t:"Jay Alammar — The Illustrated Stable Diffusion", u:"https://jalammar.github.io/illustrated-stable-diffusion/", type:"reading", time:"60 min", n:"Visual walkthrough of the full pipeline: text encoder → diffusion in latent space → VAE decoder. This is where latent space clicks."},
+{t:"Lilian Weng — What are Diffusion Models?", u:"https://lilianweng.github.io/posts/2021-07-11-diffusion-models/", type:"skim", time:"60 min", n:"The canonical technical reference (by OpenAI's former safety lead). Read the prose and figures, skim the equations — you're here for the structure of the argument, not the derivations."},
+{t:"MIT Technology Review — How do AI models generate videos?", u:"https://www.technologyreview.com/2025/09/12/1123562/how-do-ai-models-generate-videos/", type:"reading", time:"25 min", n:"Extends diffusion to video (Sora, Veo): temporal consistency, why it's hard, why it's expensive."},
+{t:"Hugging Face Diffusion Course — Unit 1", u:"https://huggingface.co/learn/diffusion-course/unit0/1", type:"course", time:"90 min", n:"Free course with runnable Colab notebooks. Execute Unit 1's notebook and watch noise become images step by step — even just running cells and reading output builds real intuition."},
+{t:"Hands-on: generate and dissect", u:"", type:"hands-on", time:"60 min", n:"Use any free image tool (e.g., Stable Diffusion via Hugging Face Spaces). Vary prompts, steps, and guidance scale; narrate to yourself what the model is doing at each stage of the pipeline."},
+{t:"World models: DeepMind Genie / interactive environments", u:"https://deepmind.google/discover/blog/genie-2-a-large-scale-foundation-world-model/", type:"skim", time:"30 min", n:"Where generative media points next: models that simulate worlds, not just render clips. Useful for research-strategy conversations."},
+{t:"Glossary self-test (Generative Media) + Feynman memo #3: 'What diffusion is' for a vendor meeting", u:"", type:"exercise", time:"75 min", n:"Half a page, then a test: explain diffusion out loud in 90 seconds. If you can't, reread Alammar."}
+],
+deliv:"90-second spoken explanation of diffusion (practiced), plus half-page written version."
+},
+{
+title:"Week 4 — Systems & Stewardship: Agents, RAG, Evals, Governance",
+hours:"~8 hours",
+goal:"You can decode any vendor architecture slide (agents, RAG, MCP, evals), and you own a governance vocabulary — NIST RMF, ISO 42001, EU AI Act — mapped to your university's actual decisions.",
+sessions:[
+{t:"Anthropic — Building Effective Agents", u:"https://www.anthropic.com/research/building-effective-agents", type:"reading", time:"45 min", n:"The most-cited practical taxonomy of agent architectures: workflows vs. agents, when each is warranted. Directly reusable in vendor evaluation."},
+{t:"Hugging Face AI Agents Course — Unit 1", u:"https://huggingface.co/learn/agents-course/unit0/introduction", type:"course", time:"90 min", n:"Free certified course. Unit 1 covers agents, tools, and the reasoning-action loop. Skim the code; absorb the concepts."},
+{t:"Pinecone — Retrieval-Augmented Generation explained", u:"https://www.pinecone.io/learn/retrieval-augmented-generation/", type:"reading", time:"45 min", n:"RAG end to end: chunking, embeddings, vector search, grounding. Nearly every 'AI for your campus' product is this pattern."},
+{t:"Evals: browse HELM and LMArena", u:"https://crfm.stanford.edu/helm/", type:"hands-on", time:"45 min", n:"Stanford's HELM (transparent benchmarks) and lmarena.ai (human preference rankings). Learn what the leaderboards measure and how they're gamed."},
+{t:"NIST AI Risk Management Framework — core document", u:"https://www.nist.gov/itl/ai-risk-management-framework", type:"skim", time:"60 min", n:"Read the framework core: Govern / Map / Measure / Manage. This is the shared risk vocabulary of U.S. institutions; also note ISO/IEC 42001 as its certifiable cousin."},
+{t:"Stanford HAI — 2026 AI Index Report", u:"https://hai.stanford.edu/ai-index/2026-ai-index-report", type:"skim", time:"60 min", n:"Read the key takeaways and the Responsible AI + Education chapters. The single best source of citable numbers for your first semester of meetings."},
+{t:"EDUCAUSE — AI in higher education", u:"https://www.educause.edu/focus-areas-and-initiatives/policy-and-security/artificial-intelligence", type:"skim", time:"30 min", n:"How peer institutions are handling policy, procurement, and academic integrity. Also skim the EU AI Act summary at artificialintelligenceact.eu for the education-as-high-risk angle."},
+{t:"Capstone: briefing + vendor question bank", u:"", type:"exercise", time:"105 min", n:"Produce two artifacts: (1) a two-page 'State of AI for our university' briefing synthesizing all four weeks; (2) a 15-question vendor due-diligence bank drawn from this curriculum (training data use? which evals? red-teaming? RAG or fine-tuned? open or closed weights? NIST/ISO alignment?)."}
+],
+deliv:"Capstone: two-page leadership briefing + 15-question vendor due-diligence bank."
+}
+];
+
+/* ---------- RETENTION / STRATEGY ---------- */
+const STRATEGY = `
+<h2>How to Get the Most from 32 Hours</h2>
+<p class="lede">Candid feedback on the plan itself, then the scaffolding that will make it stick.</p>
+
+<h3>Three honest critiques of the framing</h3>
+<div class="card"><div class="tip"><span class="tipnum">1</span><div><strong>32 hours buys fluency, not expertise — and fluency is the right goal.</strong> Nobody becomes an AI expert in a month, PhD or not, and pretending otherwise leads to brittle overconfidence. What 32 well-spent hours genuinely buys: you will understand every term in a vendor pitch, follow a research talk's argument, and ask the question in the room that reveals whether someone knows what they're talking about. For a Deputy CAIO, that is the job. Calibrated confidence — knowing exactly where your understanding ends — will earn you more credibility with faculty than false depth.</div></div></div>
+<div class="card"><div class="tip"><span class="tipnum">2</span><div><strong>A definitions-first approach risks passive familiarity.</strong> Your instinct to start from a term list is good for coverage but dangerous for depth: recognizing a definition feels like knowing. The curriculum counters this by making you produce something every week — memos, spoken explanations, a capstone. Do not skip the exercises to fit in more reading; an hour of writing beats two hours of watching, every time. The research on the generation effect and retrieval practice is unambiguous here.</div></div></div>
+<div class="card"><div class="tip"><span class="tipnum">3</span><div><strong>Plan the maintenance orbit now.</strong> The field moves fast enough that a static month of learning depreciates ~30% per year. Before Week 4 ends, set a standing 1–2 hr/week habit: one newsletter for news (Import AI or The Batch), one for depth (Sebastian Raschka's Ahead of AI), the AI Index annually, and — most valuable — a monthly coffee with one technical faculty member where you make them explain their current work to you. Your role gives you access no course can match; use the humans.</div></div></div>
+
+<h3>Retention scaffolding (built into the curriculum)</h3>
+<div class="card"><div class="tip"><span class="tipnum">A</span><div><strong>Spaced self-testing.</strong> Each week's glossary self-test re-tests the previous week's misses first. Cover the definition, recall aloud, then reveal. Recall attempts — even failed ones — beat rereading by a wide margin.</div></div></div>
+<div class="card"><div class="tip"><span class="tipnum">B</span><div><strong>The Feynman memos are the curriculum.</strong> One page per week, each for a different real audience (dean, faculty senate, vendor). Explaining without jargon is the most sensitive test of understanding ever devised, and you finish the month with four reusable artifacts for your actual job.</div></div></div>
+<div class="card"><div class="tip"><span class="tipnum">C</span><div><strong>Interleave, don't binge.</strong> Spread each week over 3–4 sittings rather than one Saturday. Sleep consolidation between sessions is not optional equipment. The session list is ordered — videos first for intuition, readings to consolidate, production to test.</div></div></div>
+<div class="card"><div class="tip"><span class="tipnum">D</span><div><strong>Anchor to real decisions.</strong> As you learn each concept, attach it to a live question at your university: RAG → the chatbot proposal someone will pitch you; open weights → the research computing request; NIST RMF → your first policy draft. Concepts anchored to consequences don't fade.</div></div></div>
+<div class="card"><div class="tip"><span class="tipnum">E</span><div><strong>Use an AI assistant as a sparring partner, not a summarizer.</strong> After each session, have Claude or ChatGPT quiz you, challenge your memo drafts, and role-play a skeptical CS professor. Asking it to summarize the material for you defeats the purpose; asking it to find the holes in your explanation is the single best use of the technology for learning the technology.</div></div></div>
+
+<h3>If you find spare hours</h3>
+<div class="card"><p>Deeper optional tracks, in priority order: <a href="https://github.com/mlabonne/llm-course" style="color:var(--crimson)">mlabonne's LLM Course</a> (structured roadmap with notebooks), <a href="https://www.deeplearning.ai/short-courses/" style="color:var(--crimson)">DeepLearning.AI short courses</a> (free 1-hour targeted modules on RAG, agents, evals), and Karpathy's <a href="https://www.youtube.com/watch?v=kCc8FmEb1nY" style="color:var(--crimson)">Let's build GPT from scratch</a> if you ever want to see the machinery with your own eyes — it's 2 hours of code and it permanently demystifies the field.</p></div>
+`;
+
+/* ---------- RENDER ---------- */
+const main = document.getElementById('main');
+const nav = document.getElementById('nav');
+const tabs = [
+  {id:'glossary', label:'Glossary'},
+  ...WEEKS.map((w,i)=>({id:'w'+(i+1), label:'Week '+(i+1)})),
+  {id:'strategy', label:'Strategy & Retention'}
+];
+
+let store = {};
+try{ store = JSON.parse(localStorage.getItem('aiflu')||'{}'); }catch(e){ store = {}; }
+function save(){ try{ localStorage.setItem('aiflu', JSON.stringify(store)); }catch(e){} }
+
+/* glossary panel */
+let g = '<div class="panel" id="glossary"><h2>The Vocabulary of Modern AI</h2><p class="lede">Fifty-four terms, five layers of the stack. Enough to hold a substantive conversation with a computer scientist, a vendor, or a policymaker — and to know which is bluffing.</p><input id="gsearch" class="sans" placeholder="Filter terms… (e.g., diffusion, RLHF, agent)"><dl id="glist">';
+GLOSSARY.forEach(item=>{
+  if(item[1]==="" && item[2]===""){ g += '<div class="gcat sans gitem" data-t="">'+item[0]+'</div>'; }
+  else { g += '<div class="term gitem" data-t="'+(item[0]+' '+item[1]).toLowerCase().replace(/"/g,'')+'"><dt>'+item[0]+'</dt><dd>'+item[1]+'</dd></div>'; }
+});
+g += '</dl></div>';
+
+/* week panels */
+let wp = '';
+WEEKS.forEach((w,wi)=>{
+  wp += '<div class="panel" id="w'+(wi+1)+'"><div class="week-head"><h2>'+w.title+'</h2><span class="hours sans">'+w.hours+'</span></div>';
+  wp += '<div class="goalbox"><strong>Goal:</strong> '+w.goal+'</div>';
+  w.sessions.forEach((s,si)=>{
+    const id = 'w'+wi+'s'+si;
+    const done = store[id] ? ' done' : '';
+    const chk = store[id] ? ' checked' : '';
+    const title = s.u ? '<a href="'+s.u+'" target="_blank" rel="noopener">'+s.t+'</a>' : s.t;
+    wp += '<div class="card session'+done+'" id="card-'+id+'"><input type="checkbox" data-id="'+id+'"'+chk+'><div><div class="s-title">'+title+'</div><div class="s-note">'+s.n+'</div><div class="meta sans"><span class="tag '+s.type+'">'+s.type+'</span><span class="tag time">'+s.time+'</span></div></div></div>';
+  });
+  wp += '<div class="deliverable"><strong>Week '+(wi+1)+' deliverable:</strong> '+w.deliv+'</div></div>';
+});
+
+main.innerHTML = g + wp + '<div class="panel" id="strategy">'+STRATEGY+'</div>' +
+'<div class="footer-note sans">Built July 2026 · All resources free · Curriculum: conceptual depth with light math, scoped for a university AI strategy &amp; governance role. Progress saves in this browser.</div>';
+
+/* nav */
+tabs.forEach((t,i)=>{
+  const b = document.createElement('button');
+  b.textContent = t.label;
+  b.onclick = ()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById(t.id).classList.add('active');
+    window.scrollTo(0,0);
+  };
+  nav.appendChild(b);
+});
+nav.children[0].classList.add('active');
+document.getElementById('glossary').classList.add('active');
+
+/* checkboxes + progress */
+const total = WEEKS.reduce((a,w)=>a+w.sessions.length,0);
+function updateProgress(){
+  const done = Object.values(store).filter(Boolean).length;
+  document.getElementById('pfill').style.width = (100*done/total)+'%';
+  document.getElementById('ptext').textContent = done+' of '+total+' sessions complete';
+}
+document.querySelectorAll('.session input').forEach(cb=>{
+  cb.addEventListener('change',()=>{
+    store[cb.dataset.id] = cb.checked;
+    document.getElementById('card-'+cb.dataset.id).classList.toggle('done', cb.checked);
+    save(); updateProgress();
+  });
+});
+updateProgress();
+
+/* glossary search */
+document.getElementById('gsearch').addEventListener('input',e=>{
+  const q = e.target.value.toLowerCase().trim();
+  document.querySelectorAll('.gitem').forEach(el=>{
+    if(el.classList.contains('gcat')){ el.style.display = q ? 'none':''; return; }
+    el.style.display = (!q || el.dataset.t.includes(q)) ? '' : 'none';
+  });
+});
+</script>
+</body>
+</html>
