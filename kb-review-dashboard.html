@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IU Knowledge Base — AI Tools Content Review</title>
+  <link rel="stylesheet" href="https://unpkg.com/rivet-core@2.9.0/css/rivet.min.css">
+  <style>
+    /* Custom dashboard-only styles. Prefixed kb- so they never override Rivet (rvt-*) rules. */
+    body { background: #f6f7f8; }
+    .kb-hero { background: #ffffff; border-bottom: 4px solid #990000; }
+    .kb-generated { color: #4a4a4a; }
+    .kb-statgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
+    .kb-stat { background:#fff; border:1px solid #e0e0e0; border-radius:8px; padding:1rem 1.15rem; }
+    .kb-stat__num { font-size:2.1rem; font-weight:700; line-height:1.05; color:#191919; }
+    .kb-stat__label { font-size:.82rem; color:#4a4a4a; margin-top:.15rem; }
+    .kb-cardgrid { display:grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap:1rem; }
+    .kb-card { background:#fff; border:1px solid #e0e0e0; border-radius:8px; padding:1.1rem 1.15rem; display:flex; flex-direction:column; }
+    .kb-card__top { display:flex; justify-content:space-between; align-items:flex-start; gap:.75rem; }
+    .kb-kb { font-family:monospace; font-size:.78rem; color:#6b6b6b; }
+    .kb-title { font-weight:700; font-size:1.02rem; margin:.15rem 0 .35rem; line-height:1.25; }
+    .kb-meta { font-size:.78rem; color:#4a4a4a; margin-bottom:.5rem; }
+    .kb-scorewrap { display:flex; align-items:center; gap:.5rem; margin:.35rem 0 .6rem; }
+    .kb-bar { flex:1; height:9px; background:#ececec; border-radius:6px; overflow:hidden; }
+    .kb-bar__fill { height:100%; border-radius:6px; }
+    .kb-scorenum { font-weight:700; font-size:.9rem; min-width:2.6rem; text-align:right; }
+    .kb-band { display:inline-block; font-size:.72rem; font-weight:700; letter-spacing:.02em; padding:.12rem .5rem; border-radius:999px; text-transform:uppercase; }
+    .kb-band--strong { background:#e3f2e6; color:#0a5c2b; }
+    .kb-band--good { background:#e2eefb; color:#0a4c8b; }
+    .kb-band--fair { background:#fdf1dd; color:#8a5a00; }
+    .kb-band--needs { background:#fbe4e4; color:#8b1a1a; }
+    .kb-fill--strong { background:#1a8a45; }
+    .kb-fill--good { background:#1a6fc4; }
+    .kb-fill--fair { background:#e0a020; }
+    .kb-fill--needs { background:#c0392b; }
+    .kb-assess { font-size:.9rem; color:#292929; margin:.2rem 0 .5rem; }
+    .kb-cat { font-size:.72rem; color:#6b6b6b; text-transform:uppercase; letter-spacing:.03em; }
+    .kb-toggle { align-self:flex-start; margin-top:.4rem; }
+    .kb-detail { margin-top:.75rem; padding-top:.75rem; border-top:1px dashed #d8d8d8; }
+    .kb-detail[hidden] { display:none; }
+    .kb-h { font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:#4a4a4a; margin:.6rem 0 .3rem; }
+    .kb-issue { font-size:.85rem; margin:.28rem 0; padding-left:.1rem; }
+    .kb-tag { display:inline-block; font-size:.68rem; font-weight:700; padding:.06rem .4rem; border-radius:4px; margin-right:.4rem; vertical-align:middle; }
+    .kb-tag--Outdated { background:#fbe4e4; color:#8b1a1a; }
+    .kb-tag--Consistency { background:#efe4fb; color:#5b2a8b; }
+    .kb-tag--Confusing { background:#fdf1dd; color:#8a5a00; }
+    .kb-tag--Links { background:#e2eefb; color:#0a4c8b; }
+    .kb-tag--Structure { background:#e9edf0; color:#3a4a55; }
+    .kb-improve { font-size:.87rem; margin:.3rem 0; }
+    .kb-controls { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; margin:1rem 0; }
+    .kb-controls input, .kb-controls select { padding:.4rem .55rem; border:1px solid #c4c4c4; border-radius:6px; font-size:.88rem; }
+    .kb-filterbtn { cursor:pointer; border:1px solid #c4c4c4; background:#fff; border-radius:999px; padding:.3rem .8rem; font-size:.82rem; }
+    .kb-filterbtn[aria-pressed="true"] { background:#191919; color:#fff; border-color:#191919; }
+    .kb-list { margin:.4rem 0 0; padding-left:1.15rem; }
+    .kb-list li { margin:.35rem 0; font-size:.9rem; }
+    .kb-pri { border-left:5px solid #ccc; background:#fff; border:1px solid #e0e0e0; border-radius:6px; padding:.75rem .9rem; margin:.6rem 0; }
+    .kb-pri--high { border-left-color:#c0392b; }
+    .kb-pri--med { border-left-color:#e0a020; }
+    .kb-pri--low { border-left-color:#1a6fc4; }
+    .kb-pri__sev { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
+    .kb-roadmap { counter-reset: step; }
+    .kb-step { background:#fff; border:1px solid #e0e0e0; border-radius:8px; padding:1rem 1.15rem 1rem 3.2rem; position:relative; margin:.7rem 0; }
+    .kb-step::before { counter-increment: step; content: counter(step); position:absolute; left:1rem; top:1rem; width:1.7rem; height:1.7rem; background:#990000; color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.9rem; }
+    .kb-step__cite { font-size:.78rem; color:#6b6b6b; margin-top:.4rem; font-style:italic; }
+    .kb-empty { padding:1.5rem; text-align:center; color:#6b6b6b; }
+    .kb-legend { font-size:.8rem; color:#4a4a4a; margin-top:.5rem; }
+    .kb-legend span { margin-right:1rem; white-space:nowrap; }
+    .kb-dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:.25rem; vertical-align:baseline; }
+  </style>
+</head>
+<body>
+  <header class="rvt-header-wrapper">
+    <a class="rvt-header-wrapper__skip-link" href="#main-content">Skip to main content</a>
+    <div class="rvt-header-global">
+      <div class="rvt-container-lg">
+        <div class="rvt-lockup">
+          <div class="rvt-lockup__tab">
+            <svg xmlns="http://www.w3.org/2000/svg" class="rvt-lockup__trident" viewBox="0 0 28 34">
+              <path d="M-3.34344e-05 4.70897H8.83308V7.174H7.1897V21.1426H10.6134V2.72321H8.83308V0.121224H18.214V2.65476H16.2283V21.1426H19.7889V7.174H18.214V4.64047H27.0471V7.174H25.0614V23.6761L21.7746 26.8944H16.2967V30.455H18.214V33.8787H8.76463V30.592H10.6819V26.8259H5.20403L1.91726 23.6077V7.174H-3.34344e-05V4.70897Z" fill="currentColor"></path>
+            </svg>
+          </div>
+          <div class="rvt-lockup__body">
+            <span class="rvt-lockup__title">Knowledge Base</span>
+            <span class="rvt-lockup__subtitle">AI Tools Content Review</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" class="rvt-container-lg rvt-p-tb-md">
+    <div class="kb-hero rvt-p-all-md rvt-m-bottom-md" style="border-radius:8px;">
+      <h1 class="rvt-ts-32 rvt-text-bold rvt-m-bottom-xs">AI Tools Knowledge Base — Content Review</h1>
+      <p class="rvt-ts-16 rvt-m-bottom-xs">A consistency, currency, and clarity audit of 21 IU Knowledge Base articles covering enterprise-supported AI tools, with per-article quality feedback and a research-grounded improvement plan.</p>
+      <p class="kb-generated rvt-ts-14 rvt-m-remove-bottom">Prepared for Clinton McKay · Content captured from servicenow.iu.edu on <strong>July 9, 2026</strong> · Scores are an editorial assessment, not an official IU rating.</p>
+    </div>
+
+    <div class="rvt-tabs" data-rvt-tabs="kb-tabs">
+      <div class="rvt-tabs__tablist" aria-label="Review sections" data-rvt-tablist>
+        <button class="rvt-tabs__tab" data-rvt-tab="t-overview">Overview</button>
+        <button class="rvt-tabs__tab" data-rvt-tab="t-articles">Articles (21)</button>
+        <button class="rvt-tabs__tab" data-rvt-tab="t-cross">Cross-article issues</button>
+        <button class="rvt-tabs__tab" data-rvt-tab="t-update">Update now</button>
+        <button class="rvt-tabs__tab" data-rvt-tab="t-roadmap">Improvement roadmap</button>
+      </div>
+
+      <!-- OVERVIEW -->
+      <div class="rvt-tabs__panel" data-rvt-tab-panel="t-overview" tabindex="0">
+        <h2 class="rvt-ts-26 rvt-text-bold rvt-m-top-md rvt-m-bottom-sm">Executive summary</h2>
+        <div class="kb-statgrid rvt-m-bottom-md" id="statGrid"></div>
+
+        <div class="rvt-alert rvt-alert--info" role="alert" aria-labelledby="ov-title" data-rvt-alert="info">
+          <div class="rvt-alert__title" id="ov-title">The content is solid but drifting</div>
+          <p class="rvt-alert__message">Individually, most of these articles are accurate and readable — the REALLMS set and the newest teaching-tool pages are genuinely strong. The weakness is at the <em>system</em> level: the same facts are re-stated in many places and have quietly fallen out of sync (model names, data-classification wording, which tools are "recommended"), a recently-edited flagship article still carries 2021-era claims, and a scatter of broken links and copy-paste errors erode trust. These are governance problems, not writing problems — and they're fixable with single-sourcing, a shared template, and a review cadence.</p>
+        </div>
+
+        <div class="rvt-grid rvt-m-top-md">
+          <div class="rvt-grid__item-7-lg-up">
+            <h3 class="rvt-ts-20 rvt-text-bold rvt-m-bottom-xs">Biggest themes</h3>
+            <ul class="kb-list">
+              <li><strong>Inconsistent tool facts.</strong> The Microsoft 365 Copilot page says it runs on "ChatGPT-4" with a "2021" knowledge cutoff; the hub page says "ChatGPT-5o." Both can't be right, and both look wrong.</li>
+              <li><strong>Duplication that drifts.</strong> Tool specs live both in the "Generative AI tools at IU" matrix and in each tool's own article, so they disagree over time (e.g., Copilot data classification: "University-internal" vs "Critical").</li>
+              <li><strong>Stale claims.</strong> "IU is currently evaluating alternatives to the public version of ChatGPT" persists even though ChatGPT Edu is now offered.</li>
+              <li><strong>Terminology drift.</strong> "REALLMS" vs "REALLMs," "NotebookLM" vs "Google Notebook LM," varied phrasings of the research-data carve-out.</li>
+              <li><strong>Link rot & copy-paste errors.</strong> A truncated "KB00" link, three malformed mailto links, a protocol-less URL, and a NotebookLM page that signs off talking about "Google Gemini."</li>
+            </ul>
+          </div>
+          <div class="rvt-grid__item-5-lg-up">
+            <h3 class="rvt-ts-20 rvt-text-bold rvt-m-bottom-xs">Quality distribution</h3>
+            <div id="bandBreakdown"></div>
+            <p class="kb-legend rvt-m-top-sm">Scored across five dimensions (each /5): currency, cross-article consistency, clarity/plain-language, structure/findability, completeness. Overall = sum ÷ 25.</p>
+            <div class="kb-legend">
+              <span><span class="kb-dot" style="background:#1a8a45"></span>Strong 80–100</span>
+              <span><span class="kb-dot" style="background:#1a6fc4"></span>Good 70–79</span>
+              <span><span class="kb-dot" style="background:#e0a020"></span>Fair 56–69</span>
+              <span><span class="kb-dot" style="background:#c0392b"></span>Needs work &lt;56</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ARTICLES -->
+      <div class="rvt-tabs__panel" data-rvt-tab-panel="t-articles" tabindex="0">
+        <h2 class="rvt-ts-26 rvt-text-bold rvt-m-top-md rvt-m-bottom-xs">Per-article review</h2>
+        <p class="rvt-ts-14 kb-generated rvt-m-bottom-xs">Honest, constructive read of each article plus three concrete improvements. Filter, search, sort, and expand any card for detail.</p>
+        <div class="kb-controls">
+          <input type="search" id="searchBox" placeholder="Search title or KB number…" aria-label="Search articles">
+          <button class="kb-filterbtn" data-band="all" aria-pressed="true">All</button>
+          <button class="kb-filterbtn" data-band="strong" aria-pressed="false">Strong</button>
+          <button class="kb-filterbtn" data-band="good" aria-pressed="false">Good</button>
+          <button class="kb-filterbtn" data-band="fair" aria-pressed="false">Fair</button>
+          <button class="kb-filterbtn" data-band="needs" aria-pressed="false">Needs work</button>
+          <select id="catFilter" aria-label="Filter by category"><option value="all">All categories</option></select>
+          <select id="sortBy" aria-label="Sort articles">
+            <option value="scoreAsc">Sort: lowest score first</option>
+            <option value="scoreDesc">Sort: highest score first</option>
+            <option value="oldest">Sort: oldest first</option>
+          </select>
+          <button class="kb-filterbtn" id="expandAll" aria-pressed="false">Expand all</button>
+        </div>
+        <div class="kb-cardgrid" id="cardGrid"></div>
+        <p class="kb-empty" id="emptyMsg" hidden>No articles match those filters.</p>
+      </div>
+
+      <!-- CROSS-ARTICLE -->
+      <div class="rvt-tabs__panel" data-rvt-tab-panel="t-cross" tabindex="0">
+        <h2 class="rvt-ts-26 rvt-text-bold rvt-m-top-md rvt-m-bottom-sm">Cross-article inconsistencies &amp; confusion</h2>
+        <div id="crossList"></div>
+      </div>
+
+      <!-- UPDATE NOW -->
+      <div class="rvt-tabs__panel" data-rvt-tab-panel="t-update" tabindex="0">
+        <h2 class="rvt-ts-26 rvt-text-bold rvt-m-top-md rvt-m-bottom-xs">What needs updating — prioritized worklist</h2>
+        <p class="rvt-ts-14 kb-generated rvt-m-bottom-sm">Ordered by user impact. "High" items are visible factual errors or contradictions; "Medium" are stale/omitted content; "Low" are polish and hygiene.</p>
+        <div id="updateList"></div>
+      </div>
+
+      <!-- ROADMAP -->
+      <div class="rvt-tabs__panel" data-rvt-tab-panel="t-roadmap" tabindex="0">
+        <h2 class="rvt-ts-26 rvt-text-bold rvt-m-top-md rvt-m-bottom-xs">A better information landscape</h2>
+        <p class="rvt-ts-14 kb-generated rvt-m-bottom-sm">Ten moves to make this set of articles more effective, each grounded in established knowledge-base and content-design practice.</p>
+        <div class="kb-roadmap" id="roadmap"></div>
+
+        <h3 class="rvt-ts-20 rvt-text-bold rvt-m-top-lg rvt-m-bottom-xs">Sources informing these recommendations</h3>
+        <ul class="kb-list" id="sourceList"></ul>
+      </div>
+    </div>
+
+    <p class="kb-generated rvt-ts-12 rvt-m-top-lg">Built with the Rivet Design System (rivet-core 2.9.0). Article content © Indiana University, reproduced here for internal editorial review.</p>
+  </main>
+
+  <script src="https://unpkg.com/rivet-core@2.9.0/js/rivet.min.js"></script>
+  <script>
+  const articles = [
+    { id:"KB0025766", title:"AI at IU developer toolkits", cat:"Overview / hub", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0025766", updated:"2026-03", updatedTxt:"~Mar 2026", score:48, band:"needs",
+      assess:"A two-sentence stub that lists only Azure OpenAI and REALLMS. The 'toolkits' (plural) framing oversells what's here, and everything on it is already covered — better — inside the 'Generative AI tools' matrix and the research-data article. As written it's a redundant orphan.",
+      strengths:["Correctly points developers to the two API options","Links out to the fuller Azure and REALLMS articles"],
+      issues:[{t:"Structure",x:"Thin stub with no audience, eligibility, cost, or 'how to request' information."},{t:"Consistency",x:"Duplicates the 'AI at IU Toolkit' section of the hub and the research-data article, which are more complete."},{t:"Confusing",x:"Title implies multiple toolkits; body describes two services with no framing of when to choose which."}],
+      improves:["Either expand into a real decision guide (when to use Azure vs REALLMS, eligibility, data classes, how to request) or retire it and redirect to the hub.","Add the missing essentials every tool article should have: audience, data-classification approvals, cost, and a getting-started path.","If kept, make it the single canonical 'API/developer access' topic and have other pages link to it rather than restating it."] },
+
+    { id:"KB0026654", title:"About Google Gemini at IU", cat:"End-user chat tool", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0026654", updated:"2026-06", updatedTxt:"~Jun 2026", score:72, band:"good",
+      assess:"A clear, recently-updated tool overview with good use-case examples and a sensible structure. It's let down by a vague 'Limitations' section and by data-protection details that don't quite match the hub page.",
+      strengths:["Recently updated; concrete use cases (answers, images, brainstorming, Double-check)","Clear account guidance and the personal-vs-IU-account warning"],
+      issues:[{t:"Confusing",x:"'Google sets daily quotas of some advanced-level features… may be called AI Pro or other names' is too vague to act on."},{t:"Consistency",x:"Omits the 72-hour chat-retention detail that the hub matrix states for Gemini."}],
+      improves:["Replace the vague quota paragraph with the actual limits (what's capped, at what number, what happens when you hit it).","Pull the 72-hour retention and 'stays in IU's domain' protections into this page so it matches the hub.","Mirror the section pattern used by the ChatGPT Edu and Copilot pages so the tool articles read as a consistent set."] },
+
+    { id:"KB0026655", title:"About Google NotebookLM at IU", cat:"End-user chat tool", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0026655", updated:"2025-11", updatedTxt:"~Nov 2025", score:60, band:"fair",
+      assess:"Structurally fine and useful, but it's eight months old and closes with a privacy paragraph that talks about 'Google Gemini' — a clear copy-paste artifact from the sibling article. That single error undermines confidence in the whole page.",
+      strengths:["Good explanation of what NotebookLM is for (source-grounded synthesis)","Clear IU-account requirement and data-classification statement"],
+      issues:[{t:"Consistency",x:"Closing privacy paragraph references 'Google Gemini' instead of NotebookLM (copy-paste carryover)."},{t:"Outdated",x:"Eight months since last update; NotebookLM's feature set (audio overviews, sharing) changes often."},{t:"Structure",x:"Thinner on features/use cases than the Gemini page, so the pair feels uneven."}],
+      improves:["Fix the 'Google Gemini' reference in the privacy sign-off.","Refresh against current NotebookLM features and re-date the article.","Add a short feature/use-case list to match the depth of the Gemini article."] },
+
+    { id:"KB0026507", title:"Generative AI tools at IU", cat:"Overview / hub", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0026507", updated:"2026-04", updatedTxt:"~Apr 2026", score:76, band:"good",
+      assess:"The most important page in the set and the closest thing to a single source of truth — a genuinely useful comparison matrix. Precisely because everyone relies on it, its errors matter most: a questionable 'ChatGPT-5o' model name, several typos, and two malformed links. It also restates per-tool specs that live in dedicated articles, which is how the set drifts out of sync.",
+      strengths:["Comprehensive matrix: availability, data classes, models, protections, cost, where to start","Strong 'use your IU account' and research-data framing up top"],
+      issues:[{t:"Consistency",x:"'ChatGPT-5o' / 'GPT-5o' model naming conflicts with the Copilot page's 'ChatGPT-4' and is likely inaccurate."},{t:"Links",x:"Gemini link is missing its protocol (resolves to servicenow.iu.edu); 'datard@iu.edu' renders as a malformed mailto."},{t:"Confusing",x:"Typos ('materials. such as PDFs. and interact'; 'Google Notebook LM') and duplication with the per-tool pages."}],
+      improves:["Verify and correct all model names/knowledge-cutoff claims against vendor facts, then lock the wording.","Fix the malformed Gemini and datard links and run a typo pass.","Make this the canonical spec table and have tool pages link to it instead of repeating specs, to stop future drift."] },
+
+    { id:"KB0025865", title:"Precautions about using ChatGPT at IU", cat:"Policy / guidance", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0025865", updated:"2026-03", updatedTxt:"~Mar 2026", score:56, band:"fair",
+      assess:"A reasonable warning about the personal/public version of ChatGPT, but it now fights the rest of the KB. It says IU is 'currently evaluating alternatives to the public version of ChatGPT' — which already shipped as ChatGPT Edu — and understates Copilot's approved data classification. The 'personal ChatGPT' vs 'ChatGPT Edu' split is a real source of user confusion.",
+      strengths:["Clear that public ChatGPT is not approved for institutional data","Good classroom and incidental-use guidance"],
+      issues:[{t:"Outdated",x:"'IU is currently evaluating alternatives to the public version of ChatGPT' contradicts the existence of ChatGPT Edu."},{t:"Consistency",x:"Says Copilot is approved for 'University-internal' data; the Copilot and hub pages say up to Critical."},{t:"Confusing",x:"Doesn't clearly disambiguate personal ChatGPT from the sanctioned ChatGPT Edu."}],
+      improves:["Remove/replace the 'evaluating alternatives' line and point to ChatGPT Edu as the sanctioned option.","Align the Copilot data-classification claim with the Copilot/hub articles.","Add a prominent callout distinguishing personal ChatGPT (not approved) from ChatGPT Edu (approved)."] },
+
+    { id:"KB0025830", title:"Acceptable uses of generative AI services at IU", cat:"Policy / guidance", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0025830", updated:"2025-12", updatedTxt:"~Dec 2025", score:76, band:"good",
+      assess:"One of the better policy pages — concrete do/don't examples and a sound data-management framing. Main risks are age (seven months) and overlap with the two research-data articles and the ChatGPT precautions page; the reader isn't told which policy page is authoritative.",
+      strengths:["Actionable acceptable-use examples (syllabi, correspondence, events)","Clear 'treat it like posting to a public website' mental model"],
+      issues:[{t:"Outdated",x:"Seven months old; the approved-tool landscape (ChatGPT Edu, NotebookLM, REALLMS) has moved on."},{t:"Consistency",x:"Body names only ChatGPT/Copilot/Gemini as 'notable systems'; doesn't reconcile with the current approved set."},{t:"Structure",x:"Overlaps with the research-data and ChatGPT-precautions pages without a clear hierarchy."}],
+      improves:["Refresh and either list the current approved tools or defer explicitly to the hub as the source of truth.","Add a 'last reviewed' date and named owner (this is a policy page).","Define its lane relative to the research-data and ChatGPT pages to remove overlap."] },
+
+    { id:"KB0026800", title:"About ChatGPT Edu at IU", cat:"End-user chat tool", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0026800", updated:"2026-05", updatedTxt:"~May 2026", score:72, band:"good",
+      assess:"A recent, well-organized page with clear login steps and a good migration note. It stumbles on eligibility (never says who can get it) and on jargon/limits wording ('5,000 credits weekly… unlimited by providing an IU account number', 'Codex') that a general reader won't parse.",
+      strengths:["Clear step-by-step access flow and migration pointer","Correct, unambiguous data-classification limit (Restricted, not Critical)"],
+      issues:[{t:"Confusing",x:"'Credits' model and the 5,000/10,000/unlimited tiers aren't explained in plain terms."},{t:"Consistency",x:"Doesn't state eligibility; the hub matrix limits it to faculty/staff, which isn't reflected here."},{t:"Confusing",x:"Unexplained jargon: 'Codex', 'deep research', 'automated task features'."}],
+      improves:["State plainly who is eligible (and whether students are included), matching the hub.","Rewrite the limits section in plain language: what a 'credit' is and how to get more.","Define or drop the jargon terms on first use."] },
+
+    { id:"KB0026817", title:"Acceptable use of AI tools with IU research data", cat:"Policy / guidance", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0026817", updated:"2025-11", updatedTxt:"~Nov 2025", score:64, band:"fair",
+      assess:"Thorough and important, but dense, eight months old, and carrying a broken cross-link ('Google Gemini → KB00'). It overlaps heavily with the 'Researcher responsibilities' page; together they read as one topic split awkwardly across two articles.",
+      strengths:["Precise treatment of approved vs prohibited research-data classes","Good concrete examples of Restricted vs Critical research data"],
+      issues:[{t:"Links",x:"'Google Gemini' cross-reference is truncated/broken ('KB00')."},{t:"Outdated",x:"Eight months old; approved-tool list needs re-verification."},{t:"Structure",x:"Dense legal prose; heavy overlap with the researcher-responsibilities article."}],
+      improves:["Fix the broken Gemini link and re-verify all cross-references.","Add a scannable decision table: data classification → which tools are allowed.","Consolidate with 'Researcher responsibilities' into a clear two-part set with no repetition."] },
+
+    { id:"KB0027312", title:"Researcher responsibilities for using AI tools with research data at IU", cat:"Policy / guidance", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0027312", updated:"2026-04", updatedTxt:"~Apr 2026", score:68, band:"fair",
+      assess:"Strong, responsible content (accountability, trustworthy-AI principles) hurt by rough execution: multiple grammar slips, 'REALLMs' casing, and a 'self-attestation form' that's referenced but not clearly linked. It also overlaps with the research-data acceptable-use page.",
+      strengths:["Clear articulation of PI accountability and human oversight","Useful 'questions to consider' and OECD trustworthy-AI framing"],
+      issues:[{t:"Confusing",x:"Grammar errors ('the what types', 'What kinds of tasks is the AI tool is good at doing')."},{t:"Consistency",x:"'REALLMs' casing conflicts with 'REALLMS' used elsewhere."},{t:"Structure",x:"Overlaps with the research-data acceptable-use article; the self-attestation form isn't clearly linked."}],
+      improves:["Copy-edit for grammar and standardize 'REALLMS' casing.","Link the self-attestation form explicitly and say when/how to complete it.","Define this page's scope vs the acceptable-use page and cross-link them as a pair."] },
+
+    { id:"KB0026698", title:"Migrate from a personal ChatGPT account to the IU ChatGPT Edu workspace", cat:"Procedure", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0026698", updated:"2026-02", updatedTxt:"~Feb 2026", score:64, band:"fair",
+      assess:"A genuinely helpful procedure that's undercut by sloppiness: a 'UTITS' typo, 'exiting' for 'existing', repetition between Overview and Recommendations, and a logic bug — the 'Export and Delete' option says your subscription is refunded 'once the account is transferred,' which is copy-pasted from the Transfer option. Procedures on a vendor UI that changes often also need a 'last verified' date.",
+      strengths:["Covers a real, confusing task in useful depth","Good FAQ and clear irreversibility warnings"],
+      issues:[{t:"Confusing",x:"'Export and Delete' reuses 'once the account is transferred' — wrong for a delete path."},{t:"Confusing",x:"Typos: 'UTITS' (→ UITS) and 'exiting data' (→ existing)."},{t:"Outdated",x:"Five months old; OpenAI's onboarding UI changes frequently, so steps drift."}],
+      improves:["Fix the Option-2 'transferred' logic error and the UTITS/exiting typos.","Trim the repeated guidance between Overview and Recommendations.","Add annotated screenshots and a 'steps last verified' date given UI volatility."] },
+
+    { id:"KB0025870", title:"About AI detection tools", cat:"Policy / guidance", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0025870", updated:"2025-11", updatedTxt:"~Nov 2025", score:68, band:"fair",
+      assess:"A sensible, well-reasoned stance (no detector is approved; detectors are unreliable). The risk is currency: it's eight months old in a fast-moving area, cites the 2023 OpenAI-detector shutdown as the marquee example, and shows a 'log in to see all content' banner that suggests some guidance is gated.",
+      strengths:["Clear institutional position and the false-positive warning","Good redirect to CITL teaching alternatives"],
+      issues:[{t:"Outdated",x:"Eight months old; verify current Turnitin/GPTZero posture at IU."},{t:"Structure",x:"Login-gated banner implies hidden content for a policy that should be fully public."},{t:"Confusing",x:"Leans on a single 2023 example; readers may assume the page itself is dated."}],
+      improves:["Refresh the detection landscape and re-verify the Turnitin/GPTZero situation at IU.","Make the full guidance public (remove the login gate) if nothing here is truly restricted.","Add current evidence/examples and a 'last reviewed' date."] },
+
+    { id:"KB0025888", title:"About Microsoft 365 Copilot at IU", cat:"End-user chat tool", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0025888", updated:"2026-07", updatedTxt:"~Jul 8, 2026 (21h before capture)", score:60, band:"fair",
+      assess:"The most instructive article in the set. It was edited within a day of capture, yet still tells users Copilot is 'built on the same AI models as ChatGPT-4' and that ChatGPT is 'based on data up to 2021.' That a fresh edit left two-year-old claims in place is the clearest sign edits here are surface-level, not content reviews. Otherwise it's detailed and well-structured.",
+      strengths:["Thorough: compatibility, data classification up to Critical, age-13 note","Good privacy explanation (UISO access, no model training)"],
+      issues:[{t:"Outdated",x:"'ChatGPT-4' and 'data up to 2021' are inaccurate and were left untouched by a recent edit."},{t:"Consistency",x:"Model claim conflicts with the hub's 'ChatGPT-5o'; age-13 rule appears here but not in the hub."},{t:"Confusing",x:"Unexplained 'Topics: Limited to 30 replies' terminology."}],
+      improves:["Correct the model and knowledge-cutoff statements and stop citing a fixed year.","Reconcile with the hub matrix (model name; carry the age-13 rule into the hub too).","Explain what 'Topics' and the 30-reply limit mean for a user."] },
+
+    { id:"KB0026671", title:"About Research and Academic LLM Services (REALLMS) at IU", cat:"REALLMS", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0026671", updated:"2026-06", updatedTxt:"~Jun 2026", score:76, band:"good",
+      assess:"A clean, recent hub for the REALLMS family that routes people to Chat, API, and Terms of Service. Nearly there — it buries REALLMS's biggest differentiator (on-prem, approved for Critical/PHI) and could summarize eligibility up front.",
+      strengths:["Clear split of Chat vs API with the right onward links","Recent and free of factual errors"],
+      issues:[{t:"Structure",x:"Leads with architecture; doesn't foreground the Critical/PHI approval that makes REALLMS distinctive."},{t:"Confusing",x:"'For more see, About the…' has a misplaced comma."}],
+      improves:["Add a one-line value banner up top: on-prem, no cost, approved for Critical data and PHI.","Summarize who can use it and how to start before diving into components.","Fix the 'For more see,' comma and tighten the intro."] },
+
+    { id:"KB0027272", title:"About the REALLMS API at IU", cat:"REALLMS", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0027272", updated:"2026-06", updatedTxt:"~late Jun 2026 (10d)", score:80, band:"strong",
+      assess:"A strong, current developer page: honest 'beta' note, working curl examples, clear key-provisioning path, and prominent PHI/Critical approval. The main risk is that its model list must stay identical to the Chat page and the Terms of Service — three places to update the same list.",
+      strengths:["Concrete, copy-pasteable examples and endpoint list","Prominent data-classification approval; sensible rate-limit guidance"],
+      issues:[{t:"Consistency",x:"Model list duplicates the Chat and ToS pages; easy to fall out of sync."},{t:"Confusing",x:"Assumes familiarity with RT Projects/allocations without a one-line primer."}],
+      improves:["Single-source the model list so API, Chat, and ToS all pull from one place.","Add a one-sentence primer (and link) on RT Projects allocations for first-timers.","State auth/rate-limit specifics (limits, retry behavior) explicitly."] },
+
+    { id:"KB0027284", title:"About the REALLMS Chat at IU", cat:"REALLMS", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0027284", updated:"2026-06", updatedTxt:"~late Jun 2026 (11d)", score:80, band:"strong",
+      assess:"A clear, current page for a tool 'anyone with an IU account' can use — which is exactly why the developer-grade model details ('Tensor type: BF16+UB') feel out of place for the general audience. Strong otherwise.",
+      strengths:["Recent; clear access statement and feature/collections overview","Prominent Critical/PHI approval"],
+      issues:[{t:"Confusing",x:"'Tensor type: BF16 / FP8' and context-length specs are developer jargon on a general-audience page."},{t:"Consistency",x:"Model list must match the API and ToS pages."}],
+      improves:["Move the tensor-type/architecture detail to the API page or an expandable 'technical details' section.","Single-source the model list shared with API and ToS.","Add short getting-started steps or a screenshot of the chat UI."] },
+
+    { id:"KB0027412", title:"REALLMS: Terms of service", cat:"REALLMS", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0027412", updated:"2026-05-28", updatedTxt:"May 28, 2026 (dated in body)", score:88, band:"strong",
+      assess:"The exemplar of the set. It carries an explicit 'Last updated' date, lists related policies, and is cleanly structured with numbered sections and clear notice periods. This is the template the other articles should aspire to — the only gap is a plain-language summary for non-lawyers.",
+      strengths:["Explicit last-updated date and linked governing policies","Clear, well-numbered structure and concrete notice periods"],
+      issues:[{t:"Structure",x:"No plain-language TL;DR for a document most users will skim."},{t:"Consistency",x:"'Supported models' section must track the actual API/Chat model list."}],
+      improves:["Add a short plain-language summary box at the top ('what this means for you').","Keep the supported-models reference synced with the single-sourced model list.","Adopt this article's dated, structured format as the standard for all AI articles."] },
+
+    { id:"KB0027433", title:"About the Next AI Innovators pilot at IU", cat:"Program / service", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0027433", updated:"2026-06", updatedTxt:"~mid-Jun 2026 (24d)", score:68, band:"fair",
+      assess:"Short, clear, and current, but thin for a program page: it explains the pilot exists and who it's for, but not which tools are in it, how long it runs, or what participants get out of it.",
+      strengths:["Clear audience (faculty and leadership) and purpose","Recent; links to the AI at IU site and Next.IU"],
+      issues:[{t:"Structure",x:"No timeline, tool list, or expected outcomes."},{t:"Confusing",x:"Relationship to Next.IU and to other AI pilots isn't spelled out."}],
+      improves:["Add the pilot's duration, which tools are included, and what participants receive.","Explain what happens after the pilot (how it feeds tool decisions).","Clarify how this relates to Next.IU and the broader AI-at-IU program."] },
+
+    { id:"KB0027454", title:"About Canvas AI features (IgniteAI) at IU", cat:"Teaching tool", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0027454", updated:"2026-07", updatedTxt:"~Jul 8, 2026 (18h before capture)", score:80, band:"strong",
+      assess:"Current, tightly scoped, and honest about the vetting gate between what Instructure offers and what IU turns on. The obvious gap for a tool operating inside Canvas: no word on student-data privacy or classification.",
+      strengths:["Very recent; clear scope and the compliance-gate explanation","Concrete list of the two approved features"],
+      issues:[{t:"Structure",x:"No data-classification/privacy note for AI features touching student data in Canvas."},{t:"Confusing",x:"'Enable' section is one line; no real steps."}],
+      improves:["Add a data-classification/privacy statement for student data processed by IgniteAI.","Expand the enable section into actual steps (or link them).","Set expectations for the 'updated as more become available' list — who updates it and how often."] },
+
+    { id:"KB0026631", title:"About Chat AIU", cat:"Program / service", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0026631", updated:"2025-11", updatedTxt:"~Nov 2025", score:52, band:"needs",
+      assess:"A thin, eight-month-old page for a build-your-own-chatbot service, with a malformed 'eashelp' mailto link. It never clearly says who it's for (unit web teams? developers?) or what building a 'tenant' actually involves, so the audience is left guessing.",
+      strengths:["States the Critical-data approval and the request-form path","Names the owning team (UITS Enterprise Applications)"],
+      issues:[{t:"Links",x:"'eashelp@iu.edu' renders as a malformed mailto ('nulleashelp@iu.edu')."},{t:"Outdated",x:"Eight months old with no examples or screenshots of the product."},{t:"Confusing",x:"Audience and prerequisites for requesting a 'tenant' are unclear."}],
+      improves:["Fix the mailto link.","Name the audience and prerequisites explicitly (who should request this and what they need).","Refresh with an example deployment/screenshot and a clearer 'what you get' summary."] },
+
+    { id:"KB0027216", title:"About the Top Hat Ace AI-powered assistant", cat:"Teaching tool", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0027216", updated:"2026-04", updatedTxt:"~Apr 2026", score:48, band:"needs",
+      assess:"The weakest-structured page: much of it is a dump of vendor links, one bullet is garbled ('Highlighting, Taking Notes and Asking Ace Highlighting on page'), eligibility is muddled (said to be 'free to all faculty and staff' for a tool whose point is student studying), and there's no data-classification note for a tool handling student content.",
+      strengths:["Covers both instructor and student angles","Links to Top Hat's own how-to material"],
+      issues:[{t:"Confusing",x:"Garbled bullet text and heavy reliance on raw vendor links."},{t:"Consistency",x:"Eligibility is unclear (faculty/staff 'free' vs a student-facing study tool)."},{t:"Structure",x:"No data-classification/privacy note for student data."}],
+      improves:["Rewrite the garbled bullet and replace link-dumping with brief, structured summaries.","Clarify who can use Ace (instructors vs students) and how it's enabled.","Add a data-classification/privacy statement for student data in Top Hat."] },
+
+    { id:"KB0026791", title:"About the GenAI 101 course in Canvas", cat:"Program / service", url:"https://servicenow.iu.edu/kb?id=kb_article_view&sysparm_article=KB0026791", updated:"2025-11", updatedTxt:"~Nov 2025", score:76, band:"good",
+      assess:"Clear, friendly, and complete for what it is — enrollment, badges, alumni access, and a helpful 'use a computer not the app' note. Its main issue is age (eight months) and a few missing specifics (time to complete, module list).",
+      strengths:["Warm, plain-language tone; clear enrollment and badge details","Thoughtful notes on device/app limitations and alumni access"],
+      issues:[{t:"Outdated",x:"Eight months old; course content, badges, and 'Crimson Jr.' may have changed."},{t:"Structure",x:"No time-to-complete estimate or module outline."},{t:"Links",x:"'arlo@iu.edu' renders as a malformed mailto ('nullarlo@iu.edu')."}],
+      improves:["Refresh and re-date; confirm badge names and the Crimson Jr. assistant are current.","Add estimated completion time and a short module list so learners know what they're committing to.","Fix the arlo mailto link and add a 'last reviewed' date/owner."] }
+  ];
+
+  const crossIssues = [
+    { sev:"high", tag:"Consistency", title:"Model names and knowledge cutoffs disagree", body:"The Copilot page (KB0025888) says Copilot runs on 'ChatGPT-4' with a knowledge cutoff of 2021; the hub (KB0026507) says 'ChatGPT-5o'/'GPT-5o'; the ChatGPT precautions page (KB0025865) just says 'ChatGPT.' At least two of these are wrong, and users comparing pages will notice. Pick verified, vendor-accurate names and state cutoffs generically ('recent') rather than a fixed year." },
+    { sev:"high", tag:"Consistency", title:"Copilot's approved data classification is stated three ways", body:"KB0025865 says Copilot is approved for 'University-internal'; KB0025888 and KB0026507 say up to 'Critical' (excluding PCI DSS). For a data-handling decision this is the most consequential inconsistency in the set." },
+    { sev:"high", tag:"Outdated", title:"'IU is evaluating alternatives to public ChatGPT' is stale", body:"KB0025865 still frames ChatGPT as under evaluation, but ChatGPT Edu (KB0026800) is live and 'recommended.' The two pages contradict each other on IU's posture toward OpenAI." },
+    { sev:"med", tag:"Consistency", title:"Which tools are 'recommended' isn't consistent", body:"Some pages say the recommended tools are 'Microsoft 365 Copilot Chat and Google Gemini' (two); others add NotebookLM and/or ChatGPT Edu (three or four). The canonical recommended set should be defined once and referenced." },
+    { sev:"med", tag:"Consistency", title:"Eligibility for ChatGPT Edu is ambiguous", body:"The hub matrix limits ChatGPT Edu to faculty/staff, but the ChatGPT Edu page (KB0026800) never states eligibility and reads as broadly available. Students shouldn't have to guess." },
+    { sev:"med", tag:"Confusing", title:"Research-data carve-out is phrased inconsistently", body:"The hub says 'research data with contractual, regulatory, or legal constraints'; the Gemini and Edu pages say 'research data with contract restrictions related to AI.' These describe different scopes and should be standardized to one canonical phrase." },
+    { sev:"med", tag:"Structure", title:"Overlapping policy pages with no clear hierarchy", body:"'Acceptable uses' (KB0025830), 'Precautions about ChatGPT' (KB0025865), 'Research-data acceptable use' (KB0026817), and 'Researcher responsibilities' (KB0027312) cover overlapping ground. Readers aren't told which is authoritative or how they relate." },
+    { sev:"med", tag:"Consistency", title:"'Incidental personal use' text is copy-pasted between tools", body:"Near-identical privacy/incidental-use blocks appear across tool pages — which is how the NotebookLM page ended up signing off about 'Google Gemini.' Shared boilerplate should be single-sourced, not hand-copied." },
+    { sev:"low", tag:"Consistency", title:"Terminology drift", body:"'REALLMS' vs 'REALLMs'; 'NotebookLM' vs 'Google Notebook LM'; 'Microsoft 365 Copilot Chat' vs alternate names ('Bing Chat Enterprise', 'Copilot for Web'). A short canonical-names list would fix this." },
+    { sev:"low", tag:"Links", title:"Broken and malformed links across the set", body:"Truncated 'Google Gemini → KB00' (KB0026817); protocol-less Gemini URL and malformed 'datard' mailto (KB0026507); malformed 'eashelp' and 'arlo' mailtos (KB0026631, KB0026791). A link audit would catch all of these." },
+    { sev:"low", tag:"Structure", title:"Inconsistent metadata: dates, owners, audience", body:"Only the REALLMS Terms of Service carries an explicit last-updated date. Most pages omit a named owner and an audience line, making currency impossible to judge at a glance." }
+  ];
+
+  const updates = [
+    { sev:"high", who:"KB0025888 — Microsoft 365 Copilot", what:"Correct 'ChatGPT-4' and 'data up to 2021'; state the current model and a generic cutoff. This is user-facing and demonstrably wrong." },
+    { sev:"high", who:"KB0026507 — Generative AI tools (hub)", what:"Verify/fix model names ('ChatGPT-5o'), then align the Copilot model/data-class wording with the Copilot page." },
+    { sev:"high", who:"KB0025865 — Precautions about ChatGPT", what:"Remove the 'evaluating alternatives' line; reconcile Copilot's data classification; disambiguate personal ChatGPT vs ChatGPT Edu." },
+    { sev:"high", who:"KB0026698 — Migrate to ChatGPT Edu", what:"Fix the 'Export and Delete' logic error (it wrongly says the account is 'transferred') — this can mislead users into a destructive action." },
+    { sev:"med", who:"KB0026655 — NotebookLM", what:"Fix the closing 'Google Gemini' copy-paste error and refresh the eight-month-old content." },
+    { sev:"med", who:"KB0026817 — Research-data acceptable use", what:"Repair the truncated 'Google Gemini → KB00' link and re-verify the approved-tool list." },
+    { sev:"med", who:"KB0026800 — ChatGPT Edu", what:"Add explicit eligibility and rewrite the 'credits' limits in plain language." },
+    { sev:"med", who:"KB0025830 & KB0025870 — Acceptable uses / AI detection", what:"Refresh 7–8 month-old policy pages; add last-reviewed dates; re-verify detector guidance." },
+    { sev:"med", who:"KB0027216 — Top Hat Ace", what:"Rewrite the garbled bullet, clarify eligibility, and add a student-data privacy note." },
+    { sev:"low", who:"KB0026507 / KB0026631 / KB0026791", what:"Fix malformed mailto and protocol-less links (datard, eashelp, arlo, Gemini)." },
+    { sev:"low", who:"KB0026698 & KB0027312", what:"Copy-edit typos ('UTITS', 'exiting') and standardize 'REALLMS' casing and grammar." },
+    { sev:"low", who:"All tool pages", what:"Add a consistent header block: audience, data classification, cost, how to start, last reviewed, owner." }
+  ];
+
+  const roadmap = [
+    { h:"Make the comparison matrix the single source of truth", b:"Keep the per-tool spec facts (availability, data class, cost, model) in one place — the hub matrix — and have each tool article link to it rather than restate it. This is the core of single-sourcing/topic-based authoring: write a fact once, reference it everywhere, and it can't drift.", cite:"Single-sourcing & topic-based authoring (Heretto; TechnicalWriterHQ)" },
+    { h:"Adopt a standard template per article type", b:"Define templates for 'tool overview,' 'policy,' and 'procedure,' each with required fields (audience, data classification, cost, how to start, last reviewed, owner). Consistency across pages is a documented usability driver and makes gaps obvious.", cite:"NN/g content layout & consistency; GOV.UK content design" },
+    { h:"Put a scannable summary block at the top of every tool page", b:"Lead with 'Who it's for / What you can do / What data you can use / How to start.' Users scan rather than read on the web, and front-loading the decision-critical facts reduces support questions.", cite:"NN/g (how users read on the web); GOV.UK writing for the web" },
+    { h:"Run a plain-language pass", b:"Strip developer jargon from general-audience pages (tensor types, 'Codex', 'Topics', undefined 'credits') and define any necessary technical term on first use. Plain language is understood faster by everyone, including experts.", cite:"GOV.UK plain-language guidance; ONS style guide" },
+    { h:"Institute a content lifecycle with review dates and owners", b:"Give every article a visible 'last reviewed' date and a named owner, with a quarterly review — shorter for fast-moving tools (models, OpenAI/Instructure UIs). The Copilot page proves undated edits let stale facts survive.", cite:"Content audit / lifecycle governance (Digital.gov; Siteimprove)" },
+    { h:"Do a ROT pass — Redundant, Outdated, Trivial", b:"Retire or merge the thin, duplicative pages (developer-toolkits stub; overlapping policy pages). Redundant content confuses readers and multiplies maintenance; outdated content erodes trust.", cite:"ROT analysis (Oomph; Annertech; Innovatia)" },
+    { h:"Consolidate the policy/guidance cluster", b:"Turn the four overlapping policy pages into one authoritative 'Acceptable use of AI at IU' hub with clearly-scoped task topics beneath it, so each answer lives in exactly one findable place.", cite:"Findability & information architecture (NN/g)" },
+    { h:"Publish a one-page terminology & style sheet", b:"Fix canonical names (REALLMS, NotebookLM, Microsoft 365 Copilot Chat) and one canonical phrasing of the research-data carve-out and data classifications. Shared terminology is what keeps a multi-author KB coherent.", cite:"Consistency (NN/g); single-sourcing of shared terms" },
+    { h:"Single-source shared snippets and lists", b:"The REALLMS model list, the 'incidental personal use' privacy block, and data-classification definitions should be reusable snippets pulled into pages — not hand-copied. This prevents the copy-paste errors already visible (NotebookLM→Gemini; duplicated refund text).", cite:"Single-sourcing / reuse (Document360; Heretto)" },
+    { h:"Fix and monitor the link layer", b:"Audit every internal KB cross-link and mailto, standardize link text, and add link-checking to the review cadence. Broken links are a direct, measurable trust and findability cost.", cite:"Content audit & maintenance (Siteimprove; contentaudits.net)" }
+  ];
+
+  const sources = [
+    ['Nielsen Norman Group — Help and Documentation (Heuristic #10)','https://www.nngroup.com/articles/help-and-documentation/'],
+    ['Nielsen Norman Group — 10 Usability Heuristics','https://www.nngroup.com/articles/ten-usability-heuristics/'],
+    ['GOV.UK — Content design: writing for GOV.UK (plain language)','https://www.gov.uk/guidance/content-design/writing-for-gov-uk'],
+    ['GOV.UK — Content principles: conventions and research background','https://www.gov.uk/government/publications/govuk-content-principles-conventions-and-research-background/govuk-content-principles-conventions-and-research-background'],
+    ['Heretto — Topic-Based Authoring vs Traditional Docs','https://www.heretto.com/blog/topic-based-authoring-vs-traditional-authoring'],
+    ['TechnicalWriterHQ — What Is Single Source Authoring?','https://technicalwriterhq.com/writing/technical-writing/single-source-authoring/'],
+    ['Oomph — What Is a ROT Analysis?','https://www.oomphinc.com/insights/rot-analysis-content-strategy/'],
+    ['Digital.gov — A conversation about content audits','https://digital.gov/2023/09/12/a-conversation-about-content-audits'],
+    ['Siteimprove — How to identify and fix content rot','https://www.siteimprove.com/blog/how-to-identify-and-fix-content-rot/'],
+    ['Rivet Design System — Getting started','https://rivet.iu.edu/getting-started/']
+  ];
+
+  const bandName = { strong:"Strong", good:"Good", fair:"Fair", needs:"Needs work" };
+
+  // ---- Overview stats ----
+  function pct(n){ return Math.round(n); }
+  const avg = pct(articles.reduce((s,a)=>s+a.score,0)/articles.length);
+  const counts = { strong:0, good:0, fair:0, needs:0 };
+  articles.forEach(a=>counts[a.band]++);
+  const nOutdated = articles.filter(a=>a.issues.some(i=>i.t==="Outdated")).length;
+  const nLinks = articles.filter(a=>a.issues.some(i=>i.t==="Links")).length;
+  const nConsist = articles.filter(a=>a.issues.some(i=>i.t==="Consistency")).length;
+
+  const stats = [
+    [articles.length,"Articles reviewed"],
+    [avg+"%","Average quality score"],
+    [counts.strong+counts.good,"Strong or Good"],
+    [counts.fair+counts.needs,"Fair or Needs work"],
+    [nOutdated,"With outdated content"],
+    [nConsist,"With cross-article conflicts"],
+    [nLinks,"With broken/malformed links"],
+    [3,"High-priority fixes"]
+  ];
+  document.getElementById('statGrid').innerHTML = stats.map(s=>
+    `<div class="kb-stat"><div class="kb-stat__num">${s[0]}</div><div class="kb-stat__label">${s[1]}</div></div>`).join('');
+
+  document.getElementById('bandBreakdown').innerHTML = ['strong','good','fair','needs'].map(b=>{
+    const n = counts[b]; const w = Math.round(n/articles.length*100);
+    return `<div class="kb-scorewrap"><span style="min-width:6.5rem;font-size:.85rem">${bandName[b]} (${n})</span>
+      <div class="kb-bar"><div class="kb-bar__fill kb-fill--${b}" style="width:${w}%"></div></div></div>`;
+  }).join('');
+
+  // ---- Article cards ----
+  const catSet = [...new Set(articles.map(a=>a.cat))].sort();
+  const catFilter = document.getElementById('catFilter');
+  catSet.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; catFilter.appendChild(o); });
+
+  let state = { band:'all', cat:'all', q:'', sort:'scoreAsc', expandAll:false };
+
+  function cardHTML(a){
+    const issues = a.issues.map(i=>`<div class="kb-issue"><span class="kb-tag kb-tag--${i.t}">${i.t}</span>${i.x}</div>`).join('');
+    const strengths = a.strengths.map(s=>`<li>${s}</li>`).join('');
+    const improves = a.improves.map((s,i)=>`<div class="kb-improve"><strong>${i+1}.</strong> ${s}</div>`).join('');
+    return `<div class="kb-card" data-band="${a.band}" data-cat="${a.cat}" data-search="${(a.title+' '+a.id).toLowerCase()}" data-score="${a.score}" data-updated="${a.updated}">
+      <div class="kb-card__top">
+        <div>
+          <div class="kb-kb">${a.id}</div>
+          <div class="kb-title">${a.title}</div>
+          <div class="kb-cat">${a.cat}</div>
+        </div>
+        <span class="kb-band kb-band--${a.band}">${bandName[a.band]}</span>
+      </div>
+      <div class="kb-scorewrap">
+        <div class="kb-bar"><div class="kb-bar__fill kb-fill--${a.band}" style="width:${a.score}%"></div></div>
+        <span class="kb-scorenum">${a.score}</span>
+      </div>
+      <div class="kb-meta">Last updated: ${a.updatedTxt}</div>
+      <div class="kb-assess">${a.assess}</div>
+      <button class="rvt-button rvt-button--secondary rvt-button--small kb-toggle" data-toggle aria-expanded="false">Show detail</button>
+      <div class="kb-detail" hidden>
+        <div class="kb-h">What works</div>
+        <ul class="kb-list">${strengths}</ul>
+        <div class="kb-h">Issues found</div>
+        ${issues}
+        <div class="kb-h">3 ways to improve</div>
+        ${improves}
+        <div class="rvt-m-top-sm"><a class="rvt-ts-14" href="${a.url}" target="_blank" rel="noopener">Open article in IU KB ↗</a></div>
+      </div>
+    </div>`;
+  }
+
+  function render(){
+    let list = articles.slice();
+    if(state.band!=='all') list = list.filter(a=>a.band===state.band);
+    if(state.cat!=='all') list = list.filter(a=>a.cat===state.cat);
+    if(state.q) list = list.filter(a=>(a.title+' '+a.id).toLowerCase().includes(state.q));
+    if(state.sort==='scoreAsc') list.sort((a,b)=>a.score-b.score);
+    if(state.sort==='scoreDesc') list.sort((a,b)=>b.score-a.score);
+    if(state.sort==='oldest') list.sort((a,b)=>a.updated.localeCompare(b.updated));
+    const grid = document.getElementById('cardGrid');
+    grid.innerHTML = list.map(cardHTML).join('');
+    document.getElementById('emptyMsg').hidden = list.length>0;
+    // wire toggles
+    grid.querySelectorAll('[data-toggle]').forEach(btn=>{
+      const detail = btn.nextElementSibling;
+      if(state.expandAll){ detail.hidden=false; btn.setAttribute('aria-expanded','true'); btn.textContent='Hide detail'; }
+      btn.addEventListener('click',()=>{
+        const open = detail.hidden;
+        detail.hidden = !open;
+        btn.setAttribute('aria-expanded', String(open));
+        btn.textContent = open ? 'Hide detail' : 'Show detail';
+      });
+    });
+  }
+
+  document.getElementById('searchBox').addEventListener('input',e=>{ state.q=e.target.value.toLowerCase().trim(); render(); });
+  document.getElementById('catFilter').addEventListener('change',e=>{ state.cat=e.target.value; render(); });
+  document.getElementById('sortBy').addEventListener('change',e=>{ state.sort=e.target.value; render(); });
+  document.querySelectorAll('.kb-filterbtn[data-band]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.kb-filterbtn[data-band]').forEach(b=>b.setAttribute('aria-pressed','false'));
+      btn.setAttribute('aria-pressed','true');
+      state.band=btn.dataset.band; render();
+    });
+  });
+  const expandBtn = document.getElementById('expandAll');
+  expandBtn.addEventListener('click',()=>{
+    state.expandAll=!state.expandAll;
+    expandBtn.setAttribute('aria-pressed',String(state.expandAll));
+    expandBtn.textContent = state.expandAll ? 'Collapse all' : 'Expand all';
+    render();
+  });
+
+  // ---- Cross-article issues ----
+  document.getElementById('crossList').innerHTML = crossIssues.map(c=>
+    `<div class="kb-pri kb-pri--${c.sev==='high'?'high':c.sev==='med'?'med':'low'}">
+      <div><span class="kb-tag kb-tag--${c.tag}">${c.tag}</span><span class="kb-pri__sev">${c.sev==='high'?'High impact':c.sev==='med'?'Medium impact':'Low / hygiene'}</span></div>
+      <div class="kb-title" style="margin:.3rem 0 .2rem">${c.title}</div>
+      <div class="kb-assess rvt-m-remove-bottom">${c.body}</div>
+    </div>`).join('');
+
+  // ---- Update worklist ----
+  const sevRank = {high:0, med:1, low:2};
+  document.getElementById('updateList').innerHTML = updates.slice().sort((a,b)=>sevRank[a.sev]-sevRank[b.sev]).map(u=>
+    `<div class="kb-pri kb-pri--${u.sev}">
+      <span class="kb-pri__sev">${u.sev==='high'?'High':u.sev==='med'?'Medium':'Low'} priority</span>
+      <div class="kb-title" style="margin:.25rem 0 .2rem">${u.who}</div>
+      <div class="kb-assess rvt-m-remove-bottom">${u.what}</div>
+    </div>`).join('');
+
+  // ---- Roadmap ----
+  document.getElementById('roadmap').innerHTML = roadmap.map(r=>
+    `<div class="kb-step"><div class="kb-title" style="margin:0 0 .2rem">${r.h}</div>
+      <div class="kb-assess rvt-m-remove-bottom">${r.b}</div>
+      <div class="kb-step__cite">Grounded in: ${r.cite}</div></div>`).join('');
+
+  document.getElementById('sourceList').innerHTML = sources.map(s=>
+    `<li><a href="${s[1]}" target="_blank" rel="noopener">${s[0]} ↗</a></li>`).join('');
+
+  render();
+  if (window.Rivet && Rivet.init) { Rivet.init(); }
+  </script>
+</body>
+</html>
