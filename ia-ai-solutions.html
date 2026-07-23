@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Data Solutions — IU</title>
+
+  <!-- Rivet Design System 2.8.0 CSS (CDN) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rivet-core@2.8.0/css/rivet.min.css">
+
+  <!--
+    Extension styles only. These target namespaced .ia-* classes so Rivet's own
+    .rvt-* rules are never overridden — following Rivet's "Extending Rivet" guidance.
+  -->
+  <style>
+    :root { color-scheme: light; }
+
+    /* Near-fullscreen dialog variant (extends .rvt-dialog via an added class;
+       only sizes the added .ia-* classes, so Rivet's positioning is untouched) */
+    .ia-modal { width: 94vw; max-width: 1180px; }
+    .ia-modal-scroll {
+      max-height: 72vh;
+      overflow-y: auto;
+      padding-right: 0.25rem;
+    }
+
+    /* Diagram frame inside a modal */
+    .ia-diagram { background: #ffffff; overflow-x: auto; }
+    .ia-diagram .mermaid { margin: 0; text-align: center; }
+    .ia-diagram svg { max-width: 100%; height: auto; }
+
+    /* Tag rows (containers only; the badges themselves are pure Rivet) */
+    .ia-tags { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+
+    /* Legend swatches */
+    .ia-legend-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 0.5rem 1.25rem;
+    }
+    .ia-legend-item { display: flex; align-items: center; gap: 0.5rem; }
+    .ia-swatch {
+      width: 14px; height: 14px; border-radius: 3px; flex: 0 0 auto;
+      display: inline-block; border: 1px solid rgba(0,0,0,0.2);
+    }
+    .ia-count {
+      font-variant-numeric: tabular-nums;
+      color: #4a4a4a;
+      font-size: 0.8125rem;
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    /* Keep every card in a grid the same height so the button lines up */
+    .ia-card-col { display: flex; }
+    .ia-card-col > .rvt-card { display: flex; flex-direction: column; width: 100%; }
+    .ia-card-col .rvt-card__body { display: flex; flex-direction: column; flex: 1 1 auto; }
+    .ia-push { margin-top: auto; }
+
+    /* Page navigation (replaces the Rivet tabs; namespaced, no Rivet overrides) */
+    .ia-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      border-bottom: 1px solid #c4c9cf;
+      margin-bottom: 1.5rem;
+    }
+    .ia-nav-item {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      border: 0;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -1px;
+      padding: 0.75rem 1.1rem;
+      font: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #4c5a69;
+      cursor: pointer;
+    }
+    .ia-nav-item:hover { color: #990000; }
+    .ia-nav-item[aria-current="page"] { color: #990000; border-bottom-color: #990000; }
+    .ia-nav-item:focus-visible { outline: 2px solid #006298; outline-offset: 2px; border-radius: 2px; }
+
+    /* Markdown export page */
+    .ia-md-toolbar { display: flex; justify-content: flex-end; margin-bottom: 0.5rem; }
+    .ia-md-block {
+      background: #f8f9fa;
+      border: 1px solid #c4c9cf;
+      border-radius: 0.25rem;
+      padding: 1rem 1.25rem;
+      max-height: 70vh;
+      overflow: auto;
+    }
+    .ia-md-block code {
+      display: block;
+      white-space: pre;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 0.8125rem;
+      line-height: 1.55;
+      color: #243142;
+    }
+
+    /* Claude Analysis page */
+    .ia-analysis { max-width: 62rem; }
+    .ia-lead { font-size: 1.125rem; line-height: 1.5; }
+
+    /* Inline project reference that opens the solution's modal */
+    .ia-projlink {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      font: inherit;
+      font-weight: 700;
+      color: #990000;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      text-decoration-thickness: 1px;
+      cursor: pointer;
+    }
+    .ia-projlink:hover { color: #5c0000; text-decoration-thickness: 2px; }
+    .ia-projlink:focus-visible { outline: 2px solid #006298; outline-offset: 2px; border-radius: 2px; }
+
+    /* At-a-glance stat tiles */
+    .ia-stats { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .ia-stat {
+      flex: 1 1 130px;
+      border: 1px solid #c4c9cf;
+      border-radius: 0.35rem;
+      padding: 0.75rem 0.9rem;
+      background: #f8f9fa;
+    }
+    .ia-stat b {
+      display: block;
+      font-size: 1.75rem;
+      line-height: 1.1;
+      color: #990000;
+      font-variant-numeric: tabular-nums;
+    }
+    .ia-stat span { font-size: 0.8125rem; color: #4a4a4a; }
+
+    /* Analysis section blocks */
+    .ia-analysis h3 { border-bottom: 2px solid #990000; padding-bottom: 0.35rem; }
+    .ia-deepdive {
+      border: 1px solid #c4c9cf;
+      border-left: 4px solid #990000;
+      border-radius: 0.35rem;
+      padding: 1rem 1.25rem;
+    }
+    .ia-theme-table { width: 100%; border-collapse: collapse; }
+    .ia-theme-table th, .ia-theme-table td {
+      text-align: left;
+      vertical-align: top;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid #dfe3e8;
+      font-size: 0.9375rem;
+    }
+    .ia-theme-table th { color: #243142; font-weight: 700; }
+    .ia-theme-table tbody th { white-space: nowrap; }
+
+    .ia-hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- ============================ HEADER ============================ -->
+  <header class="rvt-header-wrapper">
+    <a class="rvt-header-wrapper__skip-link" href="#main-content">Skip to main content</a>
+    <div class="rvt-header-global">
+      <div class="rvt-container-xl">
+        <div class="rvt-header-global__inner">
+          <div class="rvt-header-global__logo-slot">
+            <a class="rvt-lockup" href="#0">
+              <div class="rvt-lockup__tab">
+                <svg xmlns="http://www.w3.org/2000/svg" class="rvt-lockup__trident" viewBox="0 0 28 34">
+                  <path d="M-3.34344e-05 4.70897H8.83308V7.174H7.1897V21.1426H10.6134V2.72321H8.83308V0.121224H18.214V2.65476H16.2283V21.1426H19.7889V7.174H18.214V4.64047H27.0471V7.174H25.0614V23.6761L21.7746 26.8944H16.2967V30.455H18.214V33.8787H8.76463V30.592H10.6819V26.8259H5.20403L1.91726 23.6077V7.174H-3.34344e-05V4.70897Z" fill="currentColor"></path>
+                </svg>
+              </div>
+              <div class="rvt-lockup__body">
+                <span class="rvt-lockup__title">AI Data Solutions</span>
+                <span class="rvt-lockup__subtitle">Indiana University</span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================ MAIN ============================ -->
+  <main id="main-content" class="rvt-container-xl rvt-p-tb-xl rvt-p-lr-md">
+
+    <div class="rvt-m-bottom-md">
+      <h1 class="rvt-ts-32 rvt-text-bold">AI Data Solutions</h1>
+    </div>
+
+    <!-- ============================ PAGE NAV ============================ -->
+    <nav class="ia-nav" aria-label="Sections">
+      <button type="button" class="ia-nav-item" data-ia-nav="solutions" aria-current="page">Solutions</button>
+      <button type="button" class="ia-nav-item" data-ia-nav="legend">Tools &amp; data sources</button>
+      <button type="button" class="ia-nav-item" data-ia-nav="markdown">Markdown</button>
+      <button type="button" class="ia-nav-item" data-ia-nav="analysis">Claude Analysis</button>
+    </nav>
+
+    <!-- ============================ PAGE: Solutions ============================ -->
+    <section class="ia-page" id="page-solutions" data-ia-page="solutions">
+
+      <div class="rvt-flow rvt-m-bottom-lg">
+        <p class="rvt-ts-18">
+          How teams across Indiana University are building AI data solutions. Each card is one
+          solution &mdash; open it to read a short summary and see a diagram of how it works.
+        </p>
+        <p class="rvt-ts-14 rvt-color-black-500">
+          Showing <strong>9</strong> solutions from <strong>3 teams</strong>: Institutional Analytics &mdash; Research &amp; Analytics,
+          UITS Student Success Applications (Departmental Solutions), and UITS Enterprise Data Services (EDED).
+          More teams can be added over time.
+        </p>
+      </div>
+
+        <!-- ---------- Filters ---------- -->
+    <section class="rvt-border-all rvt-border-radius rvt-p-all-md rvt-m-bottom-lg" aria-label="Filter solutions">
+      <div class="rvt-row rvt-items-end">
+        <div class="rvt-cols-3-md rvt-m-bottom-sm">
+          <label class="rvt-label" for="filter-team">Team</label>
+          <select class="rvt-select" id="filter-team">
+            <option value="all">All teams</option>
+            <option value="ia-ra">IA Research &amp; Analytics</option>
+            <option value="uits-ssa">UITS Student Success Applications</option>
+            <option value="eded">UITS Enterprise Data Services (EDED)</option>
+          </select>
+        </div>
+        <div class="rvt-cols-3-md rvt-m-bottom-sm">
+          <label class="rvt-label" for="filter-tech">Technology</label>
+          <select class="rvt-select" id="filter-tech">
+            <option value="all">All technologies</option>
+            <option value="reallms">REALLMS</option>
+            <option value="llm">LLM</option>
+            <option value="fllm">Frontier LLM</option>
+            <option value="rag">RAG</option>
+            <option value="gov">Data Cookbook / DM-01</option>
+            <option value="sql">Oracle</option>
+            <option value="denodo">Denodo</option>
+            <option value="python">Python</option>
+            <option value="copilot">Microsoft Copilot</option>
+            <option value="notebooklm">NotebookLM</option>
+          </select>
+        </div>
+        <div class="rvt-cols-3-md rvt-m-bottom-sm">
+          <label class="rvt-label" for="filter-source">Data source</label>
+          <select class="rvt-select" id="filter-source">
+            <option value="all">All data sources</option>
+            <option value="instdata">Institutional data</option>
+            <option value="survey">Survey data</option>
+            <option value="canvas">Canvas data</option>
+            <option value="thematic">Thematic coding</option>
+          </select>
+        </div>
+        <div class="rvt-cols-3-md rvt-m-bottom-sm">
+          <label class="rvt-label" for="filter-search">Search</label>
+          <input class="rvt-text-input" type="text" id="filter-search" placeholder="Search title or summary&hellip;">
+        </div>
+      </div>
+      <p class="rvt-ts-14 rvt-color-black-500 rvt-m-top-xs rvt-m-bottom-none" id="result-count" aria-live="polite"></p>
+    </section>
+
+    <!-- ============================ CARD GRID ============================ -->
+    <div class="rvt-row" id="card-grid">
+
+      <!-- 1 -->
+      <div class="rvt-cols-4-md ia-card-col rvt-m-bottom-md"
+           data-team="ia-ra"
+           data-tech="reallms llm rag sql instdata"
+           data-search="natural language to sql oracle query non-technical users rag schema pilot">
+        <div class="rvt-card rvt-card--raised">
+          <div class="rvt-card__body">
+            <div class="rvt-card__eyebrow">IA Research &amp; Analytics</div>
+            <h2 class="rvt-card__title">Natural Language&ndash;to&ndash;SQL Conversion</h2>
+            <div class="rvt-card__content">
+              <p><strong>Status: Pilot</strong></p>
+              <p>Turns plain-language questions into Oracle SQL so non-technical staff can query institutional data without writing code.</p>
+            </div>
+            <div class="ia-tags rvt-m-top-sm">
+              <span class="rvt-badge">REALLMS</span>
+              <span class="rvt-badge">LLM</span>
+              <span class="rvt-badge">RAG</span>
+              <span class="rvt-badge">Oracle</span>
+              <span class="rvt-badge rvt-badge--info">Institutional data</span>
+            </div>
+            <div class="ia-push rvt-m-top-md">
+              <button type="button" class="rvt-button rvt-button--secondary" data-rvt-dialog-trigger="dialog-1">
+                <span>View diagram &amp; details</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2 -->
+      <div class="rvt-cols-4-md ia-card-col rvt-m-bottom-md"
+           data-team="ia-ra"
+           data-tech="reallms llm survey thematic"
+           data-search="thematic analysis international student exchange survey qualitative coding sentiment themes reallms api">
+        <div class="rvt-card rvt-card--raised">
+          <div class="rvt-card__body">
+            <div class="rvt-card__eyebrow">IA Research &amp; Analytics</div>
+            <h2 class="rvt-card__title">Thematic Analysis of Student Exchange Survey</h2>
+            <div class="rvt-card__content">
+              <p><strong>Status: In use</strong></p>
+              <p>AI codes open-ended student exchange survey responses to surface themes and sentiment at scale.</p>
+            </div>
+            <div class="ia-tags rvt-m-top-sm">
+              <span class="rvt-badge">REALLMS</span>
+              <span class="rvt-badge">LLM</span>
+              <span class="rvt-badge rvt-badge--info">Survey data</span>
+              <span class="rvt-badge rvt-badge--info">Thematic coding</span>
+            </div>
+            <div class="ia-push rvt-m-top-md">
+              <button type="button" class="rvt-button rvt-button--secondary" data-rvt-dialog-trigger="dialog-2">
+                <span>View diagram &amp; details</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 -->
+      <div class="rvt-cols-4-md ia-card-col rvt-m-bottom-md"
+           data-team="ia-ra"
+           data-tech="llm thematic canvas instdata"
+           data-search="peer tutoring analytics vpue school of education coaching wellness canvas engagement academic performance student success">
+        <div class="rvt-card rvt-card--raised">
+          <div class="rvt-card__body">
+            <div class="rvt-card__eyebrow">IA Research &amp; Analytics</div>
+            <h2 class="rvt-card__title">Peer Tutoring Analytics (VPUE &amp; School of Education)</h2>
+            <div class="rvt-card__content">
+              <p><strong>Status: In use &middot; collaboration</strong></p>
+              <p>Links coded coaching and peer-tutoring notes to Canvas engagement and academic outcomes to see what drives student success.</p>
+            </div>
+            <div class="ia-tags rvt-m-top-sm">
+              <span class="rvt-badge">LLM</span>
+              <span class="rvt-badge rvt-badge--info">Thematic coding</span>
+              <span class="rvt-badge rvt-badge--info">Canvas data</span>
+              <span class="rvt-badge rvt-badge--info">Institutional data</span>
+            </div>
+            <div class="ia-push rvt-m-top-md">
+              <button type="button" class="rvt-button rvt-button--secondary" data-rvt-dialog-trigger="dialog-3">
+                <span>View diagram &amp; details</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 -->
+      <div class="rvt-cols-4-md ia-card-col rvt-m-bottom-md"
+           data-team="ia-ra"
+           data-tech="python instdata"
+           data-search="iu space utilization analytics python jupyter facilities occupancy building usage sabrina andrews ad hoc">
+        <div class="rvt-card rvt-card--raised">
+          <div class="rvt-card__body">
+            <div class="rvt-card__eyebrow">IA Research &amp; Analytics</div>
+            <h2 class="rvt-card__title">IU Space Utilization Analytics</h2>
+            <div class="rvt-card__content">
+              <p><strong>Status: Delivered &middot; ad hoc</strong></p>
+              <p>A rapid Python/Jupyter build that analyzes and visualizes how IU spaces are actually used.</p>
+            </div>
+            <div class="ia-tags rvt-m-top-sm">
+              <span class="rvt-badge">Python</span>
+              <span class="rvt-badge rvt-badge--info">Institutional data</span>
+            </div>
+            <div class="ia-push rvt-m-top-md">
+              <button type="button" class="rvt-button rvt-button--secondary" data-rvt-dialog-trigger="dialog-4">
+                <span>View diagram &amp; details</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5 -->
+      <div class="rvt-cols-4-md ia-card-col rvt-m-bottom-md"
+           data-team="ia-ra"
+           data-tech="reallms rag llm copilot instdata"
+           data-search="census enrollment conversational agent microsoft copilot chat natural language demographics trends reallms rag prototype">
+        <div class="rvt-card rvt-card--raised">
+          <div class="rvt-card__body">
+            <div class="rvt-card__eyebrow">IA Research &amp; Analytics</div>
+            <h2 class="rvt-card__title">Census Enrollment Conversational Agent</h2>
+            <div class="rvt-card__content">
+              <p><strong>Status: Prototype &rarr; exploring REALLMS</strong></p>
+              <p>Lets users chat with census enrollment trends and demographics in plain language, no reporting tools required.</p>
+            </div>
+            <div class="ia-tags rvt-m-top-sm">
+              <span class="rvt-badge">REALLMS</span>
+              <span class="rvt-badge">RAG</span>
+              <span class="rvt-badge">LLM</span>
+              <span class="rvt-badge">Microsoft Copilot</span>
+              <span class="rvt-badge rvt-badge--info">Institutional data</span>
+            </div>
+            <div class="ia-push rvt-m-top-md">
+              <button type="button" class="rvt-button rvt-button--secondary" data-rvt-dialog-trigger="dialog-5">
+                <span>View diagram &amp; details</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6 -->
+      <div class="rvt-cols-4-md ia-card-col rvt-m-bottom-md"
+           data-team="ia-ra"
+           data-tech="notebooklm reallms rag llm survey instdata"
+           data-search="gradseru graduate student survey intelligence notebooklm rag reallms grounded summaries stakeholder reports 2024 2026">
+        <div class="rvt-card rvt-card--raised">
+          <div class="rvt-card__body">
+            <div class="rvt-card__eyebrow">IA Research &amp; Analytics</div>
+            <h2 class="rvt-card__title">Graduate Student Survey Intelligence (GradSERU)</h2>
+            <div class="rvt-card__content">
+              <p><strong>Status: Proof of concept &rarr; planned migration</strong></p>
+              <p>Ask plain-language questions across GradSERU survey and institutional data to get grounded summaries and comparisons.</p>
+            </div>
+            <div class="ia-tags rvt-m-top-sm">
+              <span class="rvt-badge">NotebookLM</span>
+              <span class="rvt-badge">REALLMS</span>
+              <span class="rvt-badge">RAG</span>
+              <span class="rvt-badge">LLM</span>
+              <span class="rvt-badge rvt-badge--info">Survey data</span>
+              <span class="rvt-badge rvt-badge--info">Institutional data</span>
+            </div>
+            <div class="ia-push rvt-m-top-md">
+              <button type="button" class="rvt-button rvt-button--secondary" data-rvt-dialog-trigger="dialog-6">
+                <span>View diagram &amp; details</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7 -->
+      <div class="rvt-cols-4-md ia-card-col rvt-m-bottom-md"
+           data-team="uits-ssa"
+           data-tech="fllm reallms gov sql denodo instdata"
+           data-search="crimson curator agentic data steward privacy ferpa critical governance gate frontier llm claude on-prem reallms data cookbook dm-01 denodo oracle dss fail-closed scrubbed">
+        <div class="rvt-card rvt-card--raised">
+          <div class="rvt-card__body">
+            <div class="rvt-card__eyebrow">UITS Student Success Applications</div>
+            <h2 class="rvt-card__title">Crimson Curator</h2>
+            <div class="rvt-card__content">
+              <p><strong>Status: In development &middot; demo-ready</strong></p>
+              <p>Lets frontier models like Claude answer questions over IU data without ever exposing FERPA or Critical rows.</p>
+            </div>
+            <div class="ia-tags rvt-m-top-sm">
+              <span class="rvt-badge">Frontier LLM</span>
+              <span class="rvt-badge">REALLMS</span>
+              <span class="rvt-badge">Data Cookbook / DM-01</span>
+              <span class="rvt-badge">Oracle</span>
+              <span class="rvt-badge">Denodo</span>
+              <span class="rvt-badge rvt-badge--info">Institutional data</span>
+            </div>
+            <div class="ia-push rvt-m-top-md">
+              <button type="button" class="rvt-button rvt-button--secondary" data-rvt-dialog-trigger="dialog-7">
+                <span>View diagram &amp; details</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8 -->
+      <div class="rvt-cols-4-md ia-card-col rvt-m-bottom-md"
+           data-team="eded"
+           data-tech="reallms llm rag sql python gov denodo instdata"
+           data-search="nalqi natural language query intelligence plain english oracle sql enrollment census streamlit vanna qwen embeddings text-to-sql schema examples metadata data cookbook eded enterprise data engineering development on-prem reallms self-service">
+        <div class="rvt-card rvt-card--raised">
+          <div class="rvt-card__body">
+            <div class="rvt-card__eyebrow">UITS Enterprise Data Services (EDED)</div>
+            <h2 class="rvt-card__title">NaLQi &mdash; Natural Language Query Intelligence</h2>
+            <div class="rvt-card__content">
+              <p><strong>Status: In development &middot; demo-ready</strong></p>
+              <p>Turns plain-English questions about enrollment data into validated, ready-to-run Oracle SQL &mdash; grounded in schema and verified examples, never the data itself.</p>
+            </div>
+            <div class="ia-tags rvt-m-top-sm">
+              <span class="rvt-badge">REALLMS</span>
+              <span class="rvt-badge">LLM</span>
+              <span class="rvt-badge">RAG</span>
+              <span class="rvt-badge">Oracle</span>
+              <span class="rvt-badge">Python</span>
+              <span class="rvt-badge">Data Cookbook / DM-01</span>
+              <span class="rvt-badge">Denodo</span>
+              <span class="rvt-badge rvt-badge--info">Institutional data</span>
+            </div>
+            <div class="ia-push rvt-m-top-md">
+              <button type="button" class="rvt-button rvt-button--secondary" data-rvt-dialog-trigger="dialog-8">
+                <span>View diagram &amp; details</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 9 -->
+      <div class="rvt-cols-4-md ia-card-col rvt-m-bottom-md"
+           data-team="eded"
+           data-tech="reallms llm denodo python instdata"
+           data-search="denodo ai chat room curated llm-optimized views vql domain tag data virtualization governance self-describing metadata reallms eded iu_ia_dev enrollment_room curation pipeline agent infrastructure row column security masking audit hipaa">
+        <div class="rvt-card rvt-card--raised">
+          <div class="rvt-card__body">
+            <div class="rvt-card__eyebrow">UITS Enterprise Data Services (EDED)</div>
+            <h2 class="rvt-card__title">Denodo AI Chat Room</h2>
+            <div class="rvt-card__content">
+              <p><strong>Status: In development</strong></p>
+              <p>Builds curated, self-describing views inside IU&rsquo;s governed Denodo platform so any AI agent can safely query institutional data.</p>
+            </div>
+            <div class="ia-tags rvt-m-top-sm">
+              <span class="rvt-badge">REALLMS</span>
+              <span class="rvt-badge">LLM</span>
+              <span class="rvt-badge">Denodo</span>
+              <span class="rvt-badge">Python</span>
+              <span class="rvt-badge rvt-badge--info">Institutional data</span>
+            </div>
+            <div class="ia-push rvt-m-top-md">
+              <button type="button" class="rvt-button rvt-button--secondary" data-rvt-dialog-trigger="dialog-9">
+                <span>View diagram &amp; details</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <p id="no-results" class="rvt-ts-18 rvt-text-center rvt-p-all-lg ia-hidden">
+      No solutions match your filters.
+    </p>
+
+    </section>
+
+    <!-- ============================ PAGE: Claude Analysis ============================ -->
+    <section class="ia-page ia-hidden ia-analysis" id="page-analysis" data-ia-page="analysis">
+
+      <div class="rvt-flow rvt-m-bottom-md">
+        <h2 class="rvt-ts-29 rvt-text-bold">Claude Analysis</h2>
+        <p class="ia-lead">A thematic read across the three contributing teams &mdash; where their work overlaps, the tools
+          they share, and two questions worth a closer look. Every project named below is a link:
+          <strong>click it to open that solution&rsquo;s diagram and details</strong>, exactly as on the Solutions page.</p>
+        <p class="rvt-ts-14 rvt-color-black-500">Derived only from the nine solutions catalogued here &mdash; six from
+          Institutional Analytics &mdash; Research &amp; Analytics (IA-RA), two from UITS Enterprise Data Services (EDED),
+          and one from UITS Student Success Applications (Departmental Solutions).</p>
+      </div>
+
+      <!-- At a glance -->
+      <div class="ia-stats rvt-m-bottom-lg">
+        <div class="ia-stat"><b>9</b><span>solutions</span></div>
+        <div class="ia-stat"><b>3</b><span>contributing teams</span></div>
+        <div class="ia-stat"><b>7</b><span>run on REALLMS</span></div>
+        <div class="ia-stat"><b>5</b><span>natural-language interfaces</span></div>
+        <div class="ia-stat"><b>4</b><span>use RAG</span></div>
+      </div>
+
+      <!-- ============ EXECUTIVE SUMMARY ============ -->
+      <div class="rvt-flow rvt-m-bottom-xl">
+        <h3 class="rvt-ts-23 rvt-text-bold">Executive summary</h3>
+        <p>The catalog tells one dominant story: <strong>Indiana University is teaching its institutional data to answer
+          questions in plain language</strong>, and the hard part every team is really solving is <em>trust</em> &mdash;
+          making sure a plain-language answer is correct and never leaks protected data. Three teams arrived at strikingly
+          similar architectures independently, and a shared on-prem platform, <strong>REALLMS</strong>, is emerging as the
+          connective tissue between them.</p>
+        <ul class="rvt-list-plain rvt-flow">
+          <li>&#9642;&nbsp; <strong>One problem, three teams, converging answers.</strong>
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-1">Natural Language&ndash;to&ndash;SQL</button>,
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-5">Census Enrollment Conversational Agent</button> and
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-6">GradSERU</button> (all IA-RA),
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-8">NaLQi</button> (EDED), and
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-7">Crimson Curator</button> (UITS-SSA)
+            are all variations on &ldquo;ask a question, get a governed answer.&rdquo;</li>
+          <li>&#9642;&nbsp; <strong>REALLMS is the de facto standard.</strong> Seven of nine solutions use or plan to use it,
+            spanning all three teams. It is the privacy anchor that keeps institutional data on IU infrastructure.</li>
+          <li>&#9642;&nbsp; <strong>The shared trust strategy is metadata-grounding, not data-exposure.</strong>
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-8">NaLQi</button>,
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-9">Denodo AI Chat Room</button>,
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-7">Crimson Curator</button> and
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-1">Natural Language&ndash;to&ndash;SQL</button>
+            all feed the model schema, definitions and examples while keeping actual records out of the model.</li>
+          <li>&#9642;&nbsp; <strong>EDED has built the most mature trust stack; IA-RA has the most use cases.</strong> That
+            asymmetry is the single clearest reuse opportunity in the catalog.</li>
+          <li>&#9642;&nbsp; <strong>Governance is designed in, not bolted on</strong> &mdash; the Data Cookbook / DM-01
+            classification (<button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-7">Crimson Curator</button>,
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-8">NaLQi</button>) and Denodo row/column
+            security (<button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-9">Denodo AI Chat Room</button>).</li>
+          <li>&#9642;&nbsp; <strong>A second, smaller theme</strong> is LLM thematic coding of qualitative text &mdash;
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-2">Thematic Analysis of the Student Exchange Survey</button> and
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-3">Peer Tutoring Analytics</button> &mdash; today an IA-RA specialty.</li>
+          <li>&#9642;&nbsp; <strong>One deliberate outlier.</strong>
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-4">IU Space Utilization Analytics</button>
+            is the only solution with no LLM and no REALLMS &mdash; a rapid Python/Jupyter build. A useful reminder that not
+            every data question needs a language model.</li>
+        </ul>
+      </div>
+
+      <!-- ============ THEMES AT A GLANCE ============ -->
+      <div class="rvt-flow rvt-m-bottom-xl">
+        <h3 class="rvt-ts-23 rvt-text-bold">Themes at a glance</h3>
+        <div style="overflow-x:auto;">
+        <table class="ia-theme-table">
+          <thead>
+            <tr><th scope="col">Theme</th><th scope="col">Projects</th><th scope="col">Teams</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Plain language &rarr; governed data answers</th>
+              <td>
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-1">NL&ndash;to&ndash;SQL</button>,
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-5">Census Agent</button>,
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-6">GradSERU</button>,
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-8">NaLQi</button>,
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-7">Crimson Curator</button>
+              </td>
+              <td>All three</td>
+            </tr>
+            <tr>
+              <th scope="row">Metadata-grounding &amp; verified examples</th>
+              <td>
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-1">NL&ndash;to&ndash;SQL</button>,
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-8">NaLQi</button>,
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-9">Denodo AI Chat Room</button>
+              </td>
+              <td>IA-RA, EDED</td>
+            </tr>
+            <tr>
+              <th scope="row">Governance / privacy as architecture</th>
+              <td>
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-7">Crimson Curator</button>,
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-8">NaLQi</button>,
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-9">Denodo AI Chat Room</button>
+              </td>
+              <td>EDED, UITS-SSA</td>
+            </tr>
+            <tr>
+              <th scope="row">On-prem inference (REALLMS)</th>
+              <td>
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-1">NL&ndash;to&ndash;SQL</button>,
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-2">Thematic Analysis</button>,
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-5">Census Agent</button>,
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-6">GradSERU</button>,
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-7">Crimson Curator</button>,
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-8">NaLQi</button>,
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-9">Denodo AI Chat Room</button>
+              </td>
+              <td>All three</td>
+            </tr>
+            <tr>
+              <th scope="row">Prototype externally &rarr; migrate to REALLMS</th>
+              <td>
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-5">Census Agent</button> (Copilot),
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-6">GradSERU</button> (NotebookLM)
+              </td>
+              <td>IA-RA</td>
+            </tr>
+            <tr>
+              <th scope="row">LLM thematic coding of qualitative text</th>
+              <td>
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-2">Thematic Analysis</button>,
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-3">Peer Tutoring Analytics</button>
+              </td>
+              <td>IA-RA</td>
+            </tr>
+            <tr>
+              <th scope="row">Conventional analytics (no LLM)</th>
+              <td>
+                <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-4">IU Space Utilization Analytics</button>
+              </td>
+              <td>IA-RA</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+        <p class="rvt-ts-14 rvt-color-black-500">Shared building blocks by reuse: <strong>REALLMS</strong> (7),
+          <strong>LLM</strong> (7), <strong>RAG</strong> (4), <strong>Oracle</strong> (3), <strong>Denodo</strong> (3),
+          <strong>Python</strong> (3), <strong>Data Cookbook / DM-01</strong> (2). Institutional data underpins eight of nine.</p>
+      </div>
+
+      <!-- ============ OPPORTUNITIES ============ -->
+      <div class="rvt-flow rvt-m-bottom-xl">
+        <h3 class="rvt-ts-23 rvt-text-bold">Opportunities</h3>
+        <p>The overlap is not duplication to be embarrassed by &mdash; it is a set of ready-made reuse opportunities.</p>
+        <ol class="rvt-flow">
+          <li><strong>Consolidate the natural-language-to-SQL effort.</strong>
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-1">NL&ndash;to&ndash;SQL</button> (IA-RA pilot),
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-5">Census Agent</button> (IA-RA) and
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-8">NaLQi</button> (EDED) are the same idea
+            at three maturities. NaLQi already has schema grounding, 120+ verified examples, SQL validation, auto-repair and a
+            feedback loop. <em>Why it matters:</em> IA-RA could adopt NaLQi as the engine rather than re-solve text-to-SQL.</li>
+          <li><strong>Make the Denodo &ldquo;curated room&rdquo; the shared data-access layer.</strong>
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-9">Denodo AI Chat Room</button> builds
+            governed, self-describing views any agent can consume &mdash; it already names NaLQi as a client.
+            <em>Why it matters:</em> the same rooms could back the Census Agent and GradSERU, giving every tool one governed
+            entry point instead of bespoke connections.</li>
+          <li><strong>Reuse Crimson Curator&rsquo;s fail-closed governance gate as common policy.</strong>
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-7">Crimson Curator</button>&rsquo;s
+            column-by-column DM-01 classifier is portable policy logic. <em>Why it matters:</em> fronting the NL&rarr;data tools
+            with it would give them all one consistent, auditable privacy guarantee.</li>
+          <li><strong>Share the verified-example corpus and feedback loop.</strong> NaLQi&rsquo;s &ldquo;save as training
+            pair&rdquo; mechanism (<button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-8">NaLQi</button>)
+            makes accuracy compound with use. <em>Why it matters:</em> a cross-team library of question&rarr;SQL pairs would let
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-1">NL&ndash;to&ndash;SQL</button> and
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-5">Census Agent</button> inherit corrections.</li>
+          <li><strong>Standardize the &ldquo;prototype externally &rarr; migrate to REALLMS&rdquo; path.</strong>
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-5">Census Agent</button> (from Copilot) and
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-6">GradSERU</button> (from NotebookLM) both
+            walk this road. <em>Why it matters:</em> a documented RAG-plus-REALLMS scaffold would turn a repeated migration into a template.</li>
+          <li><strong>Merge the two thematic-coding efforts into one service.</strong>
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-2">Thematic Analysis</button> and
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-3">Peer Tutoring Analytics</button> both do
+            LLM coding of open-ended text. <em>Why it matters:</em> a shared coding service would standardize codebooks and
+            consistency checks across qualitative studies.</li>
+        </ol>
+      </div>
+
+      <!-- ============ DEEP DIVE 1 ============ -->
+      <div class="ia-deepdive rvt-flow rvt-m-bottom-xl">
+        <h3 class="rvt-ts-23 rvt-text-bold">Deep dive &mdash; translating plain language into trustworthy data results</h3>
+        <p>This is the through-line of the catalog. The temptation with a large language model is to let it answer questions
+          about data directly; the danger is that it will confidently return a <em>wrong number</em>, and in institutional
+          reporting a wrong number presented as fact is worse than no answer at all. What is interesting is that, without a
+          shared playbook, the teams converged on the same defenses. Read together, their projects form a &ldquo;trust
+          ladder&rdquo; &mdash; each rung constrains the model further so the final answer can be relied upon.</p>
+        <ol class="rvt-flow">
+          <li><strong>Ground the model in metadata, never the data.</strong> Feed it schema, table relationships, Data
+            Cookbook definitions and real column values &mdash; but not records.
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-1">NL&ndash;to&ndash;SQL</button> does this
+            with a RAG pipeline; <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-8">NaLQi</button>
+            grounds on the full 152-column schema, Data Cookbook and business rules and states plainly that it &ldquo;never
+            sees actual records.&rdquo;</li>
+          <li><strong>Retrieve verified exemplars before generating.</strong>
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-8">NaLQi</button> checks for an exact or
+            near match against 120+ curated question&rarr;SQL pairs first, so common questions never depend on the model
+            improvising.</li>
+          <li><strong>Validate and auto-repair the output deterministically.</strong>
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-8">NaLQi</button> validates generated
+            Oracle SQL against the rules and auto-repairs (up to twice) before the query ever reaches a human &mdash; a
+            non-LLM safety net around an LLM.</li>
+          <li><strong>Keep a human checkpoint at the trust boundary.</strong>
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-8">NaLQi</button> is deliberately
+            <em>not</em> wired to live data yet: it hands back ready-to-run SQL for a person to execute, rather than fabricating
+            a result set. That design choice is a trust statement.</li>
+          <li><strong>Close the loop so accuracy compounds.</strong> A &ldquo;save as training pair&rdquo; feedback loop
+            (<button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-8">NaLQi</button>) turns every expert
+            correction into a new verified example, so the system gets more reliable the more it is used.</li>
+          <li><strong>Enforce governance so protected rows can never leak.</strong>
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-7">Crimson Curator</button>&rsquo;s
+            fail-closed gate classifies every referenced column and routes sensitive data to an on-prem reader; the
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-9">Denodo AI Chat Room</button> pushes
+            row/column security, masking and audit into the data layer itself.</li>
+          <li><strong>Prefer grounded, explainable answers over fluent ones.</strong>
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-5">Census Agent</button> and
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-6">GradSERU</button> both frame their goal
+            as <em>grounded</em> summaries and comparisons rather than free-form generation.</li>
+        </ol>
+        <p><strong>The read:</strong> the pilot question posed by
+          <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-1">NL&ndash;to&ndash;SQL</button> &mdash;
+          &ldquo;can an LLM reliably turn plain language into correct SQL?&rdquo; &mdash; has effectively been answered by
+          <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-8">NaLQi</button>: yes, <em>if</em> you wrap
+          the model in grounding, verified examples, deterministic validation and a human checkpoint. The recommendation is to
+          treat NaLQi&rsquo;s full stack as IU&rsquo;s reference pattern for trustworthy NL&rarr;data, paired with Crimson
+          Curator&rsquo;s gate and the Denodo rooms for governance.</p>
+      </div>
+
+      <!-- ============ DEEP DIVE 2 ============ -->
+      <div class="ia-deepdive rvt-flow rvt-m-bottom-xl">
+        <h3 class="rvt-ts-23 rvt-text-bold">Deep dive &mdash; the role of REALLMS</h3>
+        <p>REALLMS is the platform that shows up in seven of nine solutions and across all three teams &mdash; the closest
+          thing the catalog has to a standard. From the project data, it is IU&rsquo;s <strong>on-prem LLM platform</strong>:
+          it runs inside the IU data center (<button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-8">NaLQi</button>
+          names Qwen3-Coder-Next for generation and Qwen3-Embedding-8B for retrieval) and exposes APIs teams build against.
+          Its strategic value is simple: it keeps institutional data on IU infrastructure, which is what makes FERPA- and
+          HIPAA-aligned AI use possible.</p>
+        <p>What is striking is how many <em>different</em> jobs it does:</p>
+        <ul class="rvt-list-plain rvt-flow">
+          <li>&#9642;&nbsp; <strong>Generation engine</strong> for natural-language-to-SQL &mdash;
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-1">NL&ndash;to&ndash;SQL</button> and
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-8">NaLQi</button>.</li>
+          <li>&#9642;&nbsp; <strong>Embeddings / retrieval</strong> for semantic example matching &mdash;
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-8">NaLQi</button>.</li>
+          <li>&#9642;&nbsp; <strong>Coding API</strong> for qualitative thematic analysis &mdash;
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-2">Thematic Analysis of the Student Exchange Survey</button>.</li>
+          <li>&#9642;&nbsp; <strong>On-prem &ldquo;safe reader&rdquo;</strong> of sensitive rows that returns only a scrubbed
+            answer, so frontier models never see protected data &mdash;
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-7">Crimson Curator</button>.</li>
+          <li>&#9642;&nbsp; <strong>Metadata curator</strong> that decides which columns to keep, drop or alias and writes
+            self-describing view tags &mdash;
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-9">Denodo AI Chat Room</button>.</li>
+          <li>&#9642;&nbsp; <strong>Target migration platform</strong> for solutions prototyped elsewhere &mdash;
+            <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-5">Census Agent</button> (from Microsoft
+            Copilot) and <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-6">GradSERU</button> (from NotebookLM).</li>
+        </ul>
+        <p>Adoption spans the maturity curve &mdash; already in use
+          (<button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-2">Thematic Analysis</button>),
+          demo-ready (<button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-7">Crimson Curator</button>,
+          <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-8">NaLQi</button>), in development
+          (<button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-9">Denodo AI Chat Room</button>), and
+          planned or exploratory
+          (<button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-5">Census Agent</button>,
+          <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-6">GradSERU</button>).</p>
+        <p><strong>The read:</strong> REALLMS is already the shared backbone, but each team integrates with it independently.
+          The most valuable architectural move visible in the data is
+          <button type="button" class="ia-projlink" data-rvt-dialog-trigger="dialog-7">Crimson Curator</button>&rsquo;s hybrid
+          split &mdash; frontier models for public data, REALLMS for anything sensitive &mdash; which lets IU use the best
+          available models without moving protected data off-premises. Pairing a common REALLMS integration layer with the
+          Denodo curated rooms and a shared governance gate would turn seven independent integrations into one reusable platform.</p>
+      </div>
+
+      <p class="rvt-ts-14 rvt-color-black-500 rvt-m-bottom-lg">
+        <strong>Method &amp; caveats.</strong> This analysis is generated by Claude from the nine catalogued solutions only
+        &mdash; their descriptions, statuses, tools and data sources. It reflects what the catalog records, not external
+        roadmaps or team plans, and should be read as a starting point for discussion rather than a decision.
+      </p>
+    </section>
+
+    <!-- ============================ PAGE: Tools & data sources ============================ -->
+    <section class="ia-page ia-hidden" id="page-legend" data-ia-page="legend">
+        <!-- ---------- Legend ---------- -->
+    <section class="rvt-border-all rvt-border-radius rvt-p-all-md rvt-m-bottom-lg" aria-labelledby="legend-title">
+      <h2 id="legend-title" class="rvt-ts-20 rvt-text-bold rvt-m-bottom-xs">Tools &amp; data sources</h2>
+      <p class="rvt-ts-14 rvt-color-black-500 rvt-m-bottom-md">
+        Each item keeps the same color in every diagram (the swatch). Badge color shows the category:
+        <span class="rvt-badge rvt-badge--info">Data source</span> (blue) or
+        <span class="rvt-badge">Technology</span> (gray). The count shows how many solutions reuse it.
+      </p>
+
+      <h3 class="rvt-ts-14 rvt-text-bold rvt-m-top-md rvt-m-bottom-xs">Technologies</h3>
+      <div class="ia-legend-grid">
+        <div class="ia-legend-item"><span class="ia-swatch" style="background:#990000"></span><span class="rvt-badge">REALLMS</span><span class="ia-count">7 solutions &middot; 3 teams</span></div>
+        <div class="ia-legend-item"><span class="ia-swatch" style="background:#6E2585"></span><span class="rvt-badge">LLM</span><span class="ia-count">7 solutions</span></div>
+        <div class="ia-legend-item"><span class="ia-swatch" style="background:#B02A87"></span><span class="rvt-badge">Frontier LLM</span><span class="ia-count">1 solution</span></div>
+        <div class="ia-legend-item"><span class="ia-swatch" style="background:#056E41"></span><span class="rvt-badge">RAG</span><span class="ia-count">4 solutions</span></div>
+        <div class="ia-legend-item"><span class="ia-swatch" style="background:#55606E"></span><span class="rvt-badge">Data Cookbook / DM-01</span><span class="ia-count">2 solutions</span></div>
+        <div class="ia-legend-item"><span class="ia-swatch" style="background:#B26B00"></span><span class="rvt-badge">Oracle</span><span class="ia-count">3 solutions</span></div>
+        <div class="ia-legend-item"><span class="ia-swatch" style="background:#3E5C76"></span><span class="rvt-badge">Denodo</span><span class="ia-count">3 solutions</span></div>
+        <div class="ia-legend-item"><span class="ia-swatch" style="background:#2B3A67"></span><span class="rvt-badge">Python</span><span class="ia-count">3 solutions</span></div>
+        <div class="ia-legend-item"><span class="ia-swatch" style="background:#0F6E6E"></span><span class="rvt-badge">Microsoft Copilot</span><span class="ia-count">1 solution</span></div>
+        <div class="ia-legend-item"><span class="ia-swatch" style="background:#EF6C00"></span><span class="rvt-badge">NotebookLM</span><span class="ia-count">1 solution</span></div>
+      </div>
+
+      <h3 class="rvt-ts-14 rvt-text-bold rvt-m-top-md rvt-m-bottom-xs">Data sources</h3>
+      <div class="ia-legend-grid">
+        <div class="ia-legend-item"><span class="ia-swatch" style="background:#006298"></span><span class="rvt-badge rvt-badge--info">Institutional data</span><span class="ia-count">8 solutions</span></div>
+        <div class="ia-legend-item"><span class="ia-swatch" style="background:#147C8B"></span><span class="rvt-badge rvt-badge--info">Survey data</span><span class="ia-count">2 solutions</span></div>
+        <div class="ia-legend-item"><span class="ia-swatch" style="background:#D2492A"></span><span class="rvt-badge rvt-badge--info">Canvas data</span><span class="ia-count">1 solution</span></div>
+        <div class="ia-legend-item"><span class="ia-swatch" style="background:#6E6A1E"></span><span class="rvt-badge rvt-badge--info">Thematic coding</span><span class="ia-count">2 solutions</span></div>
+      </div>
+    </section>
+
+    </section>
+
+    <!-- ============================ PAGE: Markdown ============================ -->
+    <section class="ia-page ia-hidden" id="page-markdown" data-ia-page="markdown">
+      <div class="rvt-flow rvt-m-bottom-md">
+        <h2 class="rvt-ts-23 rvt-text-bold">Project data as Markdown</h2>
+        <p class="rvt-ts-14 rvt-color-black-500">
+          A plain-text summary of every solution &mdash; team, status, tools, data sources, and description &mdash;
+          formatted for pasting into an AI tool. Use the button to copy it to your clipboard.
+        </p>
+      </div>
+      <div class="ia-md-toolbar">
+        <button type="button" class="rvt-button rvt-button--secondary" id="md-copy">
+          <span id="md-copy-label">Copy</span>
+        </button>
+      </div>
+      <pre class="ia-md-block"><code id="md-content"></code></pre>
+    </section>
+
+  </main>
+
+  <!-- ============================ DIALOGS (near-fullscreen) ============================ -->
+
+  <!-- Dialog 1 -->
+  <div class="rvt-dialog ia-modal" id="dialog-1" role="dialog" tabindex="-1" aria-labelledby="dialog-1-title" data-rvt-dialog="dialog-1" data-rvt-dialog-modal data-rvt-dialog-darken-page data-rvt-dialog-disable-page-interaction hidden>
+    <header class="rvt-dialog__header">
+      <h1 class="rvt-dialog__title rvt-ts-26" id="dialog-1-title">Natural Language&ndash;to&ndash;SQL Conversion and Data Querying</h1>
+    </header>
+    <div class="rvt-dialog__body">
+      <div class="ia-modal-scroll">
+        <p class="rvt-ts-14 rvt-color-black-500 rvt-m-bottom-xs"><strong>Team:</strong> IA Research &amp; Analytics &nbsp;&middot;&nbsp; <strong>Status:</strong> Pilot</p>
+        <p class="rvt-ts-18">A pilot testing whether large language models can turn plain-language questions into Oracle SQL, so non-technical staff can query institutional data without writing code. A RAG pipeline feeds the model schema metadata, table relationships, and business context to improve query accuracy.</p>
+        <div class="ia-tags rvt-m-tb-sm">
+          <span class="rvt-badge">REALLMS</span>
+          <span class="rvt-badge">LLM</span>
+          <span class="rvt-badge">RAG</span>
+          <span class="rvt-badge">Oracle</span>
+          <span class="rvt-badge rvt-badge--info">Institutional data</span>
+        </div>
+        <div class="ia-diagram rvt-border-all rvt-border-radius rvt-p-all-md rvt-m-top-sm">
+          <pre class="mermaid">
+flowchart LR
+  U(["Non-technical user"]) --> Q["Plain-language question"]
+  Q --> APP["NL-to-SQL service on REALLMS"]:::reallms
+  RAG["RAG: schema, relationships,&lt;br/&gt;business context"]:::rag --> APP
+  APP --> LLM["Large language model"]:::llm
+  LLM --> SQLQ["Generated Oracle SQL"]:::sql
+  SQLQ --> DB[("Institutional data")]:::instdata
+  DB --> A["Answer / result set"]
+  A --> U
+  classDef reallms fill:#990000,stroke:#5c0000,color:#fff;
+  classDef llm fill:#6E2585,stroke:#4a1a5c,color:#fff;
+  classDef rag fill:#056E41,stroke:#03482b,color:#fff;
+  classDef instdata fill:#006298,stroke:#003f63,color:#fff;
+  classDef notebooklm fill:#EF6C00,stroke:#a84c00,color:#fff;
+  classDef copilot fill:#0F6E6E,stroke:#094747,color:#fff;
+  classDef sql fill:#B26B00,stroke:#7a4900,color:#fff;
+  classDef python fill:#2B3A67,stroke:#1a2542,color:#fff;
+  classDef canvas fill:#D2492A,stroke:#8f3119,color:#fff;
+  classDef survey fill:#147C8B,stroke:#0d545e,color:#fff;
+  classDef thematic fill:#6E6A1E,stroke:#4a4713,color:#fff;
+          </pre>
+        </div>
+      </div>
+    </div>
+    <div class="rvt-dialog__controls">
+      <button type="button" class="rvt-button rvt-button--secondary" data-rvt-dialog-close="dialog-1"><span>Close</span></button>
+    </div>
+    <button class="rvt-button rvt-button--plain rvt-dialog__close" data-rvt-dialog-close="dialog-1" role="button">
+      <span class="rvt-sr-only">Close</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m3.5 2.086 4.5 4.5 4.5-4.5L13.914 3.5 9.414 8l4.5 4.5-1.414 1.414-4.5-4.5-4.5 4.5L2.086 12.5l4.5-4.5-4.5-4.5L3.5 2.086Z"/></svg>
+    </button>
+  </div>
+
+  <!-- Dialog 2 -->
+  <div class="rvt-dialog ia-modal" id="dialog-2" role="dialog" tabindex="-1" aria-labelledby="dialog-2-title" data-rvt-dialog="dialog-2" data-rvt-dialog-modal data-rvt-dialog-darken-page data-rvt-dialog-disable-page-interaction hidden>
+    <header class="rvt-dialog__header">
+      <h1 class="rvt-dialog__title rvt-ts-26" id="dialog-2-title">Thematic Analysis of International Student Exchange Survey Data</h1>
+    </header>
+    <div class="rvt-dialog__body">
+      <div class="ia-modal-scroll">
+        <p class="rvt-ts-14 rvt-color-black-500 rvt-m-bottom-xs"><strong>Team:</strong> IA Research &amp; Analytics &nbsp;&middot;&nbsp; <strong>Status:</strong> In use</p>
+        <p class="rvt-ts-18">Uses REALLMS APIs to automatically code and thematically analyze open-ended responses from the International Student Exchange Program. AI-assisted categorization surfaces recurring themes and sentiment at scale while keeping coding consistent across responses.</p>
+        <div class="ia-tags rvt-m-tb-sm">
+          <span class="rvt-badge">REALLMS</span>
+          <span class="rvt-badge">LLM</span>
+          <span class="rvt-badge rvt-badge--info">Survey data</span>
+          <span class="rvt-badge rvt-badge--info">Thematic coding</span>
+        </div>
+        <div class="ia-diagram rvt-border-all rvt-border-radius rvt-p-all-md rvt-m-top-sm">
+          <pre class="mermaid">
+flowchart LR
+  S["Open-ended survey responses"]:::survey --> API["REALLMS APIs"]:::reallms
+  API --> LLM["LLM categorization"]:::llm
+  LLM --> C["Thematic coding"]:::thematic
+  C --> T["Themes, sentiment &amp;&lt;br/&gt;feedback areas"]
+  T --> R["Qualitative research&lt;br/&gt;output at scale"]
+  classDef reallms fill:#990000,stroke:#5c0000,color:#fff;
+  classDef llm fill:#6E2585,stroke:#4a1a5c,color:#fff;
+  classDef rag fill:#056E41,stroke:#03482b,color:#fff;
+  classDef instdata fill:#006298,stroke:#003f63,color:#fff;
+  classDef notebooklm fill:#EF6C00,stroke:#a84c00,color:#fff;
+  classDef copilot fill:#0F6E6E,stroke:#094747,color:#fff;
+  classDef sql fill:#B26B00,stroke:#7a4900,color:#fff;
+  classDef python fill:#2B3A67,stroke:#1a2542,color:#fff;
+  classDef canvas fill:#D2492A,stroke:#8f3119,color:#fff;
+  classDef survey fill:#147C8B,stroke:#0d545e,color:#fff;
+  classDef thematic fill:#6E6A1E,stroke:#4a4713,color:#fff;
+          </pre>
+        </div>
+      </div>
+    </div>
+    <div class="rvt-dialog__controls">
+      <button type="button" class="rvt-button rvt-button--secondary" data-rvt-dialog-close="dialog-2"><span>Close</span></button>
+    </div>
+    <button class="rvt-button rvt-button--plain rvt-dialog__close" data-rvt-dialog-close="dialog-2" role="button">
+      <span class="rvt-sr-only">Close</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m3.5 2.086 4.5 4.5 4.5-4.5L13.914 3.5 9.414 8l4.5 4.5-1.414 1.414-4.5-4.5-4.5 4.5L2.086 12.5l4.5-4.5-4.5-4.5L3.5 2.086Z"/></svg>
+    </button>
+  </div>
+
+  <!-- Dialog 3 -->
+  <div class="rvt-dialog ia-modal" id="dialog-3" role="dialog" tabindex="-1" aria-labelledby="dialog-3-title" data-rvt-dialog="dialog-3" data-rvt-dialog-modal data-rvt-dialog-darken-page data-rvt-dialog-disable-page-interaction hidden>
+    <header class="rvt-dialog__header">
+      <h1 class="rvt-dialog__title rvt-ts-26" id="dialog-3-title">Peer Tutoring Analytics for VPUE and the School of Education</h1>
+    </header>
+    <div class="rvt-dialog__body">
+      <div class="ia-modal-scroll">
+        <p class="rvt-ts-14 rvt-color-black-500 rvt-m-bottom-xs"><strong>Team:</strong> IA Research &amp; Analytics &nbsp;&middot;&nbsp; <strong>Partners:</strong> VPUE, School of Education &nbsp;&middot;&nbsp; <strong>Status:</strong> In use</p>
+        <p class="rvt-ts-18">In partnership with VPUE and the School of Education, this framework codes coaching and peer-tutoring notes and links them to Canvas engagement and academic outcomes. It looks for recurring support themes and relationships between coaching interventions and student success.</p>
+        <div class="ia-tags rvt-m-tb-sm">
+          <span class="rvt-badge">LLM</span>
+          <span class="rvt-badge rvt-badge--info">Thematic coding</span>
+          <span class="rvt-badge rvt-badge--info">Canvas data</span>
+          <span class="rvt-badge rvt-badge--info">Institutional data</span>
+        </div>
+        <div class="ia-diagram rvt-border-all rvt-border-radius rvt-p-all-md rvt-m-top-sm">
+          <pre class="mermaid">
+flowchart LR
+  N["Coaching &amp; peer-tutoring notes"] --> LLM["LLM-assisted coding"]:::llm
+  LLM --> TH["Wellness &amp; support themes"]:::thematic
+  CV["Canvas engagement metrics"]:::canvas --> M["Integrated analysis"]:::instdata
+  AP["Academic performance data"]:::instdata --> M
+  TH --> M
+  M --> I["Insights on student success"]
+  classDef reallms fill:#990000,stroke:#5c0000,color:#fff;
+  classDef llm fill:#6E2585,stroke:#4a1a5c,color:#fff;
+  classDef rag fill:#056E41,stroke:#03482b,color:#fff;
+  classDef instdata fill:#006298,stroke:#003f63,color:#fff;
+  classDef notebooklm fill:#EF6C00,stroke:#a84c00,color:#fff;
+  classDef copilot fill:#0F6E6E,stroke:#094747,color:#fff;
+  classDef sql fill:#B26B00,stroke:#7a4900,color:#fff;
+  classDef python fill:#2B3A67,stroke:#1a2542,color:#fff;
+  classDef canvas fill:#D2492A,stroke:#8f3119,color:#fff;
+  classDef survey fill:#147C8B,stroke:#0d545e,color:#fff;
+  classDef thematic fill:#6E6A1E,stroke:#4a4713,color:#fff;
+          </pre>
+        </div>
+      </div>
+    </div>
+    <div class="rvt-dialog__controls">
+      <button type="button" class="rvt-button rvt-button--secondary" data-rvt-dialog-close="dialog-3"><span>Close</span></button>
+    </div>
+    <button class="rvt-button rvt-button--plain rvt-dialog__close" data-rvt-dialog-close="dialog-3" role="button">
+      <span class="rvt-sr-only">Close</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m3.5 2.086 4.5 4.5 4.5-4.5L13.914 3.5 9.414 8l4.5 4.5-1.414 1.414-4.5-4.5-4.5 4.5L2.086 12.5l4.5-4.5-4.5-4.5L3.5 2.086Z"/></svg>
+    </button>
+  </div>
+
+  <!-- Dialog 4 -->
+  <div class="rvt-dialog ia-modal" id="dialog-4" role="dialog" tabindex="-1" aria-labelledby="dialog-4-title" data-rvt-dialog="dialog-4" data-rvt-dialog-modal data-rvt-dialog-darken-page data-rvt-dialog-disable-page-interaction hidden>
+    <header class="rvt-dialog__header">
+      <h1 class="rvt-dialog__title rvt-ts-26" id="dialog-4-title">IU Space Utilization Analytics</h1>
+    </header>
+    <div class="rvt-dialog__body">
+      <div class="ia-modal-scroll">
+        <p class="rvt-ts-14 rvt-color-black-500 rvt-m-bottom-xs"><strong>Team:</strong> IA Research &amp; Analytics &nbsp;&middot;&nbsp; <strong>Status:</strong> Delivered (ad hoc request)</p>
+        <p class="rvt-ts-18">A rapid Python/Jupyter solution built for an ad hoc request to evaluate how IU spaces are used. It extracts, analyzes, and visualizes facilities data to give stakeholders actionable insight into occupancy and building-usage patterns.</p>
+        <div class="ia-tags rvt-m-tb-sm">
+          <span class="rvt-badge">Python</span>
+          <span class="rvt-badge rvt-badge--info">Institutional data</span>
+        </div>
+        <div class="ia-diagram rvt-border-all rvt-border-radius rvt-p-all-md rvt-m-top-sm">
+          <pre class="mermaid">
+flowchart LR
+  F[("Facilities data")]:::instdata --> PY["Python / Jupyter notebook"]:::python
+  PY --> AN["Analyze occupancy &amp;&lt;br/&gt;building usage"]
+  AN --> VZ["Visualizations"]
+  VZ --> ST["Stakeholder insights"]
+  classDef reallms fill:#990000,stroke:#5c0000,color:#fff;
+  classDef llm fill:#6E2585,stroke:#4a1a5c,color:#fff;
+  classDef rag fill:#056E41,stroke:#03482b,color:#fff;
+  classDef instdata fill:#006298,stroke:#003f63,color:#fff;
+  classDef notebooklm fill:#EF6C00,stroke:#a84c00,color:#fff;
+  classDef copilot fill:#0F6E6E,stroke:#094747,color:#fff;
+  classDef sql fill:#B26B00,stroke:#7a4900,color:#fff;
+  classDef python fill:#2B3A67,stroke:#1a2542,color:#fff;
+  classDef canvas fill:#D2492A,stroke:#8f3119,color:#fff;
+  classDef survey fill:#147C8B,stroke:#0d545e,color:#fff;
+  classDef thematic fill:#6E6A1E,stroke:#4a4713,color:#fff;
+          </pre>
+        </div>
+      </div>
+    </div>
+    <div class="rvt-dialog__controls">
+      <button type="button" class="rvt-button rvt-button--secondary" data-rvt-dialog-close="dialog-4"><span>Close</span></button>
+    </div>
+    <button class="rvt-button rvt-button--plain rvt-dialog__close" data-rvt-dialog-close="dialog-4" role="button">
+      <span class="rvt-sr-only">Close</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m3.5 2.086 4.5 4.5 4.5-4.5L13.914 3.5 9.414 8l4.5 4.5-1.414 1.414-4.5-4.5-4.5 4.5L2.086 12.5l4.5-4.5-4.5-4.5L3.5 2.086Z"/></svg>
+    </button>
+  </div>
+
+  <!-- Dialog 5 -->
+  <div class="rvt-dialog ia-modal" id="dialog-5" role="dialog" tabindex="-1" aria-labelledby="dialog-5-title" data-rvt-dialog="dialog-5" data-rvt-dialog-modal data-rvt-dialog-darken-page data-rvt-dialog-disable-page-interaction hidden>
+    <header class="rvt-dialog__header">
+      <h1 class="rvt-dialog__title rvt-ts-26" id="dialog-5-title">Census Enrollment Conversational Agent</h1>
+    </header>
+    <div class="rvt-dialog__body">
+      <div class="ia-modal-scroll">
+        <p class="rvt-ts-14 rvt-color-black-500 rvt-m-bottom-xs"><strong>Team:</strong> IA Research &amp; Analytics &nbsp;&middot;&nbsp; <strong>Status:</strong> Working prototype (Microsoft Copilot Chat) &rarr; exploring REALLMS</p>
+        <p class="rvt-ts-18">A conversational agent that lets users ask natural-language questions about census enrollment trends, demographics, and metrics without touching reporting tools or databases. A working prototype runs in Microsoft Copilot Chat, with a REALLMS + RAG version now being explored for grounded, explainable answers.</p>
+        <div class="ia-tags rvt-m-tb-sm">
+          <span class="rvt-badge">REALLMS</span>
+          <span class="rvt-badge">RAG</span>
+          <span class="rvt-badge">LLM</span>
+          <span class="rvt-badge">Microsoft Copilot</span>
+          <span class="rvt-badge rvt-badge--info">Institutional data</span>
+        </div>
+        <div class="ia-diagram rvt-border-all rvt-border-radius rvt-p-all-md rvt-m-top-sm">
+          <pre class="mermaid">
+flowchart LR
+  U(["User"]) --> Q["NL question: enrollment&lt;br/&gt;trends &amp; demographics"]
+  Q --> CP["Prototype in&lt;br/&gt;Microsoft Copilot Chat"]:::copilot
+  Q -. planned .-> RE["REALLMS&lt;br/&gt;conversational agent"]:::reallms
+  ED[("Census enrollment data")]:::instdata --> RAG["RAG retrieval"]:::rag
+  RAG --> RE
+  RE --> LLM["Large language model"]:::llm
+  CP --> A["Grounded, explainable answer"]
+  LLM --> A
+  A --> U
+  classDef reallms fill:#990000,stroke:#5c0000,color:#fff;
+  classDef llm fill:#6E2585,stroke:#4a1a5c,color:#fff;
+  classDef rag fill:#056E41,stroke:#03482b,color:#fff;
+  classDef instdata fill:#006298,stroke:#003f63,color:#fff;
+  classDef notebooklm fill:#EF6C00,stroke:#a84c00,color:#fff;
+  classDef copilot fill:#0F6E6E,stroke:#094747,color:#fff;
+  classDef sql fill:#B26B00,stroke:#7a4900,color:#fff;
+  classDef python fill:#2B3A67,stroke:#1a2542,color:#fff;
+  classDef canvas fill:#D2492A,stroke:#8f3119,color:#fff;
+  classDef survey fill:#147C8B,stroke:#0d545e,color:#fff;
+  classDef thematic fill:#6E6A1E,stroke:#4a4713,color:#fff;
+          </pre>
+        </div>
+      </div>
+    </div>
+    <div class="rvt-dialog__controls">
+      <button type="button" class="rvt-button rvt-button--secondary" data-rvt-dialog-close="dialog-5"><span>Close</span></button>
+    </div>
+    <button class="rvt-button rvt-button--plain rvt-dialog__close" data-rvt-dialog-close="dialog-5" role="button">
+      <span class="rvt-sr-only">Close</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m3.5 2.086 4.5 4.5 4.5-4.5L13.914 3.5 9.414 8l4.5 4.5-1.414 1.414-4.5-4.5-4.5 4.5L2.086 12.5l4.5-4.5-4.5-4.5L3.5 2.086Z"/></svg>
+    </button>
+  </div>
+
+  <!-- Dialog 6 -->
+  <div class="rvt-dialog ia-modal" id="dialog-6" role="dialog" tabindex="-1" aria-labelledby="dialog-6-title" data-rvt-dialog="dialog-6" data-rvt-dialog-modal data-rvt-dialog-darken-page data-rvt-dialog-disable-page-interaction hidden>
+    <header class="rvt-dialog__header">
+      <h1 class="rvt-dialog__title rvt-ts-26" id="dialog-6-title">AI-Powered Graduate Student Survey Intelligence (GradSERU 2024 &amp; 2026)</h1>
+    </header>
+    <div class="rvt-dialog__body">
+      <div class="ia-modal-scroll">
+        <p class="rvt-ts-14 rvt-color-black-500 rvt-m-bottom-xs"><strong>Team:</strong> IA Research &amp; Analytics &nbsp;&middot;&nbsp; <strong>Status:</strong> NotebookLM proof of concept &rarr; planned migration to REALLMS</p>
+        <p class="rvt-ts-18">Combines GradSERU survey responses with institutional data so users can ask questions in plain language and get grounded summaries, group comparisons, and stakeholder-specific reports. Built as a NotebookLM proof of concept using RAG, with plans to migrate onto the REALLMS platform.</p>
+        <div class="ia-tags rvt-m-tb-sm">
+          <span class="rvt-badge">NotebookLM</span>
+          <span class="rvt-badge">REALLMS</span>
+          <span class="rvt-badge">RAG</span>
+          <span class="rvt-badge">LLM</span>
+          <span class="rvt-badge rvt-badge--info">Survey data</span>
+          <span class="rvt-badge rvt-badge--info">Institutional data</span>
+        </div>
+        <div class="ia-diagram rvt-border-all rvt-border-radius rvt-p-all-md rvt-m-top-sm">
+          <pre class="mermaid">
+flowchart LR
+  SV["GradSERU survey responses"]:::survey --> KB["Indexed knowledge base"]
+  ID[("Institutional data")]:::instdata --> KB
+  U(["User"]) --> Q["Plain-language question"]
+  Q --> RAG["RAG retrieval"]:::rag
+  KB --> RAG
+  RAG --> LLM["Large language model"]:::llm
+  NB["NotebookLM proof of concept"]:::notebooklm -.-> LLM
+  LLM --> O["Grounded summaries,&lt;br/&gt;comparisons &amp; reports"]
+  O --> U
+  LLM -. planned migration .-> RE["REALLMS platform"]:::reallms
+  classDef reallms fill:#990000,stroke:#5c0000,color:#fff;
+  classDef llm fill:#6E2585,stroke:#4a1a5c,color:#fff;
+  classDef rag fill:#056E41,stroke:#03482b,color:#fff;
+  classDef instdata fill:#006298,stroke:#003f63,color:#fff;
+  classDef notebooklm fill:#EF6C00,stroke:#a84c00,color:#fff;
+  classDef copilot fill:#0F6E6E,stroke:#094747,color:#fff;
+  classDef sql fill:#B26B00,stroke:#7a4900,color:#fff;
+  classDef python fill:#2B3A67,stroke:#1a2542,color:#fff;
+  classDef canvas fill:#D2492A,stroke:#8f3119,color:#fff;
+  classDef survey fill:#147C8B,stroke:#0d545e,color:#fff;
+  classDef thematic fill:#6E6A1E,stroke:#4a4713,color:#fff;
+          </pre>
+        </div>
+      </div>
+    </div>
+    <div class="rvt-dialog__controls">
+      <button type="button" class="rvt-button rvt-button--secondary" data-rvt-dialog-close="dialog-6"><span>Close</span></button>
+    </div>
+    <button class="rvt-button rvt-button--plain rvt-dialog__close" data-rvt-dialog-close="dialog-6" role="button">
+      <span class="rvt-sr-only">Close</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m3.5 2.086 4.5 4.5 4.5-4.5L13.914 3.5 9.414 8l4.5 4.5-1.414 1.414-4.5-4.5-4.5 4.5L2.086 12.5l4.5-4.5-4.5-4.5L3.5 2.086Z"/></svg>
+    </button>
+  </div>
+
+  <!-- Dialog 7 (Crimson Curator) -->
+  <div class="rvt-dialog ia-modal" id="dialog-7" role="dialog" tabindex="-1" aria-labelledby="dialog-7-title" data-rvt-dialog="dialog-7" data-rvt-dialog-modal data-rvt-dialog-darken-page data-rvt-dialog-disable-page-interaction hidden>
+    <header class="rvt-dialog__header">
+      <h1 class="rvt-dialog__title rvt-ts-26" id="dialog-7-title">Crimson Curator &mdash; Agentic Data Steward for IU Data</h1>
+    </header>
+    <div class="rvt-dialog__body">
+      <div class="ia-modal-scroll">
+        <p class="rvt-ts-14 rvt-color-black-500 rvt-m-bottom-xs"><strong>Team:</strong> UITS Student Success Applications (Departmental Solutions) &nbsp;&middot;&nbsp; <strong>Status:</strong> In development &middot; demo-ready</p>
+        <p class="rvt-ts-18">A privacy-aware chat app that lets frontier models like Claude answer questions over IU data without ever seeing FERPA or Critical rows. A fail-closed governance gate classifies every referenced column against IU&rsquo;s Data Cookbook and DM-01 matrix and routes per query: public data goes to the frontier model, while anything sensitive is read on-prem by REALLMS, which returns only a scrubbed answer &mdash; no rows leave IU.</p>
+        <div class="ia-tags rvt-m-tb-sm">
+          <span class="rvt-badge">Frontier LLM</span>
+          <span class="rvt-badge">REALLMS</span>
+          <span class="rvt-badge">Data Cookbook / DM-01</span>
+          <span class="rvt-badge">Oracle</span>
+          <span class="rvt-badge">Denodo</span>
+          <span class="rvt-badge rvt-badge--info">Institutional data</span>
+        </div>
+        <div class="ia-diagram rvt-border-all rvt-border-radius rvt-p-all-md rvt-m-top-sm">
+          <pre class="mermaid">
+flowchart TD
+  U(["User question"]) --> FLLM["Frontier LLM e.g. Claude&lt;br/&gt;interprets &amp; writes the query"]:::fllm
+  DL["Pluggable data layer&lt;br/&gt;Denodo, Oracle DSS, Postgres, MySQL, SQL Server"]:::data --> FLLM
+  FLLM --> GATE{"Governance gate&lt;br/&gt;resolve &amp; classify every column&lt;br/&gt;fail-closed"}:::gov
+  GOV["IU Data Cookbook&lt;br/&gt;+ DM-01 matrix"]:::gov --> GATE
+  GATE -->|Public| PUB["Rows to frontier LLM"]:::fllm
+  GATE -->|"Internal / Restricted / Critical"| ONP["On-prem REALLMS&lt;br/&gt;reads the rows"]:::reallms
+  PUB --> ANS(["Answer in chat"])
+  ONP --> SCR["Scrubbed answer only&lt;br/&gt;no rows leave IU"]:::reallms
+  SCR --> ANS
+  classDef reallms fill:#990000,stroke:#5c0000,color:#fff;
+  classDef fllm fill:#B02A87,stroke:#6e1a54,color:#fff;
+  classDef gov fill:#55606E,stroke:#39424d,color:#fff;
+  classDef data fill:#3E5C76,stroke:#294050,color:#fff;
+  classDef instdata fill:#006298,stroke:#003f63,color:#fff;
+          </pre>
+        </div>
+      </div>
+    </div>
+    <div class="rvt-dialog__controls">
+      <button type="button" class="rvt-button rvt-button--secondary" data-rvt-dialog-close="dialog-7"><span>Close</span></button>
+    </div>
+    <button class="rvt-button rvt-button--plain rvt-dialog__close" data-rvt-dialog-close="dialog-7" role="button">
+      <span class="rvt-sr-only">Close</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m3.5 2.086 4.5 4.5 4.5-4.5L13.914 3.5 9.414 8l4.5 4.5-1.414 1.414-4.5-4.5-4.5 4.5L2.086 12.5l4.5-4.5-4.5-4.5L3.5 2.086Z"/></svg>
+    </button>
+  </div>
+
+  <!-- Dialog 8 (NaLQi) -->
+  <div class="rvt-dialog ia-modal" id="dialog-8" role="dialog" tabindex="-1" aria-labelledby="dialog-8-title" data-rvt-dialog="dialog-8" data-rvt-dialog-modal data-rvt-dialog-darken-page data-rvt-dialog-disable-page-interaction hidden>
+    <header class="rvt-dialog__header">
+      <h1 class="rvt-dialog__title rvt-ts-26" id="dialog-8-title">NaLQi &mdash; Natural Language Query Intelligence</h1>
+    </header>
+    <div class="rvt-dialog__body">
+      <div class="ia-modal-scroll">
+        <p class="rvt-ts-14 rvt-color-black-500 rvt-m-bottom-xs"><strong>Team:</strong> UITS Enterprise Data Services (EDED) &nbsp;&middot;&nbsp; <strong>Status:</strong> In development &middot; demo-ready (not wired to live data yet, by design)</p>
+        <p class="rvt-ts-18">A standalone, privacy-first application that translates plain-English questions into correct, ready-to-run Oracle SQL for IU&rsquo;s Census enrollment data (152 columns across demographics, academic programs, campuses, and terms). The model is grounded in the real schema, Data Cookbook definitions, business rules, and a curated library of 120+ verified question&rarr;SQL examples &mdash; it never sees actual records. Generated SQL is validated against Oracle rules and auto-repaired before it reaches the user, and a &ldquo;save as training pair&rdquo; feedback loop lets experts turn each correction into a new verified example, so accuracy compounds with use. Runs entirely on IU infrastructure using REALLMS (Qwen3-Coder-Next for generation, Qwen3-Embedding-8B for retrieval); a governed data-access layer (Denodo / Oracle) is the planned path to live results.</p>
+        <div class="ia-tags rvt-m-tb-sm">
+          <span class="rvt-badge">REALLMS</span>
+          <span class="rvt-badge">LLM</span>
+          <span class="rvt-badge">RAG</span>
+          <span class="rvt-badge">Oracle</span>
+          <span class="rvt-badge">Python</span>
+          <span class="rvt-badge">Data Cookbook / DM-01</span>
+          <span class="rvt-badge">Denodo</span>
+          <span class="rvt-badge rvt-badge--info">Institutional data</span>
+        </div>
+        <div class="ia-diagram rvt-border-all rvt-border-radius rvt-p-all-md rvt-m-top-sm">
+          <pre class="mermaid">
+flowchart LR
+  U(["Staff question&lt;br/&gt;plain English"]) --> APP["NaLQi app&lt;br/&gt;Python / Streamlit"]:::python
+  APP --> FP{"Exact / near&lt;br/&gt;match?"}
+  GK["Grounding &mdash; metadata only:&lt;br/&gt;schema, Data Cookbook definitions,&lt;br/&gt;real values, verified examples"]:::gov --> RET["Semantic retrieval&lt;br/&gt;embeddings"]:::rag
+  FP -->|No| RET
+  RET --> RE["NaLQi engine on REALLMS&lt;br/&gt;on-prem, in IU data center"]:::reallms
+  RE --> LLM["Qwen3-Coder-Next"]:::llm
+  LLM --> GEN["Generated Oracle SQL"]:::sql
+  GEN --> VAL{"Validate &amp;&lt;br/&gt;auto-repair (&le; 2&times;)"}
+  FP -->|"Yes, verified SQL"| VAL
+  VAL --> OUT["Ready-to-run SQL&lt;br/&gt;to staff member"]:::sql
+  OUT -. planned governed connection .-> GOVL[("Denodo / Oracle&lt;br/&gt;row + column security")]:::denodo
+  GOVL -. results under user&rsquo;s rights .-> U
+  classDef reallms fill:#990000,stroke:#5c0000,color:#fff;
+  classDef llm fill:#6E2585,stroke:#4a1a5c,color:#fff;
+  classDef rag fill:#056E41,stroke:#03482b,color:#fff;
+  classDef instdata fill:#006298,stroke:#003f63,color:#fff;
+  classDef sql fill:#B26B00,stroke:#7a4900,color:#fff;
+  classDef python fill:#2B3A67,stroke:#1a2542,color:#fff;
+  classDef denodo fill:#3E5C76,stroke:#294050,color:#fff;
+  classDef gov fill:#55606E,stroke:#39424d,color:#fff;
+          </pre>
+        </div>
+      </div>
+    </div>
+    <div class="rvt-dialog__controls">
+      <button type="button" class="rvt-button rvt-button--secondary" data-rvt-dialog-close="dialog-8"><span>Close</span></button>
+    </div>
+    <button class="rvt-button rvt-button--plain rvt-dialog__close" data-rvt-dialog-close="dialog-8" role="button">
+      <span class="rvt-sr-only">Close</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m3.5 2.086 4.5 4.5 4.5-4.5L13.914 3.5 9.414 8l4.5 4.5-1.414 1.414-4.5-4.5-4.5 4.5L2.086 12.5l4.5-4.5-4.5-4.5L3.5 2.086Z"/></svg>
+    </button>
+  </div>
+
+  <!-- Dialog 9 (Denodo AI Chat Room) -->
+  <div class="rvt-dialog ia-modal" id="dialog-9" role="dialog" tabindex="-1" aria-labelledby="dialog-9-title" data-rvt-dialog="dialog-9" data-rvt-dialog-modal data-rvt-dialog-darken-page data-rvt-dialog-disable-page-interaction hidden>
+    <header class="rvt-dialog__header">
+      <h1 class="rvt-dialog__title rvt-ts-26" id="dialog-9-title">Denodo AI Chat Room &mdash; LLM-Ready Governed Views</h1>
+    </header>
+    <div class="rvt-dialog__body">
+      <div class="ia-modal-scroll">
+        <p class="rvt-ts-14 rvt-color-black-500 rvt-m-bottom-xs"><strong>Team:</strong> UITS Enterprise Data Services (EDED) &nbsp;&middot;&nbsp; <strong>Status:</strong> In development</p>
+        <p class="rvt-ts-18">An infrastructure-level approach that creates curated, LLM-facing views inside IU&rsquo;s governed Denodo platform (iu_ia_dev). Instead of training an external app on schema knowledge, it embeds that knowledge into the data layer itself: a Python curation pipeline reads source views and column metadata, sends them to REALLMS for LLM-driven curation (deciding which columns to keep, drop, or alias for clarity), resolves keys and associations, and emits VQL to create a self-describing view such as <em>enrollment_room</em> &mdash; complete with a structured DOMAIN tag describing the view&rsquo;s purpose, persona, and how to query it. Because the views live in Denodo, they inherit row- and column-level security, masking, and centralized audit logging (HIPAA-aligned), so any AI agent &mdash; including NaLQi &mdash; can consume them safely. The model works only on metadata; no data records are ever sent to the LLM.</p>
+        <div class="ia-tags rvt-m-tb-sm">
+          <span class="rvt-badge">REALLMS</span>
+          <span class="rvt-badge">LLM</span>
+          <span class="rvt-badge">Denodo</span>
+          <span class="rvt-badge">Python</span>
+          <span class="rvt-badge rvt-badge--info">Institutional data</span>
+        </div>
+        <div class="ia-diagram rvt-border-all rvt-border-radius rvt-p-all-md rvt-m-top-sm">
+          <pre class="mermaid">
+flowchart LR
+  SRC[("iu_ia_dev source views&lt;br/&gt;+ column metadata")]:::instdata --> PIPE["Curation pipeline&lt;br/&gt;run.py (Python)"]:::python
+  PIPE --> CUR["REALLMS LLM curation&lt;br/&gt;keep / drop / alias columns"]:::reallms
+  CUR --> KEYS["Resolve keys &amp; associations"]
+  KEYS --> VQL["Emit VQL&lt;br/&gt;CREATE OR REPLACE VIEW"]:::denodo
+  CUR --> DOM["Generate DOMAIN tag&lt;br/&gt;purpose, persona, description"]:::llm
+  VQL --> ROOM[("enrollment_room&lt;br/&gt;curated, self-describing view")]:::denodo
+  DOM --> ROOM
+  GOVN["Denodo governance&lt;br/&gt;row/column security, masking, audit"]:::gov --> ROOM
+  ROOM --> AGENT(["Any AI agent, e.g. NaLQi&lt;br/&gt;reads DOMAIN tag, queries safely"])
+  classDef reallms fill:#990000,stroke:#5c0000,color:#fff;
+  classDef llm fill:#6E2585,stroke:#4a1a5c,color:#fff;
+  classDef instdata fill:#006298,stroke:#003f63,color:#fff;
+  classDef python fill:#2B3A67,stroke:#1a2542,color:#fff;
+  classDef denodo fill:#3E5C76,stroke:#294050,color:#fff;
+  classDef gov fill:#55606E,stroke:#39424d,color:#fff;
+          </pre>
+        </div>
+      </div>
+    </div>
+    <div class="rvt-dialog__controls">
+      <button type="button" class="rvt-button rvt-button--secondary" data-rvt-dialog-close="dialog-9"><span>Close</span></button>
+    </div>
+    <button class="rvt-button rvt-button--plain rvt-dialog__close" data-rvt-dialog-close="dialog-9" role="button">
+      <span class="rvt-sr-only">Close</span>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m3.5 2.086 4.5 4.5 4.5-4.5L13.914 3.5 9.414 8l4.5 4.5-1.414 1.414-4.5-4.5-4.5 4.5L2.086 12.5l4.5-4.5-4.5-4.5L3.5 2.086Z"/></svg>
+    </button>
+  </div>
+
+  <!-- ============================ SCRIPTS ============================ -->
+  <!-- Rivet Design System 2.8.0 JS (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/rivet-core@2.8.0/js/rivet.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11.15.0/dist/mermaid.min.js"></script>
+  <script>
+    if (window.Rivet && typeof Rivet.init === 'function') { Rivet.init(); }
+
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'base',
+      themeVariables: { fontFamily: 'inherit' },
+      flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: true }
+    });
+
+    function renderDiagramsIn(root) {
+      if (!root) return;
+      var nodes = root.querySelectorAll('.mermaid:not([data-processed])');
+      if (nodes.length) {
+        try { mermaid.run({ nodes: nodes }); }
+        catch (e) { console.error('Mermaid render error', e); }
+      }
+    }
+    document.addEventListener('rvtDialogOpened', function (e) { renderDiagramsIn(e.target); });
+
+    // ---------- Filtering + faceted counts (team / technology / data source / search) ----------
+    var teamSel   = document.getElementById('filter-team');
+    var techSel   = document.getElementById('filter-tech');
+    var srcSel    = document.getElementById('filter-source');
+    var searchInp = document.getElementById('filter-search');
+    var noResults = document.getElementById('no-results');
+    var countEl   = document.getElementById('result-count');
+
+    // Precompute per-card data once
+    var cols = Array.prototype.slice.call(document.querySelectorAll('#card-grid .ia-card-col')).map(function (el) {
+      return {
+        el: el,
+        team: el.getAttribute('data-team') || '',
+        ids: new Set((el.getAttribute('data-tech') || '').split(/\s+/).filter(Boolean)),
+        hay: ((el.getAttribute('data-search') || '') + ' ' + el.textContent).toLowerCase()
+      };
+    });
+
+    // Capture each option's original label so counts can be re-appended on every update
+    function eachOption(sel, fn) { Array.prototype.forEach.call(sel.options, fn); }
+    [teamSel, techSel, srcSel].forEach(function (sel) {
+      eachOption(sel, function (o) { o._base = o.textContent; });
+    });
+
+    // Match a card against current filters. `skip` omits one facet (used when counting that facet's own options).
+    function matches(card, skip) {
+      var q = searchInp.value.trim().toLowerCase();
+      var okTeam   = skip === 'team'   || teamSel.value === 'all' || card.team === teamSel.value;
+      var okTech   = skip === 'tech'   || techSel.value === 'all' || card.ids.has(techSel.value);
+      var okSrc    = skip === 'source' || srcSel.value  === 'all' || card.ids.has(srcSel.value);
+      var okSearch = q === '' || card.hay.indexOf(q) !== -1;
+      return okTeam && okTech && okSrc && okSearch;
+    }
+
+    function countFor(skip, predicate) {
+      var n = 0;
+      cols.forEach(function (c) { if (matches(c, skip) && predicate(c)) n++; });
+      return n;
+    }
+
+    // Re-label a facet's options with the number of still-matching items that have each attribute.
+    // The default ("all") option keeps its plain label with no count.
+    function relabel(sel, skip, test) {
+      eachOption(sel, function (o) {
+        if (o.value === 'all') { o.textContent = o._base; return; }
+        var n = countFor(skip, function (c) { return test(c, o.value); });
+        o.textContent = o._base + ' (' + n + ')';
+      });
+    }
+
+    function update() {
+      relabel(teamSel, 'team',   function (c, v) { return c.team === v; });
+      relabel(techSel, 'tech',   function (c, v) { return c.ids.has(v); });
+      relabel(srcSel,  'source', function (c, v) { return c.ids.has(v); });
+
+      var shown = 0;
+      cols.forEach(function (c) {
+        var visible = matches(c, null);
+        c.el.classList.toggle('ia-hidden', !visible);
+        if (visible) shown++;
+      });
+      noResults.classList.toggle('ia-hidden', shown !== 0);
+      countEl.textContent = 'Showing ' + shown + ' of ' + cols.length + ' solutions.';
+    }
+
+    [teamSel, techSel, srcSel].forEach(function (el) { el.addEventListener('change', update); });
+    searchInp.addEventListener('input', update);
+    update();
+
+    // ---------- Page navigation (Solutions / Tools & data sources / Markdown) ----------
+    var PAGES = ['solutions', 'analysis', 'legend', 'markdown'];
+    var navBtns = Array.prototype.slice.call(document.querySelectorAll('.ia-nav-item'));
+    var pageEls = Array.prototype.slice.call(document.querySelectorAll('.ia-page'));
+
+    function showPage(name) {
+      if (PAGES.indexOf(name) === -1) name = 'solutions';
+      pageEls.forEach(function (p) {
+        p.classList.toggle('ia-hidden', p.getAttribute('data-ia-page') !== name);
+      });
+      navBtns.forEach(function (b) {
+        if (b.getAttribute('data-ia-nav') === name) b.setAttribute('aria-current', 'page');
+        else b.removeAttribute('aria-current');
+      });
+    }
+
+    navBtns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var name = b.getAttribute('data-ia-nav');
+        showPage(name);
+        if (window.history && history.replaceState) history.replaceState(null, '', '#' + name);
+        else location.hash = name;
+        window.scrollTo(0, 0);
+      });
+    });
+    window.addEventListener('hashchange', function () {
+      showPage((location.hash || '').replace('#', ''));
+    });
+    showPage((location.hash || '').replace('#', ''));
+
+    // ---------- Build the Markdown export from the live solution data ----------
+    function txt(el) { return el ? el.textContent.replace(/\s+/g, ' ').trim() : ''; }
+
+    function buildMarkdown() {
+      var out = [];
+      out.push('# IU AI Data Solutions Catalog');
+      out.push('');
+      out.push('How teams across Indiana University are building AI-assisted data solutions. Each entry lists the '
+        + 'owning team, current status, the tools and data sources it uses, and a short description.');
+      out.push('');
+
+      var teamSet = {};
+      cols.forEach(function (c) { teamSet[txt(c.el.querySelector('.rvt-card__eyebrow'))] = true; });
+      out.push('- **Solutions:** ' + cols.length);
+      out.push('- **Teams:** ' + Object.keys(teamSet).length);
+      out.push('');
+      out.push('---');
+
+      cols.forEach(function (c, i) {
+        var card = c.el;
+        var eyebrow = txt(card.querySelector('.rvt-card__eyebrow'));
+        var trigger = card.querySelector('[data-rvt-dialog-trigger]');
+        var dlg = trigger ? document.getElementById(trigger.getAttribute('data-rvt-dialog-trigger')) : null;
+        var title = dlg ? txt(dlg.querySelector('.rvt-dialog__title')) : txt(card.querySelector('.rvt-card__title'));
+        var statusEl = card.querySelector('.rvt-card__content strong');
+        var status = statusEl ? txt(statusEl).replace(/^Status:\s*/, '') : '';
+        var summary = dlg ? txt(dlg.querySelector('p.rvt-ts-18')) : '';
+        var badges = (dlg || card).querySelectorAll('.ia-tags .rvt-badge');
+        var tech = [], src = [];
+        Array.prototype.forEach.call(badges, function (b) {
+          if (b.classList.contains('rvt-badge--info')) src.push(txt(b)); else tech.push(txt(b));
+        });
+
+        out.push('');
+        out.push('## ' + (i + 1) + '. ' + title);
+        out.push('');
+        out.push('- **Team:** ' + eyebrow);
+        if (status) out.push('- **Status:** ' + status);
+        if (tech.length) out.push('- **Technologies:** ' + tech.join(', '));
+        if (src.length) out.push('- **Data sources:** ' + src.join(', '));
+        out.push('');
+        if (summary) out.push(summary);
+      });
+
+      out.push('');
+      out.push('---');
+      out.push('');
+      out.push('## Shared tools & data sources');
+      out.push('');
+      out.push('The same building block keeps the same color in every diagram. The count is how many solutions reuse it.');
+      var grids = document.querySelectorAll('#page-legend .ia-legend-grid');
+      Array.prototype.forEach.call(grids, function (grid, gi) {
+        out.push('');
+        out.push('### ' + (gi === 0 ? 'Technologies' : 'Data sources'));
+        out.push('');
+        Array.prototype.forEach.call(grid.querySelectorAll('.ia-legend-item'), function (it) {
+          out.push('- **' + txt(it.querySelector('.rvt-badge')) + '** — ' + txt(it.querySelector('.ia-count')));
+        });
+      });
+
+      return out.join('\n');
+    }
+
+    var mdString = buildMarkdown();
+    var mdContent = document.getElementById('md-content');
+    if (mdContent) mdContent.textContent = mdString;
+
+    var copyBtn = document.getElementById('md-copy');
+    var copyLabel = document.getElementById('md-copy-label');
+    function flashLabel(text) {
+      if (!copyLabel) return;
+      copyLabel.textContent = text;
+      setTimeout(function () { copyLabel.textContent = 'Copy'; }, 2000);
+    }
+    function selectMd() {
+      if (!mdContent) return;
+      var r = document.createRange();
+      r.selectNodeContents(mdContent);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(r);
+    }
+    // Fallback when the async Clipboard API is unavailable or blocked: select the text
+    // and try execCommand('copy'); if even that is denied, prompt the user to press the keys.
+    function fallbackCopy() {
+      selectMd();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      flashLabel(ok ? 'Copied!' : 'Press Ctrl/Cmd+C');
+    }
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(mdString).then(
+            function () { flashLabel('Copied!'); },
+            function () { fallbackCopy(); }
+          );
+        } else {
+          fallbackCopy();
+        }
+      });
+    }
+  </script>
+</body>
+</html>
