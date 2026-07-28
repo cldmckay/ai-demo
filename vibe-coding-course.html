@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vibe Coding @ IU — Build 10 real things in one semester</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --crimson:#990000;
+    --crimson-2:#c1121f;
+    --magenta:#d81e5b;
+    --gold:#f2a900;
+    --teal:#20a4a4;
+    --ink:#1c1512;
+    --ink-soft:#4a423d;
+    --cream:#f8f4ec;
+    --cream-2:#fffdf8;
+    --line:rgba(28,21,18,.12);
+    --shadow:0 18px 50px -20px rgba(28,21,18,.35);
+    --shadow-sm:0 8px 24px -12px rgba(28,21,18,.30);
+    --radius:22px;
+    --grad:linear-gradient(120deg,var(--crimson) 0%,var(--magenta) 55%,var(--gold) 110%);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    color:var(--ink);
+    background:var(--cream);
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,h4,.display{font-family:'Space Grotesk','Inter',sans-serif;line-height:1.08;letter-spacing:-.02em}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+  .grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  /* ---------- NAV ---------- */
+  header.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);
+    background:rgba(248,244,236,.82);border-bottom:1px solid var(--line)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:68px}
+  .brand{display:flex;align-items:center;gap:12px;font-family:'Space Grotesk';font-weight:700;font-size:1.05rem}
+  .brand .rvt-lockup__trident{width:22px;height:27px;color:var(--crimson)}
+  .brand .dot{width:7px;height:7px;border-radius:50%;background:var(--gold)}
+  .nav-links{display:flex;gap:26px;align-items:center}
+  .nav-links a{font-weight:500;font-size:.94rem;color:var(--ink-soft);transition:color .2s}
+  .nav-links a:hover{color:var(--crimson)}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:.94rem;
+    padding:11px 20px;border-radius:100px;border:none;cursor:pointer;transition:transform .15s,box-shadow .2s;font-family:inherit}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--grad);color:#fff;box-shadow:0 10px 24px -10px var(--magenta)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 30px -12px var(--magenta)}
+  .btn-ghost{background:rgba(153,0,0,.07);color:var(--crimson)}
+  .btn-ghost:hover{background:rgba(153,0,0,.13)}
+  .nav-toggle{display:none;background:none;border:none;cursor:pointer;font-size:1.6rem;color:var(--crimson)}
+
+  /* ---------- HERO ---------- */
+  .hero{position:relative;padding:86px 0 70px;overflow:hidden}
+  .blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:.55;z-index:0;animation:float 14s ease-in-out infinite}
+  .blob.b1{width:420px;height:420px;background:radial-gradient(circle,var(--magenta),transparent 65%);top:-120px;right:-80px}
+  .blob.b2{width:360px;height:360px;background:radial-gradient(circle,var(--gold),transparent 65%);bottom:-140px;left:-60px;animation-delay:-4s}
+  .blob.b3{width:300px;height:300px;background:radial-gradient(circle,var(--crimson),transparent 60%);top:40%;left:40%;opacity:.3;animation-delay:-8s}
+  @keyframes float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(24px,-30px) scale(1.08)}}
+  .hero-inner{position:relative;z-index:2;max-width:820px}
+  .eyebrow{display:inline-flex;align-items:center;gap:9px;background:var(--cream-2);border:1px solid var(--line);
+    padding:7px 15px;border-radius:100px;font-weight:600;font-size:.82rem;color:var(--crimson);box-shadow:var(--shadow-sm)}
+  .eyebrow .pulse{width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 0 rgba(32,164,164,.6);animation:pulse 2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(32,164,164,.55)}70%{box-shadow:0 0 0 10px rgba(32,164,164,0)}100%{box-shadow:0 0 0 0 rgba(32,164,164,0)}}
+  .hero h1{font-size:clamp(2.5rem,6vw,4.4rem);font-weight:700;margin:22px 0 8px}
+  .rotator{display:inline-block;position:relative;min-width:4ch}
+  .rotator span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p.lede{font-size:clamp(1.05rem,2.2vw,1.32rem);color:var(--ink-soft);max-width:620px;margin:18px 0 30px}
+  .hero-cta{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .hero-note{font-size:.88rem;color:var(--ink-soft)}
+
+  /* ---------- STATS ---------- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:56px}
+  .stat{background:var(--cream-2);border:1px solid var(--line);border-radius:var(--radius);padding:22px 20px;box-shadow:var(--shadow-sm)}
+  .stat .num{font-family:'Space Grotesk';font-weight:700;font-size:2.2rem;line-height:1}
+  .stat .lab{font-size:.86rem;color:var(--ink-soft);margin-top:6px}
+
+  /* ---------- SECTIONS ---------- */
+  section{padding:78px 0}
+  .sec-head{max-width:640px;margin-bottom:44px}
+  .sec-tag{font-weight:700;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--magenta)}
+  .sec-head h2{font-size:clamp(1.9rem,4vw,2.9rem);font-weight:700;margin:12px 0 12px}
+  .sec-head p{color:var(--ink-soft);font-size:1.06rem}
+
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+
+  /* ---------- LEARNING GRID ---------- */
+  .learn-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .learn-card{background:var(--cream-2);border:1px solid var(--line);border-radius:var(--radius);padding:24px 22px;cursor:pointer;
+    transition:transform .2s,box-shadow .25s,border-color .2s;position:relative;overflow:hidden}
+  .learn-card:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:transparent}
+  .learn-card .ic{font-size:1.7rem;margin-bottom:12px}
+  .learn-card h3{font-size:1.12rem;font-weight:600;margin-bottom:6px}
+  .learn-card .tease{font-size:.9rem;color:var(--ink-soft)}
+  .learn-card .more{max-height:0;opacity:0;overflow:hidden;transition:max-height .4s ease,opacity .3s;font-size:.9rem;color:var(--ink-soft);margin-top:0}
+  .learn-card.open{grid-column:span 2}
+  .learn-card.open .more{max-height:260px;opacity:1;margin-top:12px}
+  .learn-card .bar{height:4px;width:44px;border-radius:4px;background:var(--grad);margin-top:14px}
+
+  /* ---------- PROJECTS ---------- */
+  .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:26px}
+  .chip{border:1px solid var(--line);background:var(--cream-2);padding:9px 17px;border-radius:100px;font-weight:600;font-size:.9rem;cursor:pointer;transition:all .2s;font-family:inherit;color:var(--ink-soft)}
+  .chip.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .proj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .proj{background:var(--cream-2);border:1px solid var(--line);border-radius:var(--radius);padding:24px;cursor:pointer;
+    transition:transform .2s,box-shadow .25s;display:flex;flex-direction:column;gap:10px;position:relative}
+  .proj:hover{transform:translateY(-5px);box-shadow:var(--shadow)}
+  .proj .emoji{font-size:2rem}
+  .proj h3{font-size:1.16rem;font-weight:600}
+  .proj .desc{font-size:.92rem;color:var(--ink-soft);flex:1}
+  .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+  .tag{font-size:.74rem;font-weight:700;padding:5px 11px;border-radius:100px;letter-spacing:.02em}
+  .tag.found{background:rgba(32,164,164,.14);color:#0d6b6b}
+  .tag.adv{background:rgba(242,169,0,.18);color:#976300}
+  .tag.time{background:rgba(28,21,18,.08);color:var(--ink-soft)}
+  .proj .open-hint{font-size:.82rem;font-weight:600;color:var(--crimson);display:flex;align-items:center;gap:5px}
+
+  /* ---------- HOW BUILDS WORK ---------- */
+  .how{background:var(--ink);color:var(--cream);border-radius:34px;padding:56px 44px;position:relative;overflow:hidden}
+  .how .blob{opacity:.35}
+  .how-inner{position:relative;z-index:2}
+  .how h2{color:#fff}
+  .how-flow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:34px 0 40px}
+  .flow-step{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:20px}
+  .flow-step .n{font-family:'Space Grotesk';font-weight:700;color:var(--gold);font-size:.9rem}
+  .flow-step h4{font-size:1.05rem;margin:6px 0 5px;color:#fff}
+  .flow-step p{font-size:.86rem;color:rgba(248,244,236,.7)}
+  .how-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .how-panel{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.13);border-radius:20px;padding:26px}
+  .how-panel h4{color:#fff;font-size:1.15rem;margin-bottom:10px;display:flex;align-items:center;gap:9px}
+  .how-panel ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+  .how-panel li{font-size:.92rem;color:rgba(248,244,236,.82);padding-left:22px;position:relative}
+  .how-panel li::before{content:"";position:absolute;left:0;top:9px;width:8px;height:8px;border-radius:50%;background:var(--gold)}
+  .timebox-toggle{display:flex;gap:10px;margin:14px 0}
+  .tb-btn{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);color:#fff;padding:14px;border-radius:14px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .2s}
+  .tb-btn.on{background:var(--grad);border-color:transparent}
+  .tb-readout{font-size:.92rem;color:rgba(248,244,236,.82);min-height:44px}
+
+  /* ---------- TIMELINE ---------- */
+  .units{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .unit{background:var(--cream-2);border:1px solid var(--line);border-radius:var(--radius);padding:24px;position:relative;overflow:hidden}
+  .unit .wk{font-weight:700;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--magenta)}
+  .unit h3{font-size:1.12rem;margin:8px 0 10px}
+  .unit p{font-size:.9rem;color:var(--ink-soft)}
+  .unit .topline{height:5px;border-radius:5px;background:var(--grad);margin-bottom:16px}
+
+  /* ---------- SHOWCASE CTA ---------- */
+  .showcase{background:linear-gradient(120deg,#fff6ea,#ffeef3);border:1px solid var(--line);border-radius:34px;padding:54px 44px;text-align:center}
+  .showcase h2{font-size:clamp(1.8rem,4vw,2.7rem);margin-bottom:12px}
+  .showcase p{color:var(--ink-soft);max-width:560px;margin:0 auto 26px;font-size:1.06rem}
+  .browser-peek{max-width:680px;margin:34px auto 0;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line);cursor:pointer;transition:transform .25s}
+  .browser-peek:hover{transform:translateY(-4px)}
+  .peek-bar{background:#e9e2d6;padding:10px 14px;display:flex;gap:7px;align-items:center}
+  .peek-bar .d{width:11px;height:11px;border-radius:50%}
+  .peek-url{background:#fff;border-radius:8px;font-size:.78rem;color:var(--ink-soft);padding:4px 12px;margin-left:8px;flex:1;text-align:left}
+  .peek-body{background:#fff;padding:26px;text-align:left}
+  .peek-body .pk-h{font-family:'Space Grotesk';font-weight:700;font-size:1.3rem}
+  .peek-body .pk-s{color:var(--ink-soft);font-size:.9rem;margin:4px 0 14px}
+  .peek-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+  .peek-cards div{height:52px;border-radius:9px;background:var(--grad);opacity:.85}
+  .peek-cards div:nth-child(2){opacity:.6}
+  .peek-cards div:nth-child(3){opacity:.4}
+
+  /* ---------- MODAL ---------- */
+  .modal-back{position:fixed;inset:0;background:rgba(28,21,18,.55);backdrop-filter:blur(6px);z-index:100;
+    display:none;align-items:flex-start;justify-content:center;padding:40px 18px;overflow-y:auto}
+  .modal-back.show{display:flex}
+  .modal{background:var(--cream);border-radius:26px;max-width:560px;width:100%;box-shadow:var(--shadow);position:relative;animation:pop .3s cubic-bezier(.2,.8,.2,1)}
+  .modal.wide{max-width:940px}
+  @keyframes pop{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
+  .modal-close{position:absolute;top:16px;right:16px;background:rgba(28,21,18,.08);border:none;width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:1.2rem;color:var(--ink);z-index:5;transition:background .2s}
+  .modal-close:hover{background:rgba(28,21,18,.16)}
+  .modal-head{padding:34px 34px 0}
+  .modal-head .emoji{font-size:2.6rem}
+  .modal-head h3{font-size:1.6rem;margin:10px 0 8px}
+  .modal-body{padding:18px 34px 34px}
+  .modal-body h4{font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;color:var(--magenta);margin:18px 0 6px}
+  .modal-body p{font-size:.98rem;color:var(--ink-soft)}
+  .example-box{background:var(--cream-2);border:1px dashed var(--crimson);border-radius:16px;padding:18px;margin-top:8px}
+  .example-box .ex-title{font-weight:700;color:var(--crimson);margin-bottom:4px}
+
+  /* ---------- STUDENT PORTFOLIO (inside modal) ---------- */
+  .sp-hero{background:var(--grad);color:#fff;padding:38px 34px;border-radius:26px 26px 0 0}
+  .sp-hero .avatar{width:66px;height:66px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;font-size:1.6rem;border:2px solid rgba(255,255,255,.6)}
+  .sp-hero h3{font-size:1.9rem;margin:14px 0 4px;color:#fff}
+  .sp-hero p{color:rgba(255,255,255,.9);font-size:.98rem;max-width:560px}
+  .sp-body{padding:30px 34px 36px}
+  .sp-stat-row{display:flex;gap:14px;flex-wrap:wrap;margin:-42px 0 26px;position:relative;z-index:3}
+  .sp-stat{background:var(--cream-2);border:1px solid var(--line);border-radius:16px;padding:14px 18px;box-shadow:var(--shadow-sm)}
+  .sp-stat .n{font-family:'Space Grotesk';font-weight:700;font-size:1.5rem;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sp-stat .l{font-size:.78rem;color:var(--ink-soft)}
+  .sp-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .sp-proj{background:var(--cream-2);border:1px solid var(--line);border-radius:16px;padding:18px;transition:transform .2s}
+  .sp-proj:hover{transform:translateY(-3px)}
+  .sp-proj .thumb{height:96px;border-radius:11px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;font-size:2.2rem}
+  .sp-proj h5{font-size:1.02rem;font-weight:600;margin-bottom:3px}
+  .sp-proj .meta{font-size:.8rem;color:var(--ink-soft)}
+  .sp-proj .rt{font-size:.82rem;color:var(--ink-soft);margin-top:8px;font-style:italic;border-left:2px solid var(--gold);padding-left:9px}
+  .sp-feature{background:var(--ink);color:var(--cream);border-radius:18px;padding:24px;margin-bottom:20px}
+  .sp-feature .k{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+  .sp-feature h4{color:#fff;font-size:1.3rem;margin:6px 0 8px}
+  .sp-feature p{color:rgba(248,244,236,.82);font-size:.92rem}
+  .sp-savings{display:flex;align-items:baseline;gap:10px;margin-top:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:14px}
+  .sp-savings .big{font-family:'Space Grotesk';font-weight:700;font-size:2rem;color:var(--gold)}
+  .sp-savings .txt{font-size:.86rem;color:rgba(248,244,236,.8)}
+
+  /* ---------- FOOTER ---------- */
+  footer{background:var(--ink);color:var(--cream);padding:56px 0 40px;margin-top:20px}
+  .foot-inner{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap;align-items:flex-start}
+  footer .brand{color:#fff}
+  footer .brand .rvt-lockup__trident{color:var(--gold)}
+  footer p{color:rgba(248,244,236,.6);font-size:.9rem;max-width:340px;margin-top:12px}
+  .foot-cta{display:flex;flex-direction:column;gap:12px}
+  .foot-note{margin-top:34px;padding-top:22px;border-top:1px solid rgba(255,255,255,.12);font-size:.8rem;color:rgba(248,244,236,.45)}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media(max-width:900px){
+    .stats,.learn-grid,.how-flow,.units{grid-template-columns:repeat(2,1fr)}
+    .proj-grid{grid-template-columns:repeat(2,1fr)}
+    .how-cols,.sp-grid{grid-template-columns:1fr}
+    .learn-card.open{grid-column:span 2}
+    .nav-links{display:none}
+    .nav-toggle{display:block}
+  }
+  @media(max-width:560px){
+    .stats,.learn-grid,.proj-grid,.how-flow,.units,.peek-cards{grid-template-columns:1fr}
+    .learn-card.open{grid-column:span 1}
+    .how,.showcase{padding:38px 22px}
+    .modal-head,.modal-body,.sp-body{padding-left:22px;padding-right:22px}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<header class="nav">
+  <div class="wrap nav-inner">
+    <div class="brand">
+      <svg xmlns="http://www.w3.org/2000/svg" class="rvt-lockup__trident" viewBox="0 0 28 34">
+        <path d="M-3.34344e-05 4.70897H8.83308V7.174H7.1897V21.1426H10.6134V2.72321H8.83308V0.121224H18.214V2.65476H16.2283V21.1426H19.7889V7.174H18.214V4.64047H27.0471V7.174H25.0614V23.6761L21.7746 26.8944H16.2967V30.455H18.214V33.8787H8.76463V30.592H10.6819V26.8259H5.20403L1.91726 23.6077V7.174H-3.34344e-05V4.70897Z" fill="currentColor"></path>
+      </svg>
+      Vibe Coding <span class="dot"></span> IU
+    </div>
+    <nav class="nav-links">
+      <a href="#learn">Learn</a>
+      <a href="#projects">Projects</a>
+      <a href="#how">How it works</a>
+      <a href="#journey">15 weeks</a>
+      <button class="btn btn-primary" onclick="openStudent()">See a grad's site →</button>
+    </nav>
+    <button class="nav-toggle" onclick="document.querySelector('.nav-links').style.display= (getComputedStyle(document.querySelector('.nav-links')).display==='none'?'flex':'none')">☰</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <div class="wrap hero-inner">
+    <span class="eyebrow"><span class="pulse"></span> A new studio course · No coding experience required</span>
+    <h1>Don't just use AI.<br><span class="grad-text">Direct</span> it to build <span class="rotator"><span id="rot">websites</span></span>.</h1>
+    <p class="lede">A 15-week studio where you ship <strong>real proof-of-concepts</strong> by talking to AI — then turn the whole thing into a portfolio that gets you hired.</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary" onclick="document.getElementById('projects').scrollIntoView()">Explore the 10 builds</button>
+      <button class="btn btn-ghost" onclick="openStudent()">✦ Peek at a graduate's portfolio</button>
+    </div>
+    <p class="hero-note" style="margin-top:16px">Built for undergrads &amp; early-career makers · Indiana University</p>
+
+    <div class="stats">
+      <div class="stat reveal"><div class="num grad-text" data-count="10">10</div><div class="lab">builds you ship</div></div>
+      <div class="stat reveal"><div class="num grad-text" data-count="2">2</div><div class="lab">hour timebox per build</div></div>
+      <div class="stat reveal"><div class="num grad-text" data-count="8">8</div><div class="lab">project categories</div></div>
+      <div class="stat reveal"><div class="num grad-text" data-count="0">0</div><div class="lab">prerequisites</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- LEARN -->
+<section id="learn">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-tag">What you'll actually learn</span>
+      <h2>It's not a prompting tutorial. It's a way of <span class="grad-text">thinking</span>.</h2>
+      <p>Tap any card to dig in. You'll leave able to scope a problem, direct AI to build it, and judge whether the result is any good.</p>
+    </div>
+    <div class="learn-grid" id="learnGrid"></div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-tag">The Build Portfolio</span>
+      <h2>Ship 8 builds. Pick from <span class="grad-text">8 categories</span>.</h2>
+      <p>Every build is a timeboxed proof-of-concept — 2 hours for foundational, 4 for advanced. You're graded on your thinking, never on polish. Tap a card for an example.</p>
+    </div>
+    <div class="filters reveal">
+      <button class="chip active" data-f="all">All builds</button>
+      <button class="chip" data-f="found">Foundational · 2 hr</button>
+      <button class="chip" data-f="adv">Advanced · 4 hr</button>
+    </div>
+    <div class="proj-grid" id="projGrid"></div>
+  </div>
+</section>
+
+<!-- HOW -->
+<section id="how">
+  <div class="wrap">
+    <div class="how reveal">
+      <div class="blob b1" style="top:-100px;right:-60px"></div>
+      <div class="how-inner">
+        <span class="sec-tag" style="color:var(--gold)">How a build works</span>
+        <h2 style="font-size:clamp(1.7rem,4vw,2.6rem);margin:12px 0 6px">Specify → generate → <span class="grad-text">review</span> → iterate.</h2>
+        <div class="how-flow">
+          <div class="flow-step"><div class="n">01</div><h4>Specify</h4><p>Describe what you want and why — in plain language.</p></div>
+          <div class="flow-step"><div class="n">02</div><h4>Generate</h4><p>Let AI do the heavy lifting and produce a first version.</p></div>
+          <div class="flow-step"><div class="n">03</div><h4>Review</h4><p>The real skill: judge the output for correctness, safety &amp; bias.</p></div>
+          <div class="flow-step"><div class="n">04</div><h4>Iterate</h4><p>Refine, or stop at the timebox and reflect on the gap.</p></div>
+        </div>
+        <div class="how-cols">
+          <div class="how-panel">
+            <h4>⏱️ The timebox is the point</h4>
+            <div class="timebox-toggle">
+              <button class="tb-btn on" data-tb="2">Foundational · 2 hr</button>
+              <button class="tb-btn" data-tb="4">Advanced · 4 hr</button>
+            </div>
+            <div class="tb-readout" id="tbReadout"></div>
+          </div>
+          <div class="how-panel">
+            <h4>📝 One-page reflection</h4>
+            <ul>
+              <li>Problem &amp; who it's for</li>
+              <li>Systems-thinking breakdown</li>
+              <li>Your process &amp; refinements</li>
+              <li><strong>Human + AI:</strong> what <em>you</em> uniquely brought</li>
+              <li>Responsible-build &amp; disposable-vs-durable check</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JOURNEY -->
+<section id="journey">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-tag">The 15-week journey</span>
+      <h2>From <span class="grad-text">first build</span> to career-ready portfolio.</h2>
+      <p>Four units carry you from mindset to a public, employer-facing showcase.</p>
+    </div>
+    <div class="units">
+      <div class="unit reveal"><div class="topline"></div><div class="wk">Weeks 1–3</div><h3>Foundations &amp; Mindset</h3><p>What vibe coding is, systems thinking, and how AI reshapes your creativity &amp; learning.</p></div>
+      <div class="unit reveal"><div class="topline"></div><div class="wk">Weeks 4–8</div><h3>Core Craft</h3><p>The build loop plus websites, PWAs, extensions, data apps &amp; disposable software. Midterm portfolio due.</p></div>
+      <div class="unit reveal"><div class="topline"></div><div class="wk">Weeks 9–12</div><h3>Prototype → Product</h3><p>Where PoCs fit in UX &amp; engineering, building AI features on LLMs, and local vs. vended models on IU's REALLMS.</p></div>
+      <div class="unit reveal"><div class="topline"></div><div class="wk">Weeks 13–15</div><h3>Career &amp; Capstone</h3><p>Map skills to a real job, prep interviews, and launch your final portfolio site on demo day.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- SHOWCASE -->
+<section>
+  <div class="wrap">
+    <div class="showcase reveal">
+      <span class="sec-tag">The payoff</span>
+      <h2>You leave with a <span class="grad-text">portfolio</span>, not just a grade.</h2>
+      <p>Every build lands on a public site you actually own — the kind of thing you send a recruiter instead of a résumé bullet. Here's what a graduate's might look like.</p>
+      <button class="btn btn-primary" onclick="openStudent()">Open the example portfolio →</button>
+      <div class="browser-peek" onclick="openStudent()">
+        <div class="peek-bar">
+          <span class="d" style="background:#ff5f57"></span><span class="d" style="background:#febc2e"></span><span class="d" style="background:#28c840"></span>
+          <span class="peek-url">maya-builds.iu.edu</span>
+        </div>
+        <div class="peek-body">
+          <div class="pk-h">Maya R. — I build with AI. ✦</div>
+          <div class="pk-s">10 timeboxed builds · Class of '27 · Kelley School of Business</div>
+          <div class="peek-cards"><div></div><div></div><div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap foot-inner">
+    <div>
+      <div class="brand">
+        <svg xmlns="http://www.w3.org/2000/svg" class="rvt-lockup__trident" viewBox="0 0 28 34">
+          <path d="M-3.34344e-05 4.70897H8.83308V7.174H7.1897V21.1426H10.6134V2.72321H8.83308V0.121224H18.214V2.65476H16.2283V21.1426H19.7889V7.174H18.214V4.64047H27.0471V7.174H25.0614V23.6761L21.7746 26.8944H16.2967V30.455H18.214V33.8787H8.76463V30.592H10.6819V26.8259H5.20403L1.91726 23.6077V7.174H-3.34344e-05V4.70897Z" fill="currentColor"></path>
+        </svg>
+        Vibe Coding <span class="dot"></span> IU
+      </div>
+      <p>A 15-week studio course teaching you to direct AI, build fast, and think in systems — responsibly.</p>
+    </div>
+    <div class="foot-cta">
+      <button class="btn btn-primary" onclick="openStudent()">See a grad's site →</button>
+      <button class="btn" style="background:rgba(255,255,255,.1);color:#fff" onclick="document.getElementById('projects').scrollIntoView()">Explore the builds</button>
+    </div>
+  </div>
+  <div class="wrap"><div class="foot-note">Interactive course preview · Indiana University. Built with the very approach the course teaches. Trident lockup from the IU Rivet Design System.</div></div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-back" id="modalBack" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalEl">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+/* ---------- ROTATOR ---------- */
+const words=["websites","Chrome extensions","games","AI tools","dashboards","mobile apps"];
+let wi=0;const rot=document.getElementById('rot');
+setInterval(()=>{wi=(wi+1)%words.length;rot.style.opacity=0;
+  setTimeout(()=>{rot.textContent=words[wi];rot.style.opacity=1;},220);},2000);
+rot.style.transition="opacity .22s";
+
+/* ---------- LEARNING CARDS ---------- */
+const learn=[
+  {ic:"🧩",t:"Systems Thinking",tz:"See any problem as inputs, outputs & feedback loops.",m:"Before you build anything, you learn to decompose a messy real-world problem into a system you can actually direct AI to solve. This is the skill that makes everything else work."},
+  {ic:"🎨",t:"Creativity & Learning",tz:"Use AI as a creative partner — without letting it think for you.",m:"When does AI deepen your understanding, and when is it a crutch? You'll build a reflective practice that keeps your own judgment and 'taste' at the center."},
+  {ic:"⚙️",t:"The Build Loop",tz:"Specify → generate → review → iterate, on a timer.",m:"The core craft: writing clear specs, reading AI output critically, debugging with AI, and scoping ruthlessly to a 2-hour box."},
+  {ic:"🤖",t:"Building AI Tools",tz:"Go from 'AI helps me build' to 'I build AI features.'",m:"Prompts-as-product, chatbots, structured outputs, and retrieval (RAG) basics — you'll build software that has AI inside it, not just software AI helped you write."},
+  {ic:"♻️",t:"Disposable vs. Durable",tz:"Know when to build a throwaway — and when not to.",m:"Not everything should last. You'll learn the economics of 'software for one' and when a quick tool beats a maintained product — plus the security & debt tradeoffs."},
+  {ic:"🔒",t:"Local vs. Vended LLMs",tz:"Pick the right model for privacy, cost & control.",m:"Commercial cloud APIs vs. open models you host. You'll build against IU's REALLMS — a free, on-premises LLM service — and learn why that matters for sensitive data."},
+  {ic:"🧪",t:"PoC · Demo · Testing",tz:"Where vibe coding fits in real UX & engineering.",m:"Validate an idea with a real prototype before anyone commits engineering time — and know exactly where to hand off to durable code, testing, and review."},
+  {ic:"🚀",t:"Career Readiness",tz:"Turn builds into offers.",m:"A public portfolio, demo storytelling, and 'employer-value thought experiments': if you joined this team Monday, what could you vibe-code by Friday?"}
+];
+const lg=document.getElementById('learnGrid');
+learn.forEach((c,i)=>{
+  const el=document.createElement('div');
+  el.className='learn-card reveal';
+  el.innerHTML=`<div class="ic">${c.ic}</div><h3>${c.t}</h3><div class="tease">${c.tz}</div><div class="more">${c.m}</div><div class="bar"></div>`;
+  el.onclick=()=>{const wasOpen=el.classList.contains('open');
+    document.querySelectorAll('.learn-card').forEach(x=>x.classList.remove('open'));
+    if(!wasOpen)el.classList.add('open');};
+  lg.appendChild(el);
+});
+
+/* ---------- PROJECTS ---------- */
+const projects=[
+  {e:"🌐",t:"Website",cat:"found",time:"2 hr",d:"A single-purpose site that does one thing well.",ex:"A one-page event landing site for your student org — schedule, RSVP link, and a countdown — shipped and live in one session.",skills:"Layout, responsive design, publishing to the web."},
+  {e:"🧩",t:"Chrome Extension",cat:"found",time:"2 hr",d:"A little tool that augments the browser you already use.",ex:"A 'focus mode' extension that hides your feed and shows a one-line goal on every new tab.",skills:"Extension APIs, permissions, and the ethics of touching other sites."},
+  {e:"📲",t:"Progressive Web App",cat:"found",time:"2 hr",d:"An installable, offline-capable app that lives on any device.",ex:"A habit tracker you install to your phone home screen that works with no signal.",skills:"PWA manifest, offline caching, cross-device UX."},
+  {e:"🕹️",t:"Basic Game",cat:"found",time:"2 hr",d:"A single-page game you can actually play.",ex:"A 60-second reaction game or a memory-match with your own photos and a live score.",skills:"Game loop, state, input handling, and juicy feedback."},
+  {e:"🎲",t:"Advanced Game",cat:"adv",time:"4 hr",d:"A companion app that augments a physical board game.",ex:"A Catan-style resource & score tracker that handles setup, turn order, and the longest-road math for you.",skills:"Modeling real rules as a system, richer state, edge cases."},
+  {e:"💬",t:"Basic LLM App",cat:"found",time:"2 hr",d:"Any format — with basic LLM functionality inside.",ex:"An 'explain-this-like-I'm-new' study buddy that turns pasted lecture notes into flashcards.",skills:"Calling an LLM, prompt design, handling messy output."},
+  {e:"🧠",t:"Advanced LLM App",cat:"adv",time:"4 hr",d:"Solve a real ~100+ hour problem from your career path.",ex:"A tool that drafts first-pass grant-report summaries for a research lab — with a calculation showing it saves the team 120+ hours a year.",skills:"Building on IU's REALLMS, RAG basics, evaluation, and proving business value."},
+  {e:"📊",t:"Data Analysis",cat:"found",time:"2 hr",d:"Vibe code → Python → analysis → a dashboard deliverable.",ex:"Turn a semester of campus-dining data into an interactive dashboard that flags the busiest hours.",skills:"Data wrangling in Python, visualization, telling a story with numbers."},
+  {e:"📱",t:"Mobile App",cat:"adv",time:"4 hr",d:"An advanced option — a real cross-platform mobile build.",ex:"A check-in app for a campus event with a QR scanner and a live attendance count.",skills:"Mobile constraints, cross-platform tradeoffs, device features."}
+];
+const pg=document.getElementById('projGrid');
+function renderProjects(filter){
+  pg.innerHTML='';
+  projects.filter(p=>filter==='all'||p.cat===filter).forEach(p=>{
+    const el=document.createElement('div');
+    el.className='proj';
+    el.innerHTML=`<div class="emoji">${p.e}</div><h3>${p.t}</h3><div class="desc">${p.d}</div>
+      <div class="badges"><span class="tag ${p.cat==='found'?'found':'adv'}">${p.cat==='found'?'Foundational':'Advanced'}</span><span class="tag time">⏱ ${p.time}</span></div>
+      <div class="open-hint">See an example →</div>`;
+    el.onclick=()=>openProject(p);
+    pg.appendChild(el);
+  });
+}
+renderProjects('all');
+document.querySelectorAll('.chip').forEach(c=>{
+  c.onclick=()=>{document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');renderProjects(c.dataset.f);};
+});
+
+/* ---------- TIMEBOX TOGGLE ---------- */
+const tbText={
+  "2":"Foundational builds get <strong>2 focused hours</strong>. Ship what you can — a working slice beats a polished nothing. Then write your reflection, even if it's unfinished.",
+  "4":"Advanced builds (board-game companion, advanced LLM tool, or mobile app) get <strong>4 hours</strong> — enough to make real progress on a hard problem, then reflect on the gap."
+};
+const tbReadout=document.getElementById('tbReadout');
+tbReadout.innerHTML=tbText["2"];
+document.querySelectorAll('.tb-btn').forEach(b=>{
+  b.onclick=()=>{document.querySelectorAll('.tb-btn').forEach(x=>x.classList.remove('on'));b.classList.add('on');tbReadout.innerHTML=tbText[b.dataset.tb];};
+});
+
+/* ---------- MODALS ---------- */
+const back=document.getElementById('modalBack');
+const modalEl=document.getElementById('modalEl');
+const mc=document.getElementById('modalContent');
+function openModal(html,wide){mc.innerHTML=html;modalEl.classList.toggle('wide',!!wide);back.classList.add('show');document.body.style.overflow='hidden';}
+function closeModal(){back.classList.remove('show');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+function openProject(p){
+  openModal(`
+    <div class="modal-head">
+      <div class="emoji">${p.e}</div>
+      <div class="badges"><span class="tag ${p.cat==='found'?'found':'adv'}">${p.cat==='found'?'Foundational':'Advanced'}</span><span class="tag time">⏱ ${p.time}</span></div>
+      <h3>${p.t}</h3>
+      <p>${p.d}</p>
+    </div>
+    <div class="modal-body">
+      <h4>Example build</h4>
+      <div class="example-box"><div class="ex-title">${p.e} ${p.t} — in action</div><p>${p.ex}</p></div>
+      <h4>What you'll practice</h4>
+      <p>${p.skills}</p>
+      <h4>Deliverable</h4>
+      <p>A link or screen recording of the demo + a one-page reflection (problem, systems thinking, your process, and what <em>you</em> brought as the human).</p>
+    </div>`);
+}
+
+/* ---------- STUDENT PORTFOLIO ---------- */
+function openStudent(){
+  openModal(`
+    <div class="sp-hero">
+      <div class="avatar">MR</div>
+      <h3>Maya R. — I build with AI. ✦</h3>
+      <p>Kelley School of Business · Class of '27 · 10 timeboxed builds shipped in one semester. Aspiring product manager who can prototype her own ideas.</p>
+    </div>
+    <div class="sp-body">
+      <div class="sp-stat-row">
+        <div class="sp-stat"><div class="n">10</div><div class="l">builds shipped</div></div>
+        <div class="sp-stat"><div class="n">6</div><div class="l">categories covered</div></div>
+        <div class="sp-stat"><div class="n">120+</div><div class="l">hrs/yr saved by capstone</div></div>
+        <div class="sp-stat"><div class="n">100%</div><div class="l">directed by me</div></div>
+      </div>
+
+      <div class="sp-feature">
+        <div class="k">⭐ Featured · Advanced LLM build (on IU REALLMS)</div>
+        <h4>LabBrief — auto-drafts research grant reports</h4>
+        <p>Built for a genomics lab drowning in monthly reporting. Pulls from their notes and drafts a first-pass summary a human then edits — private, because it runs on IU's on-premises REALLMS.</p>
+        <div class="sp-savings"><span class="big">120 hrs</span><span class="txt">saved per year: ~2 hrs × 5 staff × 12 months of manual drafting, cut to ~20 min of editing.</span></div>
+      </div>
+
+      <div class="sp-grid">
+        <div class="sp-proj"><div class="thumb" style="background:linear-gradient(120deg,#990000,#d81e5b)">🎲</div><h5>Wingspan Companion</h5><div class="meta">Advanced game · 4 hr</div><div class="rt">"Modeling the scoring rules taught me more about edge cases than any lecture."</div></div>
+        <div class="sp-proj"><div class="thumb" style="background:linear-gradient(120deg,#d81e5b,#f2a900)">📊</div><h5>Dining Rush Dashboard</h5><div class="meta">Data analysis · 2 hr</div><div class="rt">"Vibe → Python → a chart that actually changed where I eat lunch."</div></div>
+        <div class="sp-proj"><div class="thumb" style="background:linear-gradient(120deg,#20a4a4,#990000)">🧩</div><h5>DeepFocus Tab</h5><div class="meta">Chrome extension · 2 hr</div><div class="rt">"Shipped in 90 minutes. Stopped at the box and reflected on the rest."</div></div>
+        <div class="sp-proj"><div class="thumb" style="background:linear-gradient(120deg,#f2a900,#d81e5b)">💬</div><h5>NoteFlip Study Buddy</h5><div class="meta">Basic LLM app · 2 hr</div><div class="rt">"Learned exactly where the model hallucinates — and how to catch it."</div></div>
+      </div>
+
+      <p style="text-align:center;margin-top:24px;color:var(--ink-soft);font-size:.9rem">This is an illustrative example of a final student portfolio. Yours will look like you.</p>
+    </div>`,true);
+}
+
+/* ---------- SCROLL REVEAL + COUNT UP ---------- */
+const io=new IntersectionObserver((entries)=>{
+  entries.forEach(en=>{
+    if(en.isIntersecting){
+      en.target.classList.add('in');
+      const num=en.target.querySelector?.('[data-count]');
+      if(num&&!num.dataset.done){num.dataset.done=1;countUp(num);}
+      io.unobserve(en.target);
+    }
+  });
+},{threshold:.15});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+function countUp(el){
+  const target=+el.dataset.count;let cur=0;const step=Math.max(1,Math.ceil(target/24));
+  if(target===0){el.textContent='0';return;}
+  const iv=setInterval(()=>{cur+=step;if(cur>=target){cur=target;clearInterval(iv);}el.textContent=cur;},32);
+}
+</script>
+</body>
+</html>
