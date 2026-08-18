@@ -106,6 +106,9 @@ html { scroll-behavior: smooth; }
   margin-top: 1.6rem;
 }
 .gx-hero__actions { display: flex; flex-wrap: wrap; gap: .9rem; margin-top: 2.4rem; }
+.gx-hero__note { margin-top: 1.5rem; font-size: .85rem; letter-spacing: .02em; color: rgba(255,255,255,.72); }
+.gx-hero__notelink { color: #fff; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.gx-hero__notelink:hover, .gx-hero__notelink:focus { color: var(--rvt-color-crimson-100,#FFD6DB); }
 .gx-btn {
   display: inline-flex; align-items: center; gap: .55rem;
   padding: .95rem 1.7rem; border-radius: 3px;
@@ -465,11 +468,12 @@ html { scroll-behavior: smooth; }
         <p class="gx-hero__eyebrow gx-reveal">UITS Academic &amp; AI Innovation &middot; Spring 2027 Cohort</p>
         <h1 class="gx-hero__title gx-reveal" id="hero-title" style="--gx-delay:120ms">Where IU students develop <em>authentic AI skills.</em></h1>
         <p class="gx-hero__sub gx-reveal" style="--gx-delay:200ms">Building real AI tools with peers, mentors and UITS AI experts.</p>
-        <p class="gx-hero__teaser gx-reveal" style="--gx-delay:240ms">The premier AI experiential learning internship at Indiana University — a selective, paid, ten-week program open to students on all nine campuses. Teams find a real problem, build something that works, sharpen it with enterprise engineers, and pitch it to the world.</p>
+        <p class="gx-hero__teaser gx-reveal" style="--gx-delay:240ms">The premier AI experiential learning internship at Indiana University — a selective, paid, ten-week program open to students on all nine campuses. Teams find a real problem, build something that works, sharpen it with IU&rsquo;s AI experts, and share it with the world.</p>
         <div class="gx-hero__actions gx-reveal" style="--gx-delay:360ms">
           <a class="gx-btn gx-btn--solid" href="#whats-new">See what&rsquo;s new</a>
           <a class="gx-btn gx-btn--ghost" href="#overview" data-gx-overview-link>Full program overview <span aria-hidden="true">&rarr;</span></a>
         </div>
+        <p class="gx-hero__note gx-reveal" style="--gx-delay:480ms">Leadership preview — <a class="gx-hero__notelink" href="genai-ambassadors-students.html">see the student-facing recruitment version</a>.</p>
       </div>
     </div>
     <a class="gx-hero__scrollcue" href="#stats">Scroll
@@ -502,7 +506,7 @@ html { scroll-behavior: smooth; }
         <div class="rvt-stat gx-reveal" style="--gx-delay:300ms">
           <div class="rvt-stat__content rvt-flow">
             <div class="rvt-stat__number gx-statnum"><span class="rvt-sr-only">4</span><span aria-hidden="true" data-count="4">4</span></div>
-            <div class="rvt-stat__description">Audiences every team must win over — each one harder than the last</div>
+            <div class="rvt-stat__description">Audiences that help every team refine its story — peers, experts, users, and the public</div>
           </div>
         </div>
       </div>
@@ -514,51 +518,42 @@ html { scroll-behavior: smooth; }
     <div class="rvt-container-xl">
       <p class="gx-kicker gx-reveal">What&rsquo;s new for Spring 2027</p>
       <h2 class="gx-h2 gx-reveal" id="whats-new-title" style="--gx-delay:100ms">A redesign built around one idea: capability you can prove.</h2>
-      <p class="gx-lede gx-reveal" style="--gx-delay:200ms">The program has been rebuilt end to end — fewer documents, more human expertise, and every deliverable pointed at the same target: a graduate who can build with AI, reason about it at institutional scale, and tell that story to anyone.</p>
+      <p class="gx-lede gx-reveal" style="--gx-delay:200ms">The program has been rebuilt end to end — more time with mentors and experts, and every deliverable pointed at the same target: a graduate who can build with AI, reason about it at institutional scale, and tell that story to anyone.</p>
 
       <div class="gx-newgrid">
         <article class="gx-newcard gx-newcard--feature gx-reveal">
-          <span class="rvt-badge">New structure</span>
           <h3>The Rehearsal Ladder</h3>
-          <p>One story, told to four progressively harder audiences — an open IU-wide AI workshop, a solutions architect met twice, real users in testing, then the public. Every rung prepares the next, so by showcase night the pitch has already been shaped by three rooms of feedback.</p>
+          <p>Students refine and pitch their ideas to increasingly discerning audiences — an open IU-wide AI workshop, a UITS solutions architect met twice, real users in testing, and finally the public showcase. Every rung prepares the next, so by showcase night the pitch has been shaped by rounds of peer, user, and expert feedback.</p>
         </article>
         <article class="gx-newcard gx-reveal" style="--gx-delay:120ms">
-          <span class="rvt-badge rvt-badge--info">New</span>
           <h3>Solutions architect consults</h3>
-          <p>Two 45-minute sessions with UITS engineers who ship enterprise AI — feasibility at Week 5, scale and pitch rehearsal at Week 9.</p>
+          <p>Two 45-minute working sessions with UITS experts who build and run IU&rsquo;s enterprise AI systems — feasibility at Week 5, scale and pitch feedback at Week 9.</p>
         </article>
         <article class="gx-newcard gx-reveal">
-          <span class="rvt-badge rvt-badge--info">New</span>
           <h3>A self-guided learning pathway</h3>
           <p>Teams use AI to map their idea&rsquo;s three hardest scale concerns, then design their own curriculum to close the gap.</p>
         </article>
         <article class="gx-newcard gx-reveal" style="--gx-delay:200ms">
-          <span class="rvt-badge rvt-badge--success">Redesigned</span>
           <h3>A Kickstarter-style pitch video</h3>
           <p>Show it working, then make the ask — the single most shareable portfolio object the program produces.</p>
         </article>
         <article class="gx-newcard gx-reveal">
-          <span class="rvt-badge rvt-badge--success">Redesigned</span>
-          <h3>One living brief, not thirteen documents</h3>
-          <p>Thirteen Word documents collapse into one versioned brief, assessed at three checkpoints.</p>
+          <h3>One living project brief</h3>
+          <p>A single, continuously updated brief carries each team&rsquo;s thinking from problem statement to final pitch, with feedback checkpoints at Weeks 3, 6, and 10.</p>
         </article>
         <article class="gx-newcard gx-reveal" style="--gx-delay:200ms">
-          <span class="rvt-badge rvt-badge--success">Redesigned</span>
           <h3>Assessment measures capability</h3>
           <p>Does the artifact work? Is the reasoning sound? Is the reflection honest? The document is no longer the grade.</p>
         </article>
         <article class="gx-newcard gx-reveal">
-          <span class="rvt-badge rvt-badge--info">New</span>
           <h3>Three experts, defined lanes</h3>
-          <p>Campus mentor, teaching &amp; learning mentor, solutions architect — with a published &ldquo;who to ask what&rdquo; map.</p>
+          <p>A campus mentor for weekly momentum, a teaching &amp; learning mentor for idea quality and how people learn, and a UITS solutions architect for technical reality — each with a clear lane.</p>
         </article>
         <article class="gx-newcard gx-reveal" style="--gx-delay:100ms">
-          <span class="rvt-badge rvt-badge--info">New</span>
-          <h3>Campus equity guardrails</h3>
-          <p>Story outweighs production value, phone-only production is first-class, and expert meetings default to virtual.</p>
+          <h3>Designed for campus equity</h3>
+          <p>Evaluation emphasizes ideas and learning rather than production quality, mobile-device participation is fully supported, and expert engagements are offered virtually — equitable access regardless of location.</p>
         </article>
         <article class="gx-newcard gx-reveal" style="--gx-delay:200ms">
-          <span class="rvt-badge rvt-badge--info">New</span>
           <h3>AI disclosure &amp; media standards</h3>
           <p>Stated norms for disclosing AI-generated media, on-camera releases, and consent for voice and likeness.</p>
         </article>
@@ -575,7 +570,7 @@ html { scroll-behavior: smooth; }
       <div class="gx-pillars">
         <div class="gx-pillar gx-reveal">
           <h3>Real problems, real consequences</h3>
-          <p>Every project starts from a genuine student or university problem, gets tested with real users, and is shaped side by side with people who ship software for 90,000 students. The question is never &ldquo;is it done?&rdquo; — it&rsquo;s &ldquo;would IU adopt this?&rdquo;</p>
+          <p>Every project starts from a genuine student or university problem, gets tested with real users, and is shaped side by side with IU staff experts who build real-world applications used by 90,000 students. The question is never &ldquo;is it done?&rdquo; — it&rsquo;s &ldquo;would IU adopt this?&rdquo;</p>
         </div>
         <div class="gx-pillar gx-reveal" style="--gx-delay:100ms">
           <h3>AI as a lifelong learning instrument</h3>
@@ -587,7 +582,7 @@ html { scroll-behavior: smooth; }
         </div>
         <div class="gx-pillar gx-reveal">
           <h3>Media production, with judgment</h3>
-          <p>Working alongside IU&rsquo;s video and advanced visualization team, teams put AI inside a real production workflow — scripting, storyboarding, b-roll, captioning — and learn where AI helps and where the human is still better.</p>
+          <p>Working alongside IU&rsquo;s video and advanced visualization team, teams put AI inside a real production workflow — scripting, storyboarding, b-roll, captioning — and learn where AI helps and where human creativity and judgment are still better.</p>
         </div>
         <div class="gx-pillar gx-reveal" style="--gx-delay:100ms">
           <h3>A portfolio that does the talking</h3>
@@ -606,17 +601,17 @@ html { scroll-behavior: smooth; }
     <div class="rvt-container-xl">
       <p class="gx-kicker gx-reveal">The spine of the program</p>
       <h2 class="gx-h2 gx-reveal" id="ladder-title" style="--gx-delay:100ms">Progressive authentic collaboration with users and experts.</h2>
-      <p class="gx-lede gx-reveal" style="--gx-delay:200ms">The hardest professional skill is explaining your work to someone who doesn&rsquo;t already care. Ambassadors get four real repetitions — and every rung is preparation for the next.</p>
+      <p class="gx-lede gx-reveal" style="--gx-delay:200ms">Success depends not just on doing great work, but on helping others understand why it matters. Ambassadors practice that skill on every rung of the ladder — and every rung is preparation for the next.</p>
       <div class="gx-ladder">
         <div class="gx-rung gx-rung--1 gx-reveal">
           <div class="gx-rung__num" aria-hidden="true">1</div>
-          <p class="gx-rung__meta">Weeks 2&ndash;4 &middot; Low stakes</p>
+          <p class="gx-rung__meta">Weeks 2&ndash;4 &middot; A friendly first audience</p>
           <h3>The workshop conversation</h3>
           <p>Share the work with IU students, faculty, and staff at an open, IU-wide UITS-led AI workshop. Two conversations, one actionable takeaway — the first time the idea leaves the team.</p>
         </div>
         <div class="gx-rung gx-rung--2 gx-reveal" style="--gx-delay:120ms">
           <div class="gx-rung__num" aria-hidden="true">2</div>
-          <p class="gx-rung__meta">Weeks 5 &amp; 9 &middot; High stakes</p>
+          <p class="gx-rung__meta">Weeks 5 &amp; 9 &middot; Expert feedback</p>
           <h3>The solutions architect</h3>
           <p>One expert, met twice. Ideate on feasibility together at Week 5 — expert feedback while there&rsquo;s still time to act on it — then reunite at Week 9 to think bigger: scale, marketability, the pitch itself.</p>
         </div>
@@ -628,9 +623,9 @@ html { scroll-behavior: smooth; }
         </div>
         <div class="gx-rung gx-rung--4 gx-reveal" style="--gx-delay:360ms">
           <div class="gx-rung__num" aria-hidden="true">4</div>
-          <p class="gx-rung__meta">Weeks 9&ndash;10 &middot; Permanent</p>
+          <p class="gx-rung__meta">Weeks 9&ndash;10 &middot; The big stage</p>
           <h3>Pitch video &amp; showcase</h3>
-          <p>Persuade an audience that owes you nothing — in public, on the record, in a video that lives on your portfolio forever.</p>
+          <p>Share the finished work with the wider IU community, employers, and campus leaders — and gain presentation experience most students graduate without.</p>
         </div>
       </div>
     </div>
@@ -652,8 +647,8 @@ html { scroll-behavior: smooth; }
         <div class="gx-week__ghost" aria-hidden="true">01</div>
         <div class="rvt-container-xl gx-week__inner">
           <p class="gx-week__phase gx-reveal">Week 01 &middot; Foundation</p>
-          <h3 class="gx-week__title gx-reveal" id="week-1-title" style="--gx-delay:100ms">The ladder is named.</h3>
-          <p class="gx-week__story gx-reveal" style="--gx-delay:200ms">Teams form, roles lock, and working norms get written down. Each team drafts a problem definition rooted in real student or university life — and learns, explicitly, that everything ahead is one story told four times to progressively harder audiences.</p>
+          <h3 class="gx-week__title gx-reveal" id="week-1-title" style="--gx-delay:100ms">Build your team. Meet the rehearsal ladder.</h3>
+          <p class="gx-week__story gx-reveal" style="--gx-delay:200ms">Teams form, roles lock, and working norms get written down. Each team drafts a problem definition rooted in real student or university life — and learns about the rehearsal ladder: one story, refined and re-told to increasingly discerning audiences all semester.</p>
           <ul class="gx-week__milestones gx-reveal" style="--gx-delay:300ms">
             <li>Team roles assigned — coordinator, project lead, research, implementation, quality</li>
             <li>Working norms and workspace setup; problem definition statement drafted</li>
@@ -673,11 +668,11 @@ html { scroll-behavior: smooth; }
         <div class="rvt-container-xl gx-week__inner">
           <p class="gx-week__phase gx-reveal">Week 02 &middot; Users &amp; research</p>
           <h3 class="gx-week__title gx-reveal" id="week-2-title" style="--gx-delay:100ms">Meet the people you&rsquo;re building for.</h3>
-          <p class="gx-week__story gx-reveal" style="--gx-delay:200ms">Ten student interviews per team turn a hunch into evidence. The workshop window opens — the first rung of the ladder — and the media capture habit begins: ten minutes a week that will save the pitch video seven weeks from now.</p>
+          <p class="gx-week__story gx-reveal" style="--gx-delay:200ms">Ten student interviews per team turn a hunch into evidence. The workshop window opens — the first rung of the ladder — and weekly media capture begins: ten minutes of photos and clips each week that will pay off in the pitch video seven weeks from now.</p>
           <ul class="gx-week__milestones gx-reveal" style="--gx-delay:300ms">
             <li>Student interviews and user insight synthesis</li>
             <li>Workshop conversation window opens (rung 1)</li>
-            <li>Weekly media capture habit begins — photos, clips, failures</li>
+            <li>Weekly media capture begins — photos, clips, lessons learned</li>
             <li>Training Module 2: beyond prompting — context engineering</li>
           </ul>
           <div class="gx-week__badges gx-reveal" style="--gx-delay:400ms">
@@ -695,11 +690,11 @@ html { scroll-behavior: smooth; }
         <div class="rvt-container-xl gx-week__inner">
           <p class="gx-week__phase gx-reveal">Week 03 &middot; Concept &amp; design</p>
           <h3 class="gx-week__title gx-reveal" id="week-3-title" style="--gx-delay:100ms">Commit to one idea worth building.</h3>
-          <p class="gx-week__story gx-reveal" style="--gx-delay:200ms">Concepts are explored, one is locked, and the prototype workflow takes shape. Teams analyze three reference pitch videos — why do they work? — and the self-guided learning pathway begins: what would break this idea at university scale?</p>
+          <p class="gx-week__story gx-reveal" style="--gx-delay:200ms">Concepts are explored, one is locked, and the prototype workflow takes shape. Teams analyze three reference pitch videos — why do they work? — and begin a self-guided learning plan: what would this idea need to work at university scale?</p>
           <ul class="gx-week__milestones gx-reveal" style="--gx-delay:300ms">
             <li>Solutions exploration; concept locked; prototype workflow designed</li>
             <li>Pitch inspiration analysis — three references, deconstructed</li>
-            <li>Learning pathway begins: three enterprise scale concerns, case-study grounded</li>
+            <li>Self-guided learning plan begins — the three biggest scale questions, grounded in real case studies</li>
             <li>Training Module 3: beyond chat — tools, retrieval, agents</li>
           </ul>
           <div class="gx-week__badges gx-reveal" style="--gx-delay:400ms">
@@ -737,13 +732,13 @@ html { scroll-behavior: smooth; }
         <div class="gx-week__ghost" aria-hidden="true">05</div>
         <div class="rvt-container-xl gx-week__inner">
           <p class="gx-week__phase gx-reveal">Week 05 &middot; Feasibility</p>
-          <h3 class="gx-week__title gx-reveal" id="week-5-title" style="--gx-delay:100ms">Trade ideas with someone who ships.</h3>
+          <h3 class="gx-week__title gx-reveal" id="week-5-title" style="--gx-delay:100ms">Trade ideas with IU&rsquo;s AI experts.</h3>
           <p class="gx-week__story gx-reveal" style="--gx-delay:200ms">The week the training was built for. A one-page brief lands 48 hours ahead, then the team sits down with an enterprise solutions architect to collaborate: pressure-test the design, trade ideas, and surface IU capabilities that could fit — feedback that arrives while there&rsquo;s still time to act on it. Afterward, the reflection: what did we think was hard, and what did the expert see?</p>
           <ul class="gx-week__milestones gx-reveal" style="--gx-delay:300ms">
             <li>Prototype testing and refinement</li>
-            <li>Architect brief due 48 hours prior — no exceptions</li>
+            <li>One-page project summary sent to the architect 48 hours ahead</li>
             <li>Architect meeting #1: feasibility, direction, what IU capabilities could fit</li>
-            <li>Pathway reflection: the prediction-versus-reality gap, named</li>
+            <li>Team reflection: what we expected vs. what the expert saw — and what we learned</li>
             <li>Training Module 5: enterprise reality — identity, data, procurement, cost</li>
           </ul>
           <div class="gx-week__badges gx-reveal" style="--gx-delay:400ms">
@@ -761,7 +756,7 @@ html { scroll-behavior: smooth; }
         <div class="rvt-container-xl gx-week__inner">
           <p class="gx-week__phase gx-reveal">Week 06 &middot; User testing</p>
           <h3 class="gx-week__title gx-reveal" id="week-6-title" style="--gx-delay:100ms">Watch a real user try to use it.</h3>
-          <p class="gx-week__story gx-reveal" style="--gx-delay:200ms">Three to five real participants, a testing plan, and the humbling footage of someone getting stuck. The mid-sprint demo is internal and deliberately rough — &ldquo;here&rsquo;s what we have, tell us what&rsquo;s broken&rdquo; — the first of three registers every team learns to speak.</p>
+          <p class="gx-week__story gx-reveal" style="--gx-delay:200ms">Three to five real participants, a testing plan, and honest footage of where users succeed and where they get stuck. The mid-sprint demo is internal and deliberately informal — &ldquo;here&rsquo;s what we have so far, help us make it better&rdquo; — practice in asking for feedback early.</p>
           <ul class="gx-week__milestones gx-reveal" style="--gx-delay:300ms">
             <li>User testing with 3&ndash;5 participants; findings into the brief</li>
             <li>Mid-sprint demo — internal, rough on purpose</li>
@@ -840,7 +835,7 @@ html { scroll-behavior: smooth; }
         <div class="rvt-container-xl gx-week__inner">
           <p class="gx-week__phase gx-reveal">Week 10 &middot; Showcase</p>
           <h3 class="gx-week__title gx-reveal" id="week-10-title" style="--gx-delay:100ms">The top of the ladder.</h3>
-          <p class="gx-week__story gx-reveal" style="--gx-delay:200ms">The final artifact goes live at a public link. The showcase tells the <em>how</em> — process, evidence, what failed, what was learned — to an audience of funders, mentors, and employers. Every ambassador leaves with a portfolio that speaks for itself and a story about being wrong that only gets better in interviews.</p>
+          <p class="gx-week__story gx-reveal" style="--gx-delay:200ms">The final artifact goes live at a public link. The showcase tells the <em>how</em> — the process, the evidence, and how the idea grew — to an audience of faculty, campus leaders, employers, and community partners. Every ambassador leaves with a portfolio of meaningful work and real experiences they can confidently share in interviews and professional opportunities.</p>
           <ul class="gx-week__milestones gx-reveal" style="--gx-delay:300ms">
             <li>Final artifact published — a working public link</li>
             <li>Showcase presentation and showcase page copy</li>
@@ -876,7 +871,7 @@ html { scroll-behavior: smooth; }
     <div class="rvt-container-lg">
       <p class="gx-kicker gx-reveal" style="justify-content:center; color: var(--rvt-color-crimson-100,#FFD6DB);">Spring 2027</p>
       <h2 class="gx-h2 gx-reveal" id="cta-title" style="--gx-delay:100ms">Fifty ambassadors. Nine campuses. One standard.</h2>
-      <p class="gx-lede gx-reveal gx-maxw" style="--gx-delay:200ms; color: rgba(255,255,255,.85);">Selective by design — because premier and selective are the same claim. Every ambassador gets a campus mentor, a domain-matched architect, a teaching &amp; learning mentor, and real showcase attention.</p>
+      <p class="gx-lede gx-reveal gx-maxw" style="--gx-delay:200ms; color: rgba(255,255,255,.85);">Every ambassador takes an idea from concept through iteration, learns to think at institutional scale, and works closely with a campus mentor, a teaching &amp; learning mentor, and a domain-matched UITS solutions architect — then presents that work to faculty, campus leaders, employers, and community partners at the showcase.</p>
       <div class="gx-cta__actions gx-reveal" style="--gx-delay:300ms">
         <a class="gx-btn gx-btn--solid" href="#overview" data-gx-overview-link>Read the full program overview <span aria-hidden="true">&rarr;</span></a>
       </div>
@@ -903,6 +898,7 @@ html { scroll-behavior: smooth; }
         <li>Spring and fall cohorts — approximately 100 students per year.</li>
         <li>Competitive application, with campus distribution an explicit selection goal.</li>
         <li>Paid, 5&ndash;7 hours per week, ten weeks including one designed dark week.</li>
+        <li><strong>Interns and ambassadors, both on purpose:</strong> participants are paid interns — the experience is developmental, centered on learning, mentorship, and professional growth. The <em>ambassador</em> title names the second half of the bargain: they carry what they build, and what they learn, back to their home campuses.</li>
         <li>Team roles carried forward unchanged: Team Coordinator, Project Lead, Research/Data Lead, Implementation Lead, Quality/Review Lead — each member holds one primary and one backup role.</li>
         <li>Two project tracks: an <strong>AI-powered artifact</strong> (a tool, assistant, or workflow) or an <strong>AI resource</strong> (a guide, prompt library, or tutorial). Track determines the expert pairing and testing protocol.</li>
       </ul>
@@ -911,6 +907,7 @@ html { scroll-behavior: smooth; }
     <section class="gx-ov-section" aria-labelledby="ov-support">
       <h2 class="gx-ov-h2" id="ov-support">The four support relationships</h2>
       <p>Published to students and mentors as a &ldquo;who to ask what&rdquo; guide, so advice never collides.</p>
+      <p><strong>How the two mentor roles differ:</strong> the campus mentor owns weekly momentum — check-ins, logistics, unblocking. The teaching &amp; learning mentor owns idea quality — helping teams reason about their users, how people learn new tools, and whether the concept is pedagogically and practically sound. That lane applies to every project, academic or not: whether the artifact is a study aid or a parking-space finder, someone has to learn to use it, and the teaching &amp; learning mentor is the expert in how that adoption happens.</p>
       <table class="rvt-table-stripes">
         <caption class="rvt-sr-only">Support relationships, their cadence, and the question each answers</caption>
         <thead>
@@ -918,7 +915,7 @@ html { scroll-behavior: smooth; }
         </thead>
         <tbody>
           <tr><td>Campus mentor</td><td>Weekly</td><td>Are you on track? What&rsquo;s blocking you?</td></tr>
-          <tr><td>Teaching &amp; learning / academic AI innovation mentor</td><td>~3 sessions</td><td>Is this a good idea?</td></tr>
+          <tr><td>Teaching &amp; learning / academic AI innovation mentor</td><td>~3 sessions</td><td>Is this a good idea — and will people actually learn and adopt it?</td></tr>
           <tr><td>Solutions architect (or instructional design expert)</td><td>2 sessions — Weeks 5 and 9</td><td>Will it work? What happens at scale?</td></tr>
           <tr><td>Video &amp; advanced visualization team</td><td>Masterclass + office hours</td><td>How do we tell this story well?</td></tr>
         </tbody>
@@ -934,7 +931,7 @@ html { scroll-behavior: smooth; }
         </thead>
         <tbody>
           <tr><th scope="row">1</th><td>Foundation &amp; problem definition</td><td>Roles, working norms, workspace setup, problem definition statement. Training M1.</td></tr>
-          <tr><th scope="row">2</th><td>Users &amp; research</td><td>Student interviews, user insights. Training M2. Workshop window opens; media capture habit begins.</td></tr>
+          <tr><th scope="row">2</th><td>Users &amp; research</td><td>Student interviews, user insights. Training M2. Workshop window opens; weekly media capture begins.</td></tr>
           <tr><th scope="row">3</th><td>Concept selection &amp; design</td><td>Concept locked, prototype workflow, pitch inspiration analysis. Training M3. Learning pathway begins. Brief checkpoint 1.</td></tr>
           <tr><th scope="row">4</th><td>Build</td><td>Prototype v1, prompt experiments. Training M4. Workshop requirement due.</td></tr>
           <tr><th scope="row">5</th><td>Feasibility</td><td>Prototype testing. Training M5. Architect brief 48h prior; architect meeting #1; pathway reflection.</td></tr>
