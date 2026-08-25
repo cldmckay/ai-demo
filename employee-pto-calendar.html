@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Employee Paid Time Off — Calendar</title>
+  <link rel="stylesheet" href="https://unpkg.com/rivet-core@2/css/rivet.min.css">
+  <style>
+    /*
+      Custom, namespaced styles only (pto-*). No Rivet classes are overridden.
+      Colors reference Rivet design tokens with hex fallbacks.
+    */
+    .pto-month-nav { display: flex; align-items: center; justify-content: center; gap: 0.75rem; }
+    .pto-month-select { width: 9rem; }
+    .pto-year-select { width: 6.5rem; }
+
+    .pto-stat-number { font-size: 2.5rem; font-weight: 700; line-height: 1.1; }
+    .pto-stat-number--hol { color: var(--rvt-color-green-600, #056e41); }
+    .pto-stat-number--pto { color: var(--rvt-color-gold-600, #8a6a14); }
+    .pto-stat-number--sick { color: var(--rvt-color-blue-700, #0c2d51); }
+
+    /* Calendar: one grid holds the weekday headers and every day cell, so all
+       seven columns are identical widths and line up under their headers. */
+    .pto-calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      border: 1px solid var(--rvt-color-black-200, #dee0e3);
+      background: #fff;
+    }
+    .pto-calendar__row, .pto-calendar__body { display: contents; }
+    .pto-calendar__weekday {
+      padding: 0.5rem 0.25rem;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.875rem;
+      background: #fff;
+      border-bottom: 1px solid var(--rvt-color-black-200, #dee0e3);
+      border-right: 1px solid var(--rvt-color-black-200, #dee0e3);
+    }
+    .pto-calendar__weekday:nth-child(7n) { border-right: 0; }
+    .pto-day {
+      min-height: 5.5rem;
+      padding: 0.35rem 0.35rem 0.5rem;
+      background: #fff;
+      font-size: 0.875rem;
+      border-bottom: 1px solid var(--rvt-color-black-200, #dee0e3);
+      border-right: 1px solid var(--rvt-color-black-200, #dee0e3);
+    }
+    .pto-calendar__body .pto-day:nth-child(7n) { border-right: 0; }
+    .pto-calendar__body .pto-day:nth-last-child(-n+7) { border-bottom: 0; }
+    /* Weekend days that are in the month get a gray background */
+    .pto-calendar__body .pto-day:not(.pto-day--outside):nth-child(7n+1),
+    .pto-calendar__body .pto-day:not(.pto-day--outside):nth-child(7n) {
+      background: var(--rvt-color-black-100, #eceef1);
+    }
+    /* Days outside the current month stay white, with no content */
+    .pto-day--outside { background: #fff; }
+    /* Light gray background for the whole calendar panel */
+    .pto-calendar-panel { background: var(--rvt-color-black-000, #f7f7f8); }
+    .pto-day--selected {
+      outline: 2px solid var(--rvt-color-crimson-500, #900);
+      outline-offset: -2px;
+    }
+    .pto-day__number { font-weight: 700; }
+
+    /* Event pills */
+    .pto-event {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-top: 0.3rem;
+      padding: 0.1rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      line-height: 1.35;
+    }
+    .pto-event--holiday {
+      background: var(--rvt-color-green-100, #dcf0e2);
+      color: var(--rvt-color-green-700, #0a5137);
+      border: 1px solid var(--rvt-color-green-200, #b8e0c5);
+    }
+    .pto-event--pnl {
+      background: var(--rvt-color-gold-100, #f8e8ba);
+      color: var(--rvt-color-black-700, #3a3f45);
+      border: 1px solid var(--rvt-color-gold-200, #eed48a);
+    }
+    .pto-event__label {
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: left;
+    }
+    .pto-event__amount { font-weight: 700; white-space: nowrap; }
+    .pto-event__delete {
+      display: inline-flex;
+      align-items: center;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--rvt-color-crimson-500, #900);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .pto-event__delete:hover { color: var(--rvt-color-crimson-700, #59000f); }
+
+    /* Header user avatar */
+    .pto-avatar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.9rem;
+      height: 1.9rem;
+      border-radius: 50%;
+      background: var(--rvt-color-crimson-500, #900);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      margin-right: 0.4rem;
+    }
+    .pto-code-row { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; }
+    .pto-code-row .rvt-label, .pto-code-row a { white-space: nowrap; }
+  </style>
+</head>
+<body>
+
+  <header class="rvt-header-wrapper">
+    <a class="rvt-header-wrapper__skip-link" href="#main-content">Skip to main content</a>
+    <div class="rvt-header-global">
+      <div class="rvt-container-xl">
+        <div class="rvt-header-global__inner">
+          <div class="rvt-header-global__logo-slot">
+            <a class="rvt-lockup" href="#">
+              <div class="rvt-lockup__tab">
+                <svg xmlns="http://www.w3.org/2000/svg" class="rvt-lockup__trident" viewBox="0 0 28 34">
+                  <path d="M-3.34344e-05 4.70897H8.83308V7.174H7.1897V21.1426H10.6134V2.72321H8.83308V0.121224H18.214V2.65476H16.2283V21.1426H19.7889V7.174H18.214V4.64047H27.0471V7.174H25.0614V23.6761L21.7746 26.8944H16.2967V30.455H18.214V33.8787H8.76463V30.592H10.6819V26.8259H5.20403L1.91726 23.6077V7.174H-3.34344e-05V4.70897Z" fill="currentColor"></path>
+                </svg>
+              </div>
+              <div class="rvt-lockup__body">
+                <span class="rvt-lockup__title">Employee Paid Time Off</span>
+              </div>
+            </a>
+            <span class="rvt-badge rvt-badge--warning rvt-m-left-sm">Dev</span>
+          </div>
+          <div class="rvt-header-global__controls">
+            <nav aria-label="Main" class="rvt-header-menu">
+              <ul class="rvt-header-menu__list">
+                <li class="rvt-header-menu__item rvt-header-menu__item--current">
+                  <a class="rvt-header-menu__link" href="#" aria-current="page">Calendar</a>
+                </li>
+                <li class="rvt-header-menu__item">
+                  <a class="rvt-header-menu__link" href="#">Time-Off Detail</a>
+                </li>
+                <li class="rvt-header-menu__item">
+                  <div class="rvt-dropdown" data-rvt-dropdown="user-menu">
+                    <button type="button" class="rvt-header-menu__link rvt-dropdown__toggle" data-rvt-dropdown-toggle="user-menu">
+                      <span class="pto-avatar" aria-hidden="true">JN</span>
+                      <span>Jerry K Neal</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" class="rvt-m-left-xs">
+                        <path d="M8 12.46a2 2 0 0 1-1.52-.7L1.24 5.65l1.52-1.3L8 10.46l5.24-6.11 1.52 1.3-5.24 6.11a2 2 0 0 1-1.52.7Z"/>
+                      </svg>
+                    </button>
+                    <div class="rvt-dropdown__menu" data-rvt-dropdown-menu hidden>
+                      <a href="#">Profile</a>
+                      <a href="#">Log out</a>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" class="rvt-container-xl rvt-p-tb-lg">
+    <h1 class="rvt-ts-32 rvt-m-bottom-md">Calendar</h1>
+
+    <div class="rvt-row">
+      <!-- Add Dates form -->
+      <div class="rvt-cols-3-lg rvt-m-bottom-lg">
+        <div class="rvt-border-all rvt-border-radius rvt-p-all-lg">
+          <h2 class="rvt-ts-23 rvt-text-bold">Add Dates</h2>
+          <p class="rvt-ts-xs rvt-color-black-500 rvt-m-top-xxs rvt-m-bottom-sm">* indicates required field</p>
+
+          <label for="from-date" class="rvt-label">From *</label>
+          <input type="text" id="from-date" class="rvt-text-input" placeholder="MM/DD/YYYY" required>
+
+          <label for="thru-date" class="rvt-label rvt-m-top-md">Thru *</label>
+          <input type="text" id="thru-date" class="rvt-text-input" placeholder="MM/DD/YYYY" required>
+
+          <label for="description" class="rvt-label rvt-m-top-md">Description</label>
+          <input type="text" id="description" class="rvt-text-input">
+
+          <label for="hours-per-day" class="rvt-label rvt-m-top-md">Hours Per Day</label>
+          <input type="text" id="hours-per-day" class="rvt-text-input">
+
+          <div class="rvt-checkbox rvt-m-top-md">
+            <input type="checkbox" name="include-weekends" id="include-weekends">
+            <label for="include-weekends">Include Weekends</label>
+          </div>
+
+          <div class="pto-code-row rvt-m-top-md">
+            <label for="time-off-code" class="rvt-label">Time-off Code *</label>
+            <a href="#" class="rvt-ts-xs">Show Advanced Codes</a>
+          </div>
+          <select id="time-off-code" class="rvt-select" required>
+            <option selected>PTO - Annual Limit not affected (PNL)</option>
+            <option>PTO (PTO)</option>
+            <option>Holiday (HOL)</option>
+            <option>Sick (SCK)</option>
+          </select>
+
+          <button type="button" class="rvt-button rvt-m-top-lg">Apply and Save</button>
+        </div>
+      </div>
+
+      <!-- Balances + calendar -->
+      <div class="rvt-cols-9-lg">
+        <div class="rvt-row rvt-m-bottom-lg">
+          <div class="rvt-cols-4-md">
+            <div class="rvt-border-all rvt-border-radius rvt-p-all-md">
+              <div class="rvt-ts-xs rvt-text-uppercase rvt-color-black-500">Holiday Available</div>
+              <div class="pto-stat-number pto-stat-number--hol">8</div>
+            </div>
+          </div>
+          <div class="rvt-cols-4-md">
+            <div class="rvt-border-all rvt-border-radius rvt-p-all-md">
+              <div class="rvt-ts-xs rvt-text-uppercase rvt-color-black-500">PTO Available</div>
+              <div class="pto-stat-number pto-stat-number--pto">308</div>
+            </div>
+          </div>
+          <div class="rvt-cols-4-md">
+            <div class="rvt-border-all rvt-border-radius rvt-p-all-md">
+              <div class="rvt-ts-xs rvt-text-uppercase rvt-color-black-500">Sick Available</div>
+              <div class="pto-stat-number pto-stat-number--sick">572</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calendar panel: month picker + calendar grid live in one container -->
+        <section class="pto-calendar-panel rvt-border-all rvt-border-radius rvt-p-all-md" aria-label="Time-off calendar">
+          <div class="pto-month-nav rvt-m-bottom-md">
+            <button type="button" class="rvt-button rvt-button--plain" aria-label="Previous month">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M11.46 15.46 5.35 9.52a2 2 0 0 1 0-3.04l6.11-5.94 1.3 1.52L6.65 8l6.11 5.94-1.3 1.52Z"/>
+              </svg>
+            </button>
+            <div class="pto-month-select">
+              <label for="month-select" class="rvt-sr-only">Month</label>
+              <select id="month-select" class="rvt-select">
+                <option>January</option><option>February</option><option>March</option>
+                <option>April</option><option>May</option><option>June</option>
+                <option>July</option><option>August</option><option>September</option>
+                <option>October</option><option>November</option><option>December</option>
+              </select>
+            </div>
+            <div class="pto-year-select">
+              <label for="year-select" class="rvt-sr-only">Year</label>
+              <select id="year-select" class="rvt-select">
+                <option>2025</option><option>2026</option><option selected>2027</option><option>2028</option>
+              </select>
+            </div>
+            <button type="button" class="rvt-button rvt-button--plain" aria-label="Next month">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                <path d="m4.54 15.46-1.3-1.52L9.35 8 3.24 2.06l1.3-1.52 6.11 5.94a2 2 0 0 1 0 3.04l-6.11 5.94Z"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="pto-calendar">
+          <div class="pto-calendar__row">
+            <div class="pto-calendar__weekday">Sunday</div>
+            <div class="pto-calendar__weekday">Monday</div>
+            <div class="pto-calendar__weekday">Tuesday</div>
+            <div class="pto-calendar__weekday">Wednesday</div>
+            <div class="pto-calendar__weekday">Thursday</div>
+            <div class="pto-calendar__weekday">Friday</div>
+            <div class="pto-calendar__weekday">Saturday</div>
+          </div>
+          <div class="pto-calendar__body">
+            <!-- Week 1 -->
+            <div class="pto-day pto-day--outside" aria-hidden="true"></div>
+            <div class="pto-day pto-day--outside" aria-hidden="true"></div>
+            <div class="pto-day pto-day--outside" aria-hidden="true"></div>
+            <div class="pto-day pto-day--outside" aria-hidden="true"></div>
+            <div class="pto-day pto-day--outside" aria-hidden="true"></div>
+            <div class="pto-day pto-day--selected">
+              <div class="pto-day__number">1</div>
+              <div class="pto-event pto-event--holiday">
+                <span class="pto-event__label">New Year's Day - 2027</span>
+                <span class="pto-event__amount">+8</span>
+              </div>
+              <div class="pto-event pto-event--holiday">
+                <span class="pto-event__label">New Year's Day</span>
+                <span class="pto-event__amount">&minus;8</span>
+                <button type="button" class="pto-event__delete" aria-label="Delete New Year's Day time off">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 2.086 4.5 4.5 4.5-4.5L13.914 3.5 9.414 8l4.5 4.5-1.414 1.414-4.5-4.5-4.5 4.5L2.086 12.5l4.5-4.5-4.5-4.5L3.5 2.086Z"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="pto-day"><div class="pto-day__number">2</div></div>
+
+            <!-- Week 2 -->
+            <div class="pto-day"><div class="pto-day__number">3</div></div>
+            <div class="pto-day">
+              <div class="pto-day__number">4</div>
+              <div class="pto-event pto-event--pnl">
+                <span class="pto-event__label">PNL</span>
+                <span class="pto-event__amount">&minus;8</span>
+                <button type="button" class="pto-event__delete" aria-label="Delete PNL time off on January 4">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 2.086 4.5 4.5 4.5-4.5L13.914 3.5 9.414 8l4.5 4.5-1.414 1.414-4.5-4.5-4.5 4.5L2.086 12.5l4.5-4.5-4.5-4.5L3.5 2.086Z"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="pto-day">
+              <div class="pto-day__number">5</div>
+              <div class="pto-event pto-event--pnl">
+                <span class="pto-event__label">PNL</span>
+                <span class="pto-event__amount">&minus;8</span>
+                <button type="button" class="pto-event__delete" aria-label="Delete PNL time off on January 5">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 2.086 4.5 4.5 4.5-4.5L13.914 3.5 9.414 8l4.5 4.5-1.414 1.414-4.5-4.5-4.5 4.5L2.086 12.5l4.5-4.5-4.5-4.5L3.5 2.086Z"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="pto-day">
+              <div class="pto-day__number">6</div>
+              <div class="pto-event pto-event--pnl">
+                <span class="pto-event__label">PNL</span>
+                <span class="pto-event__amount">&minus;8</span>
+                <button type="button" class="pto-event__delete" aria-label="Delete PNL time off on January 6">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 2.086 4.5 4.5 4.5-4.5L13.914 3.5 9.414 8l4.5 4.5-1.414 1.414-4.5-4.5-4.5 4.5L2.086 12.5l4.5-4.5-4.5-4.5L3.5 2.086Z"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="pto-day">
+              <div class="pto-day__number">7</div>
+              <div class="pto-event pto-event--pnl">
+                <span class="pto-event__label">PNL</span>
+                <span class="pto-event__amount">&minus;8</span>
+                <button type="button" class="pto-event__delete" aria-label="Delete PNL time off on January 7">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 2.086 4.5 4.5 4.5-4.5L13.914 3.5 9.414 8l4.5 4.5-1.414 1.414-4.5-4.5-4.5 4.5L2.086 12.5l4.5-4.5-4.5-4.5L3.5 2.086Z"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="pto-day">
+              <div class="pto-day__number">8</div>
+              <div class="pto-event pto-event--pnl">
+                <span class="pto-event__label">PNL</span>
+                <span class="pto-event__amount">&minus;8</span>
+                <button type="button" class="pto-event__delete" aria-label="Delete PNL time off on January 8">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 2.086 4.5 4.5 4.5-4.5L13.914 3.5 9.414 8l4.5 4.5-1.414 1.414-4.5-4.5-4.5 4.5L2.086 12.5l4.5-4.5-4.5-4.5L3.5 2.086Z"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="pto-day"><div class="pto-day__number">9</div></div>
+
+            <!-- Week 3 -->
+            <div class="pto-day"><div class="pto-day__number">10</div></div>
+            <div class="pto-day"><div class="pto-day__number">11</div></div>
+            <div class="pto-day"><div class="pto-day__number">12</div></div>
+            <div class="pto-day"><div class="pto-day__number">13</div></div>
+            <div class="pto-day"><div class="pto-day__number">14</div></div>
+            <div class="pto-day">
+              <div class="pto-day__number">15</div>
+              <div class="pto-event pto-event--pnl">
+                <span class="pto-event__label">PNL</span>
+                <span class="pto-event__amount">&minus;8</span>
+                <button type="button" class="pto-event__delete" aria-label="Delete PNL time off on January 15">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 2.086 4.5 4.5 4.5-4.5L13.914 3.5 9.414 8l4.5 4.5-1.414 1.414-4.5-4.5-4.5 4.5L2.086 12.5l4.5-4.5-4.5-4.5L3.5 2.086Z"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="pto-day"><div class="pto-day__number">16</div></div>
+
+            <!-- Week 4 -->
+            <div class="pto-day"><div class="pto-day__number">17</div></div>
+            <div class="pto-day"><div class="pto-day__number">18</div></div>
+            <div class="pto-day"><div class="pto-day__number">19</div></div>
+            <div class="pto-day">
+              <div class="pto-day__number">20</div>
+              <div class="pto-event pto-event--holiday">
+                <span class="pto-event__label">MLK Day - 2027 - Holiday</span>
+                <span class="pto-event__amount">+8</span>
+              </div>
+              <div class="pto-event pto-event--holiday">
+                <span class="pto-event__label">MLK Day - 2027</span>
+                <span class="pto-event__amount">&minus;8</span>
+                <button type="button" class="pto-event__delete" aria-label="Delete MLK Day time off">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 2.086 4.5 4.5 4.5-4.5L13.914 3.5 9.414 8l4.5 4.5-1.414 1.414-4.5-4.5-4.5 4.5L2.086 12.5l4.5-4.5-4.5-4.5L3.5 2.086Z"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="pto-day"><div class="pto-day__number">21</div></div>
+            <div class="pto-day"><div class="pto-day__number">22</div></div>
+            <div class="pto-day"><div class="pto-day__number">23</div></div>
+
+            <!-- Week 5 -->
+            <div class="pto-day"><div class="pto-day__number">24</div></div>
+            <div class="pto-day"><div class="pto-day__number">25</div></div>
+            <div class="pto-day"><div class="pto-day__number">26</div></div>
+            <div class="pto-day"><div class="pto-day__number">27</div></div>
+            <div class="pto-day"><div class="pto-day__number">28</div></div>
+            <div class="pto-day"><div class="pto-day__number">29</div></div>
+            <div class="pto-day"><div class="pto-day__number">30</div></div>
+
+            <!-- Week 6 -->
+            <div class="pto-day">
+              <div class="pto-day__number">31</div>
+              <div class="pto-event pto-event--pnl">
+                <span class="pto-event__label">PTO Accr</span>
+                <span class="pto-event__amount">+24</span>
+              </div>
+            </div>
+            <div class="pto-day pto-day--outside" aria-hidden="true"></div>
+            <div class="pto-day pto-day--outside" aria-hidden="true"></div>
+            <div class="pto-day pto-day--outside" aria-hidden="true"></div>
+            <div class="pto-day pto-day--outside" aria-hidden="true"></div>
+            <div class="pto-day pto-day--outside" aria-hidden="true"></div>
+            <div class="pto-day pto-day--outside" aria-hidden="true"></div>
+          </div>
+        </div>
+          <p class="rvt-ts-xs rvt-m-top-xs rvt-m-bottom-none">* Indicates a correction.</p>
+        </section>
+
+        <!-- Requested change #2: the YTD section is wrapped in a disclosure (closed on load) -->
+        <div class="rvt-disclosure rvt-m-top-xl" data-rvt-disclosure="ytd-disclosure">
+          <button type="button" class="rvt-disclosure__toggle" data-rvt-disclosure-toggle="ytd-disclosure" aria-expanded="false">
+            YTD Earnings and YTD Approved Usage
+          </button>
+          <div class="rvt-disclosure__content" data-rvt-disclosure-target hidden>
+            <p class="rvt-ts-14 rvt-m-bottom-sm">YTD Earnings and YTD Approved Usage are totals as of the last month of PTO approved for: <strong>May, 2026</strong></p>
+            <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="ytd-table-caption">
+              <table class="rvt-table">
+                <caption id="ytd-table-caption" class="rvt-sr-only">Year-to-date earnings and approved usage by category</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Category</th>
+                    <th scope="col" class="rvt-text-right">Jan 1 Carryover</th>
+                    <th scope="col" class="rvt-text-right">YTD Earned</th>
+                    <th scope="col" class="rvt-text-right">YTD Approved Usage</th>
+                    <th scope="col" class="rvt-text-right">Accrued Balance</th>
+                    <th scope="col" class="rvt-text-right">Available this Month (January)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row"><span class="rvt-badge rvt-badge--success-secondary">HOL</span></th>
+                    <td class="rvt-text-right">8</td>
+                    <td class="rvt-text-right">0</td>
+                    <td class="rvt-text-right">0</td>
+                    <td class="rvt-text-right">8</td>
+                    <td class="rvt-text-right rvt-text-bold">8</td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><span class="rvt-badge rvt-badge--warning-secondary">PTO</span></th>
+                    <td class="rvt-text-right">356</td>
+                    <td class="rvt-text-right">0</td>
+                    <td class="rvt-text-right">0</td>
+                    <td class="rvt-text-right">356</td>
+                    <td class="rvt-text-right rvt-text-bold">308</td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><span class="rvt-badge rvt-badge--info-secondary">SICK</span></th>
+                    <td class="rvt-text-right">572</td>
+                    <td class="rvt-text-right">0</td>
+                    <td class="rvt-text-right">0</td>
+                    <td class="rvt-text-right">572</td>
+                    <td class="rvt-text-right rvt-text-bold">572</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="rvt-footer-base rvt-m-top-xl">
+    <div class="rvt-container-xl">
+      <div class="rvt-footer-base__inner">
+        <div class="rvt-footer-base__logo">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 34" width="20" height="24" aria-hidden="true">
+            <path d="M-3.34344e-05 4.70897H8.83308V7.174H7.1897V21.1426H10.6134V2.72321H8.83308V0.121224H18.214V2.65476H16.2283V21.1426H19.7889V7.174H18.214V4.64047H27.0471V7.174H25.0614V23.6761L21.7746 26.8944H16.2967V30.455H18.214V33.8787H8.76463V30.592H10.6819V26.8259H5.20403L1.91726 23.6077V7.174H-3.34344e-05V4.70897Z" fill="currentColor"></path>
+          </svg>
+        </div>
+        <ul class="rvt-footer-base__list">
+          <li class="rvt-footer-base__item">
+            <a class="rvt-footer-base__link" href="https://accessibility.iu.edu/assistance/">Accessibility</a>
+          </li>
+          <li class="rvt-footer-base__item">
+            Copyright © 2026 <a class="rvt-footer-base__link" href="https://www.iu.edu/">The Trustees of Indiana University</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/rivet-core@2/js/rivet.min.js"></script>
+  <script>
+    if (window.Rivet && typeof window.Rivet.init === 'function') { window.Rivet.init(); }
+
+    // Mockup behavior: the delete (x) buttons remove their event pill
+    document.querySelectorAll('.pto-event__delete').forEach(function (btn) {
+      btn.addEventListener('click', function () { btn.closest('.pto-event').remove(); });
+    });
+  </script>
+</body>
+</html>
