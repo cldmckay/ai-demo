@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UITS AI Request Catalog</title>
+<link rel="stylesheet" href="rivet.min.css">
+<style>
+  /* Page-specific helpers only. Rivet classes are not overridden. */
+  .page[hidden] { display: none; }
+  .wf-diagram { overflow-x: auto; }
+  .wf-diagram svg { max-width: 100%; height: auto; }
+  .sn-frame { margin: 1.5rem 0 0; border: 1px solid #c8cbcc; border-radius: 10px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,.12); background: #fff; }
+  .sn-frame__bar { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: #eceeef; border-bottom: 1px solid #c8cbcc; }
+  .sn-frame__dots { display: flex; gap: 6px; }
+  .sn-frame__dots i { width: 11px; height: 11px; border-radius: 50%; background: #c8cbcc; display: block; }
+  .sn-frame__url { flex: 1; background: #fff; border-radius: 6px; padding: 3px 10px; font-size: 12px; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .frame-wrap { position: relative; }
+  .frame-cta { position: sticky; bottom: 1.5rem; z-index: 2; display: flex; justify-content: center; margin-top: -5.5rem; padding-bottom: 2.5rem; pointer-events: none; transition: opacity .2s; }
+  .frame-cta.is-off { opacity: 0; visibility: hidden; }
+  .frame-cta .rvt-button { pointer-events: auto; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+  .sn-frame--with-cta { margin-top: 1.5rem; }
+  .sn-frame iframe { display: block; width: 100%; height: 900px; border: 0; }
+</style>
+</head>
+<body>
+<div class="rvt-layout">
+
+<header class="rvt-header-wrapper">
+  <a class="rvt-header-wrapper__skip-link" href="#main-content">Skip to main content</a>
+  <div class="rvt-header-global">
+    <div class="rvt-container-xl">
+      <div class="rvt-header-global__inner">
+        <div class="rvt-header-global__logo-slot">
+          <a class="rvt-lockup" href="#home">
+            <div class="rvt-lockup__tab">
+              <svg xmlns="http://www.w3.org/2000/svg" class="rvt-lockup__trident" viewBox="0 0 28 34">
+                <path d="M-3.34344e-05 4.70897H8.83308V7.174H7.1897V21.1426H10.6134V2.72321H8.83308V0.121224H18.214V2.65476H16.2283V21.1426H19.7889V7.174H18.214V4.64047H27.0471V7.174H25.0614V23.6761L21.7746 26.8944H16.2967V30.455H18.214V33.8787H8.76463V30.592H10.6819V26.8259H5.20403L1.91726 23.6077V7.174H-3.34344e-05V4.70897Z" fill="currentColor"></path>
+              </svg>
+            </div>
+            <div class="rvt-lockup__body">
+              <span class="rvt-lockup__title">AI Request Catalog</span>
+              <span class="rvt-lockup__subtitle">UITS AI Innovation</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="main-content" class="rvt-layout__wrapper rvt-layout__wrapper--details rvt-container-xl">
+
+  <div class="rvt-layout__sidebar">
+    <nav class="rvt-sidenav" aria-labelledby="sidenav-label" data-rvt-sidenav data-rvt-sidenav-open-all>
+      <span class="rvt-sidenav__label" id="sidenav-label">Catalog items</span>
+      <ul class="rvt-sidenav__list">
+        <li class="rvt-sidenav__item">
+          <div class="rvt-sidenav__item-wrapper">
+            <a href="#eng-overview" class="rvt-sidenav__link">AI Engineering Consultation</a>
+            <button class="rvt-sidenav__toggle" data-rvt-sidenav-toggle="eng-list">
+              <span class="rvt-sr-only">Show AI Engineering Consultation pages</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m15.146 6.263-1.292-1.526L8 9.69 2.146 4.737.854 6.263 8 12.31l7.146-6.047Z"/></svg>
+            </button>
+          </div>
+          <ul class="rvt-sidenav__list" data-rvt-sidenav-list="eng-list">
+            <li class="rvt-sidenav__item"><a href="#eng-overview" class="rvt-sidenav__link">Overview</a></li>
+            <li class="rvt-sidenav__item"><a href="#eng-form" class="rvt-sidenav__link">Request form preview</a></li>
+            <li class="rvt-sidenav__item"><a href="#eng-workflow" class="rvt-sidenav__link">Workflow</a></li>
+            <li class="rvt-sidenav__item"><a href="#eng-build" class="rvt-sidenav__link">Catalog item and variables</a></li>
+            <li class="rvt-sidenav__item"><a href="#eng-rules" class="rvt-sidenav__link">Rules and triage</a></li>
+            <li class="rvt-sidenav__item"><a href="#eng-sla" class="rvt-sidenav__link">SLAs and notifications</a></li>
+            <li class="rvt-sidenav__item"><a href="#eng-survey" class="rvt-sidenav__link">Post-close survey</a></li>
+            <li class="rvt-sidenav__item"><a href="#eng-open" class="rvt-sidenav__link">Open items</a></li>
+          </ul>
+        </li>
+        <li class="rvt-sidenav__item">
+          <div class="rvt-sidenav__item-wrapper">
+            <a href="#tool-overview" class="rvt-sidenav__link">AI Tool or Productivity Consultation</a>
+            <button class="rvt-sidenav__toggle" data-rvt-sidenav-toggle="tool-list">
+              <span class="rvt-sr-only">Show AI Tool or Productivity Consultation pages</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m15.146 6.263-1.292-1.526L8 9.69 2.146 4.737.854 6.263 8 12.31l7.146-6.047Z"/></svg>
+            </button>
+          </div>
+          <ul class="rvt-sidenav__list" data-rvt-sidenav-list="tool-list">
+            <li class="rvt-sidenav__item"><a href="#tool-overview" class="rvt-sidenav__link">Overview</a></li>
+            <li class="rvt-sidenav__item"><a href="#tool-form" class="rvt-sidenav__link">Request form preview</a></li>
+            <li class="rvt-sidenav__item"><a href="#tool-workflow" class="rvt-sidenav__link">Workflow</a></li>
+            <li class="rvt-sidenav__item"><a href="#tool-build" class="rvt-sidenav__link">Catalog item and variables</a></li>
+            <li class="rvt-sidenav__item"><a href="#tool-rules" class="rvt-sidenav__link">Rules and routing</a></li>
+            <li class="rvt-sidenav__item"><a href="#tool-sla" class="rvt-sidenav__link">SLAs and notifications</a></li>
+            <li class="rvt-sidenav__item"><a href="#tool-survey" class="rvt-sidenav__link">Post-close survey</a></li>
+            <li class="rvt-sidenav__item"><a href="#tool-open" class="rvt-sidenav__link">Open items</a></li>
+          </ul>
+        </li>
+        <li class="rvt-sidenav__item">
+          <div class="rvt-sidenav__item-wrapper">
+            <a href="#svc-overview" class="rvt-sidenav__link">AI Service or Integration Request</a>
+            <button class="rvt-sidenav__toggle" data-rvt-sidenav-toggle="svc-list">
+              <span class="rvt-sr-only">Show AI Service or Integration Request pages</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m15.146 6.263-1.292-1.526L8 9.69 2.146 4.737.854 6.263 8 12.31l7.146-6.047Z"/></svg>
+            </button>
+          </div>
+          <ul class="rvt-sidenav__list" data-rvt-sidenav-list="svc-list">
+            <li class="rvt-sidenav__item"><a href="#svc-overview" class="rvt-sidenav__link">Overview</a></li>
+            <li class="rvt-sidenav__item"><a href="#svc-form" class="rvt-sidenav__link">Request form preview</a></li>
+            <li class="rvt-sidenav__item"><a href="#svc-workflow" class="rvt-sidenav__link">Workflow</a></li>
+            <li class="rvt-sidenav__item"><a href="#svc-build" class="rvt-sidenav__link">Catalog item and variables</a></li>
+            <li class="rvt-sidenav__item"><a href="#svc-rules" class="rvt-sidenav__link">Rules and review</a></li>
+            <li class="rvt-sidenav__item"><a href="#svc-sla" class="rvt-sidenav__link">SLAs and notifications</a></li>
+            <li class="rvt-sidenav__item"><a href="#svc-survey" class="rvt-sidenav__link">Post-close survey</a></li>
+            <li class="rvt-sidenav__item"><a href="#svc-open" class="rvt-sidenav__link">Open items</a></li>
+          </ul>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="rvt-layout__content">
+
+  <!-- ============ HOME ============ -->
+  <section class="page rvt-flow" id="page-home" aria-labelledby="h-home">
+    <h1 id="h-home" class="rvt-ts-36">AI request catalog items</h1>
+    <p class="rvt-ts-20">Three ServiceNow catalog items that let IU faculty, staff, and researchers request help from UITS AI Innovation. Pick an item in the left navigation to see its request form, workflow, and build details.</p>
+
+    <div class="rvt-row rvt-m-top-lg">
+      <div class="rvt-cols-4-md rvt-m-bottom-md">
+        <div class="rvt-card rvt-card--raised rvt-card--clickable">
+          <div class="rvt-card__body">
+            <h2 class="rvt-card__title"><a href="#eng-overview">AI Engineering Consultation</a></h2>
+            <div class="rvt-card__content"><p>Plan an AI tool, agent, chatbot, or automation you want to build.</p></div>
+            <div class="rvt-card__meta"><span class="rvt-badge rvt-badge--success-secondary">Draft ready for review</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="rvt-cols-4-md rvt-m-bottom-md">
+        <div class="rvt-card rvt-card--raised rvt-card--clickable">
+          <div class="rvt-card__body">
+            <h2 class="rvt-card__title"><a href="#tool-overview">AI Tool or Productivity Consultation</a></h2>
+            <div class="rvt-card__content"><p>Get help using AI tools you already have access to, on your own or with your team.</p></div>
+            <div class="rvt-card__meta"><span class="rvt-badge rvt-badge--success-secondary">Draft ready for review</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="rvt-cols-4-md rvt-m-bottom-md">
+        <div class="rvt-card rvt-card--raised rvt-card--clickable">
+          <div class="rvt-card__body">
+            <h2 class="rvt-card__title"><a href="#svc-overview">AI Service or Integration Request</a></h2>
+            <div class="rvt-card__content"><p>Ask for a new AI tool, a disabled feature, a configuration change, or an integration.</p></div>
+            <div class="rvt-card__meta"><span class="rvt-badge rvt-badge--success-secondary">Draft ready for review</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="rvt-ts-26">Where to start</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-start">
+      <table class="rvt-table-compact">
+        <caption id="cap-start" class="rvt-sr-only">Where each audience should start</caption>
+        <thead><tr><th scope="col">If you are</th><th scope="col">Read these pages</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Reviewing the service</th><td>Overview, Request form preview, Workflow</td></tr>
+          <tr><th scope="row">Building it in ServiceNow</th><td>Catalog item and variables, Rules and triage, SLAs and notifications, Post-close survey</td></tr>
+          <tr><th scope="row">Tracking decisions</th><td>Open items</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="rvt-ts-26">Shared by all three items</h2>
+    <ul class="rvt-list">
+      <li><strong>Category:</strong> Artificial Intelligence (new, Employee Center topic Technology &gt; Artificial Intelligence)</li>
+      <li><strong>Variable sets:</strong> AI Request – Requester (all items); AI Request – Data (engineering and service items)</li>
+      <li><strong>Surveys:</strong> AI Innovation – Consultation Feedback (both consultations); AI Innovation – Service Request Feedback (service requests)</li>
+      <li><strong>Owner:</strong> Clinton Roeth-McKay, Deputy Chief AI Innovation Officer, UITS</li>
+    </ul>
+  </section>
+
+  <!-- ============ ENG: OVERVIEW ============ -->
+  <section class="page rvt-flow" id="page-eng-overview" aria-labelledby="h-eng-overview" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Engineering Consultation</p>
+    <h1 id="h-eng-overview" class="rvt-ts-36">Overview</h1>
+    <p class="rvt-ts-20">Requesters book a 30-minute or 1-hour consultation with UITS AI Innovation to plan something they want to build with AI. Every request gets a response within 2 business days and a meeting within 5 business days of submission.</p>
+
+    <dl class="rvt-list-description">
+      <dt>Who can request</dt><dd>IU faculty, staff, and researchers</dd>
+      <dt>Not available to</dt><dd>Students, external users, guests</dd>
+      <dt>Item owner</dt><dd>Clinton Roeth-McKay, Deputy Chief AI Innovation Officer, UITS</dd>
+      <dt>Fulfilled by</dt><dd>AI Innovation intake group, with consultants from AI Engineering &amp; Enablement</dd>
+      <dt>Response target</dt><dd>2 business days</dd>
+      <dt>Meeting target</dt><dd>5 business days from submission</dd>
+      <dt>Meeting length</dt><dd>30 minutes or 1 hour, chosen by the requester</dd>
+    </dl>
+
+    <h2 class="rvt-ts-26">What requesters see in the portal</h2>
+    <p>The catalog item page as it will appear in the IU Service Portal.</p>
+    <div class="frame-wrap">
+    <figure class="sn-frame sn-frame--with-cta" aria-label="Service Portal preview: AI Engineering Consultation item page">
+      <div class="sn-frame__bar" aria-hidden="true"><span class="sn-frame__dots"><i></i><i></i><i></i></span><span class="sn-frame__url">servicenow.iu.edu/sp?id=sc_cat_item&amp;sys_id=…</span></div>
+      <iframe src="sn-item.html" title="Service Portal preview: AI Engineering Consultation item page" loading="lazy"></iframe>
+    </figure>
+    <div class="frame-cta is-off">
+      <a class="rvt-button" href="#eng-form"><span>Try the request form preview</span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.586 7 7.293 3.707 8.707 2.293 14.414 8l-5.707 5.707-1.414-1.414L10.586 9H2V7h8.586Z"/></svg></a>
+    </div>
+    </div>
+
+    <h2 class="rvt-ts-26">Related knowledge</h2>
+    <ul class="rvt-list">
+      <li><a href="https://uits.iu.edu/ai">AI at IU</a> – UITS overview of AI services, training, and secure use</li>
+      <li><a href="https://kb.iu.edu/d/avqg">About institutional data at IU</a> – IU KB article on data classification levels</li>
+      <li><a href="https://datamanagement.iu.edu/faq/genai.html">What generative AI tools are available at IU?</a> – approved tools and the most sensitive data each may use</li>
+    </ul>
+  </section>
+
+  <!-- ============ ENG: FORM PREVIEW ============ -->
+  <section class="page rvt-flow" id="page-eng-form" aria-labelledby="h-eng-form" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Engineering Consultation</p>
+    <h1 id="h-eng-form" class="rvt-ts-36">Request form preview</h1>
+
+    <p class="rvt-ts-20">A working preview of the request form in the IU Service Portal. Conditional questions, the Required information list, and submit behave as they will in ServiceNow. Nothing is submitted.</p>
+    <p>Try choosing <strong>Restricted</strong> for data classification, or <strong>Cloud provider</strong> for where it should run.</p>
+    <figure class="sn-frame" aria-label="Service Portal preview: AI Engineering Consultation request form">
+      <div class="sn-frame__bar" aria-hidden="true"><span class="sn-frame__dots"><i></i><i></i><i></i></span><span class="sn-frame__url">servicenow.iu.edu/sp?id=sc_cat_item&amp;sys_id=…</span></div>
+      <iframe src="sn-form.html" title="Service Portal preview: AI Engineering Consultation request form" loading="lazy"></iframe>
+    </figure>
+  </section>
+
+  <!-- ============ ENG: WORKFLOW ============ -->
+  <section class="page rvt-flow" id="page-eng-workflow" aria-labelledby="h-eng-workflow" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Engineering Consultation</p>
+    <h1 id="h-eng-workflow" class="rvt-ts-36">Workflow</h1>
+    <p class="rvt-ts-20">Every request is triaged within 2 business days and met within 5. Sensitive data adds an approval-path discussion to the meeting but never delays it. Completed requests end with a short survey.</p>
+
+    <div class="wf-diagram rvt-border-all rvt-border-radius rvt-p-all-md">
+<pre class="mermaid">
+flowchart TD
+  A([Requester submits form]) --> B["Triage review<br/><i>respond within 2 business days</i>"]
+  B -->|Wrong item| R[Redirect or decline<br/>with explanation]
+  B -->|Sensitive data| S[Add approval-path<br/>discussion to agenda]
+  B -->|Clear| C[Assign consultant and<br/>send booking link]
+  S --> C
+  C --> D["Consultation held<br/><i>within 5 business days of submission</i>"]
+  D --> E[Record outcome and<br/>close request]
+  E --> F[Satisfaction survey sent]
+  F -->|Low rating or unclear next steps| G[Owner follow-up task]
+  R --> X([Closed, no survey])
+  class B,D sla
+  class F survey
+  classDef sla fill:#F7EBEB,stroke:#990000,stroke-width:2px,color:#191919
+  classDef survey fill:#EEF7FC,stroke:#006298,stroke-width:2px,color:#191919
+</pre>
+    </div>
+    <p class="rvt-ts-14 rvt-color-black-500">Red boxes are where the two SLAs stop. Blue box is the post-close survey.</p>
+
+    <h2 class="rvt-ts-26">Steps</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-steps">
+      <table class="rvt-table-compact">
+        <caption id="cap-steps" class="rvt-sr-only">Fulfillment steps</caption>
+        <thead><tr><th scope="col">Step</th><th scope="col">Who</th><th scope="col">In ServiceNow</th><th scope="col">Target</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">1. Submit</th><td>Requester</td><td>REQ and RITM created; confirmation email</td><td>—</td></tr>
+          <tr><th scope="row">2. Triage</th><td>AI Innovation intake group</td><td>Catalog task; sets <code>triage_result</code>; customer-visible comment</td><td>2 business days</td></tr>
+          <tr><th scope="row">3. Schedule</th><td>Consultant, AI Engineering &amp; Enablement</td><td>Catalog task; booking link or invite; sets <code>meeting_datetime</code></td><td>—</td></tr>
+          <tr><th scope="row">4. Consult</th><td>Consultant and requester</td><td>Sets <code>consultation_outcome</code>; closes task</td><td>5 business days from submission</td></tr>
+          <tr><th scope="row">5. Close</th><td>Flow</td><td>RITM Closed Complete; summary email</td><td>—</td></tr>
+          <tr><th scope="row">6. Survey</th><td>Requester</td><td>Survey sent on close; low score creates owner task</td><td>Expires after 14 days</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>RITM stages:</strong> Waiting for review → Under review → Scheduling → Scheduled → Completed (or Redirected / Declined)</p>
+    <p>Triage is a catalog task, not a formal approval, so the response clock measures real review work.</p>
+  </section>
+
+  <!-- ============ ENG: BUILD ============ -->
+  <section class="page rvt-flow" id="page-eng-build" aria-labelledby="h-eng-build" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Engineering Consultation · ServiceNow build</p>
+    <h1 id="h-eng-build" class="rvt-ts-36">Catalog item and variables</h1>
+    <p class="rvt-ts-20">Record settings and every variable on the form. Variables marked (VS) belong to a variable set shared with other AI items.</p>
+
+    <h2 class="rvt-ts-26">Catalog item record (sc_cat_item)</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-rec">
+      <table class="rvt-table-compact">
+        <caption id="cap-rec" class="rvt-sr-only">Catalog item record fields</caption>
+        <thead><tr><th scope="col">Field</th><th scope="col">Value</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Name</th><td>AI Engineering Consultation</td></tr>
+          <tr><th scope="row">Short description</th><td>Meet with UITS AI Innovation to plan an AI solution you want to build.</td></tr>
+          <tr><th scope="row">Catalog and category</th><td>Service Catalog › Artificial Intelligence; Employee Center topic Technology › Artificial Intelligence</td></tr>
+          <tr><th scope="row">Owner</th><td>Clinton Roeth-McKay</td></tr>
+          <tr><th scope="row">Fulfillment group</th><td>AI Innovation intake group (name to be confirmed)</td></tr>
+          <tr><th scope="row">Execution</th><td>Flow Designer: AI Engineering Consultation – Fulfillment</td></tr>
+          <tr><th scope="row">Delivery time</th><td>5 days</td></tr>
+          <tr><th scope="row">Cart</th><td>No price; hide quantity and Add to cart; single Submit button</td></tr>
+          <tr><th scope="row">Available for</th><td>IU faculty, staff, and researchers</td></tr>
+          <tr><th scope="row">Not available for</th><td>Students, external users, guests</td></tr>
+          <tr><th scope="row">Portals</th><td>Employee Center and Service Portal, desktop and mobile</td></tr>
+          <tr><th scope="row">Meta keywords</th><td>AI, artificial intelligence, LLM, GPT, Claude, agent, chatbot, machine learning, RAG, model, automation, build, develop</td></tr>
+          <tr><th scope="row">Related knowledge</th><td>Links listed on the Overview page</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="rvt-ts-26">Variables</h2>
+    <p>M = mandatory. C = mandatory only when shown (see Rules and triage).</p>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-vars">
+      <table class="rvt-table-compact">
+        <caption id="cap-vars" class="rvt-sr-only">Form variables</caption>
+        <thead><tr><th scope="col">Variable name</th><th scope="col">Label</th><th scope="col">Type</th><th scope="col">Req.</th><th scope="col">Choices or notes</th></tr></thead>
+        <tbody>
+          <tr><th scope="row" colspan="5" class="rvt-bg-black-000">Container: Requester (VS: AI Request – Requester)</th></tr>
+          <tr><td><code>requested_for</code></td><td>Who is this request for?</td><td>Reference (sys_user)</td><td>M</td><td>Defaults to current user</td></tr>
+          <tr><td><code>department</code></td><td>Department or unit</td><td>Reference (cmn_department)</td><td>M</td><td>Auto-filled from requested_for</td></tr>
+          <tr><td><code>additional_contacts</code></td><td>Other people to include</td><td>List collector (sys_user)</td><td></td><td>Added to watch list and invite</td></tr>
+          <tr><th scope="row" colspan="5" class="rvt-bg-black-000">Container: About your project</th></tr>
+          <tr><td><code>project_title</code></td><td>Project name</td><td>Single line text</td><td>M</td><td></td></tr>
+          <tr><td><code>project_description</code></td><td>What do you want to build?</td><td>Multi-line text</td><td>M</td><td></td></tr>
+          <tr><td><code>project_stage</code></td><td>Where are you in the process?</td><td>Select box</td><td>M</td><td>Just an idea · Exploring options · Prototype exists · In production, needs changes</td></tr>
+          <tr><td><code>intended_users</code></td><td>Who will use it?</td><td>Checkboxes</td><td>M</td><td>Students · Faculty · Staff · Researchers · Public or external users</td></tr>
+          <tr><td><code>user_count</code></td><td>About how many users?</td><td>Select box</td><td>M</td><td>Fewer than 50 · 50–500 · 500–5,000 · More than 5,000 · Not sure</td></tr>
+          <tr><td><code>target_date</code></td><td>Is there a date you need this by?</td><td>Date</td><td></td><td></td></tr>
+          <tr><td><code>funding</code></td><td>Is funding identified?</td><td>Select box</td><td></td><td>Yes · No · Grant pending · Not sure</td></tr>
+          <tr><td><code>supporting_docs</code></td><td>Supporting documents</td><td>Attachment</td><td></td><td>Allow .pdf .docx .pptx .xlsx .png .jpg .txt .md</td></tr>
+          <tr><th scope="row" colspan="5" class="rvt-bg-black-000">Container: Data (VS: AI Request – Data)</th></tr>
+          <tr><td><code>data_classification</code></td><td>Highest classification of data</td><td>Select box</td><td>M</td><td>Public · University-internal · Restricted · Critical · Not sure</td></tr>
+          <tr><td><code>data_types</code></td><td>Which kinds of data are involved?</td><td>Checkboxes</td><td>C</td><td>FERPA · HIPAA · Payment card · Employee/HR · Research · SSNs/IDs · Export-controlled · None of these</td></tr>
+          <tr><td><code>data_steward_consulted</code></td><td>Has the data steward approved this use?</td><td>Select box</td><td></td><td>Yes · No · In progress · I don't know who that is</td></tr>
+          <tr><td><code>data_leaves_iu</code></td><td>Sent to an outside AI service or vendor?</td><td>Multiple choice</td><td>M</td><td>Yes · No · Not sure</td></tr>
+          <tr><th scope="row" colspan="5" class="rvt-bg-black-000">Container: Technical details</th></tr>
+          <tr><td><code>technical_constraints</code></td><td>Technical constraints</td><td>Multi-line text</td><td></td><td></td></tr>
+          <tr><td><code>preferred_ai_tools</code></td><td>Preferred enterprise AI tools or models</td><td>Checkboxes</td><td></td><td>Microsoft Copilot · Google Gemini · ChatGPT Edu · Microsoft Copilot Studio · Microsoft Foundry · Chat AIU · REALLMS · No preference or not sure · Other</td></tr>
+          <tr><td><code>preferred_ai_tools_other</code></td><td>Other AI tools</td><td>Single line text</td><td>C</td><td></td></tr>
+          <tr><td><code>integrations</code></td><td>IU systems it needs to connect to</td><td>Checkboxes</td><td></td><td>Canvas · Student Information System · Microsoft 365 or Teams · ServiceNow · Kuali · Data warehouse or reporting · None · Other</td></tr>
+          <tr><td><code>integrations_other</code></td><td>Other integrations</td><td>Multi-line text</td><td>C</td><td></td></tr>
+          <tr><td><code>delivery_mechanism</code></td><td>Where would you like it to run?</td><td>Select box</td><td>M</td><td>Enterprise Kubernetes environment · Intelligent Infrastructure · Departmental servers · Cloud provider · AppKube · Not sure, recommend one · Other</td></tr>
+          <tr><td><code>cloud_provider</code></td><td>Which cloud provider?</td><td>Select box</td><td>C</td><td>AWS · Microsoft Azure · Google Cloud · Other</td></tr>
+          <tr><td><code>delivery_other</code></td><td>How would you like to deploy it?</td><td>Multi-line text</td><td>C</td><td></td></tr>
+          <tr><th scope="row" colspan="5" class="rvt-bg-black-000">Container: Scheduling</th></tr>
+          <tr><td><code>meeting_length</code></td><td>How long should the consultation be?</td><td>Multiple choice</td><td>M</td><td>30 minutes · 1 hour</td></tr>
+          <tr><td><code>availability</code></td><td>Times that work for you</td><td>Multi-line text</td><td></td><td></td></tr>
+          <tr><td><code>anything_else</code></td><td>Anything else we should know?</td><td>Multi-line text</td><td></td><td></td></tr>
+          <tr><td><code>acknowledgment</code></td><td>Not a commitment to build, host, or fund (item variable)</td><td>Checkbox</td><td>M</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ ENG: RULES ============ -->
+  <section class="page rvt-flow" id="page-eng-rules" aria-labelledby="h-eng-rules" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Engineering Consultation · ServiceNow build</p>
+    <h1 id="h-eng-rules" class="rvt-ts-36">Rules and triage</h1>
+    <p class="rvt-ts-20">Catalog UI policies drive the form; fulfiller-only variables drive the flow and reporting; the triage checklist sets <code>triage_result</code>.</p>
+
+    <h2 class="rvt-ts-26">Catalog UI policies</h2>
+    <p>Apply each policy to the catalog item, RITM, and catalog task views.</p>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-ui">
+      <table class="rvt-table-compact">
+        <caption id="cap-ui" class="rvt-sr-only">Catalog UI policies</caption>
+        <thead><tr><th scope="col">When</th><th scope="col">Then</th></tr></thead>
+        <tbody>
+          <tr><td><code>data_classification</code> is Restricted, Critical, or Not sure</td><td>Show <code>data_types</code> (mandatory) and <code>data_steward_consulted</code></td></tr>
+          <tr><td><code>data_classification</code> is Restricted or Critical</td><td>Show message: “Because this involves sensitive data, part of your consultation will cover the steps needed to get approval before you proceed.”</td></tr>
+          <tr><td><code>data_types</code> includes None of these</td><td>Clear and disable the other boxes (catalog client script)</td></tr>
+          <tr><td><code>preferred_ai_tools</code> includes Other</td><td>Show <code>preferred_ai_tools_other</code>, mandatory</td></tr>
+          <tr><td><code>integrations</code> includes Other</td><td>Show <code>integrations_other</code>, mandatory</td></tr>
+          <tr><td><code>delivery_mechanism</code> is Cloud provider</td><td>Show <code>cloud_provider</code>, mandatory</td></tr>
+          <tr><td><code>delivery_mechanism</code> is Other</td><td>Show <code>delivery_other</code>, mandatory</td></tr>
+          <tr><td>View is RITM or catalog task</td><td>Requester variables read-only for fulfillers</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="rvt-ts-26">Fulfiller-only variables</h2>
+    <p>Hidden on the portal, visible on the RITM. Required before the related task can close.</p>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-ful">
+      <table class="rvt-table-compact">
+        <caption id="cap-ful" class="rvt-sr-only">Fulfiller-only variables</caption>
+        <thead><tr><th scope="col">Variable name</th><th scope="col">Type</th><th scope="col">Choices</th><th scope="col">Set during</th></tr></thead>
+        <tbody>
+          <tr><td><code>triage_result</code></td><td>Select box</td><td>Clear · Sensitive data · Redirect · Decline</td><td>Triage</td></tr>
+          <tr><td><code>assigned_consultant</code></td><td>Reference (sys_user)</td><td>Members of AI Engineering &amp; Enablement</td><td>Triage</td></tr>
+          <tr><td><code>meeting_datetime</code></td><td>Date/time</td><td></td><td>Scheduling</td></tr>
+          <tr><td><code>consultation_outcome</code></td><td>Select box</td><td>No further action · Follow-up consultation · Submit an AI Service or Integration Request · Refer to project intake · Refer to another unit</td><td>Consultation</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="rvt-ts-26">Triage checklist</h2>
+    <p>A flag never delays the meeting. It adds the approvals discussion to the agenda.</p>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-tri">
+      <table class="rvt-table-compact">
+        <caption id="cap-tri" class="rvt-sr-only">Triage checklist</caption>
+        <thead><tr><th scope="col">Signal on the form</th><th scope="col">triage_result</th><th scope="col">Meeting covers</th></tr></thead>
+        <tbody>
+          <tr><td>Critical data, or HIPAA, payment card, or SSN data</td><td><span class="rvt-badge rvt-badge--warning-secondary">Sensitive data</span></td><td>Data steward approval and security review steps</td></tr>
+          <tr><td>Restricted data sent to an outside AI service</td><td><span class="rvt-badge rvt-badge--warning-secondary">Sensitive data</span></td><td>Contract and data agreement requirements</td></tr>
+          <tr><td>Student records (FERPA) with an outside AI service</td><td><span class="rvt-badge rvt-badge--warning-secondary">Sensitive data</span></td><td>Privacy review steps</td></tr>
+          <tr><td>Export-controlled research data</td><td><span class="rvt-badge rvt-badge--warning-secondary">Sensitive data</span></td><td>Export-control steps; refer to research compliance</td></tr>
+          <tr><td>Decisions about people (admissions, grading, hiring, aid)</td><td><span class="rvt-badge rvt-badge--warning-secondary">Sensitive data</span></td><td>Privacy review and AI governance</td></tr>
+          <tr><td>Public-facing tool</td><td><span class="rvt-badge rvt-badge--success-secondary">Clear</span></td><td>Accessibility and content moderation</td></tr>
+          <tr><td>Unapproved or consumer AI tool named</td><td><span class="rvt-badge rvt-badge--success-secondary">Clear</span></td><td>Moving to an approved enterprise tool</td></tr>
+          <tr><td>Classification is Not sure</td><td><span class="rvt-badge rvt-badge--success-secondary">Clear</span></td><td>Classifying the data</td></tr>
+          <tr><td>Really about using an existing tool</td><td><span class="rvt-badge rvt-badge--info-secondary">Redirect</span></td><td>Send to AI Tool or Productivity Consultation</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="rvt-ts-14 rvt-color-black-500">To be validated with the University Information Security Office and University Compliance.</p>
+  </section>
+
+  <!-- ============ ENG: SLA ============ -->
+  <section class="page rvt-flow" id="page-eng-sla" aria-labelledby="h-eng-sla" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Engineering Consultation · ServiceNow build</p>
+    <h1 id="h-eng-sla" class="rvt-ts-36">SLAs and notifications</h1>
+    <p class="rvt-ts-20">Two SLA definitions on the RITM table, on IU business hours (8 a.m.–5 p.m. Eastern, Monday–Friday, excluding IU holidays).</p>
+
+    <h2 class="rvt-ts-26">SLA definitions</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-sla">
+      <table class="rvt-table-compact">
+        <caption id="cap-sla" class="rvt-sr-only">SLA definitions</caption>
+        <thead><tr><th scope="col">SLA</th><th scope="col">Starts</th><th scope="col">Pauses</th><th scope="col">Stops</th><th scope="col">Target</th><th scope="col">Alerts</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">AI Consult – Initial response</th><td>RITM created</td><td>Awaiting user info</td><td>Triage task closed with a customer-visible comment</td><td>2 business days</td><td>50% and 75% to intake group; breach to AI Innovation leadership</td></tr>
+          <tr><th scope="row">AI Consult – Meeting held</th><td>RITM created</td><td>Awaiting user info; requester asks for a later date</td><td>Scheduling task closed with <code>meeting_datetime</code> in the past</td><td>5 business days</td><td>75% to consultant and intake group; breach to AI Innovation leadership</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Sensitive data does not pause either SLA.</p>
+
+    <h2 class="rvt-ts-26">Notifications</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-notif">
+      <table class="rvt-table-compact">
+        <caption id="cap-notif" class="rvt-sr-only">Notifications</caption>
+        <thead><tr><th scope="col">Event</th><th scope="col">To</th><th scope="col">Says</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Submitted</th><td>Requester, contacts</td><td>RITM number, next steps, 2-day response promise</td></tr>
+          <tr><th scope="row">Triage clear</th><td>Requester</td><td>Assigned consultant and booking link</td></tr>
+          <tr><th scope="row">Sensitive data flagged</th><td>Requester</td><td>The consultation will cover the steps needed to get approval; timing unchanged</td></tr>
+          <tr><th scope="row">Awaiting user info</th><td>Requester</td><td>The question; reminders at 3 and 5 business days; auto-close at 10</td></tr>
+          <tr><th scope="row">Meeting scheduled</th><td>Requester, contacts, consultant</td><td>Teams invite with RITM link and form summary</td></tr>
+          <tr><th scope="row">Redirected or declined</th><td>Requester</td><td>Reason and where to go instead</td></tr>
+          <tr><th scope="row">Closed complete</th><td>Requester</td><td>Outcome summary and next-step links; survey follows</td></tr>
+          <tr><th scope="row">SLA warning or breach</th><td>Intake group, AI Innovation leadership</td><td>RITM link and time remaining</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ ENG: SURVEY ============ -->
+  <section class="page rvt-flow" id="page-eng-survey" aria-labelledby="h-eng-survey" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Engineering Consultation · ServiceNow build</p>
+    <h1 id="h-eng-survey" class="rvt-ts-36">Post-close survey</h1>
+    <p class="rvt-ts-20">Five questions, about one minute, sent once when the request closes complete. The wording works for all three AI items.</p>
+
+    <h2 class="rvt-ts-26">What requesters see</h2>
+    <p>A working preview of the survey in the IU Service Portal. Answer with a low rating to see the follow-up rule.</p>
+    <figure class="sn-frame" aria-label="Service Portal preview: Consultation Feedback survey">
+      <div class="sn-frame__bar" aria-hidden="true"><span class="sn-frame__dots"><i></i><i></i><i></i></span><span class="sn-frame__url">servicenow.iu.edu/sp?id=take_survey&amp;instance_id=…</span></div>
+      <iframe src="sn-survey.html" title="Service Portal preview: Consultation Feedback survey" loading="lazy"></iframe>
+    </figure>
+
+    <h2 class="rvt-ts-26">Questions</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-sq">
+      <table class="rvt-table-compact">
+        <caption id="cap-sq" class="rvt-sr-only">Survey questions</caption>
+        <thead><tr><th scope="col">#</th><th scope="col">Question</th><th scope="col">Type</th><th scope="col">Req.</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Overall, how satisfied are you with your consultation?</td><td>Likert, very dissatisfied to very satisfied</td><td>M</td></tr>
+          <tr><td>2</td><td>How useful was the consultation in helping you with what you needed?</td><td>Likert, not at all to extremely useful</td><td>M</td></tr>
+          <tr><td>3</td><td>How satisfied are you with how quickly we responded and met with you?</td><td>Likert, very dissatisfied to very satisfied</td><td>M</td></tr>
+          <tr><td>4</td><td>Do you have a clear understanding of your next steps, including any approvals you need?</td><td>Yes · Partly · No</td><td>M</td></tr>
+          <tr><td>5</td><td>What could we do better?</td><td>Multi-line text</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="rvt-ts-26">Survey settings</h2>
+    <dl class="rvt-list-description">
+      <dt>Survey name</dt><dd>AI Innovation – Consultation Feedback</dd>
+      <dt>Trigger</dt><dd>sc_req_item State changes to Closed Complete, Item is AI Engineering Consultation or AI Tool or Productivity Consultation</dd>
+      <dt>Not sent when</dt><dd>Redirected, Declined, or Closed Incomplete</dd>
+      <dt>Recipient</dt><dd><code>requested_for</code></dd>
+      <dt>Frequency limit</dt><dd>One survey per person per 30 days across all three AI items</dd>
+      <dt>Reminder and expiration</dt><dd>One reminder after 3 days; expires after 14 days</dd>
+      <dt>Follow-up rule</dt><dd>A 1–2 rating on question 1, or No on question 4, creates a task for the item owner</dd>
+      <dt>Reporting</dt><dd>Monthly: average of questions 1 and 2, and share of Yes on question 4</dd>
+    </dl>
+  </section>
+
+  <!-- ============ ENG: OPEN ============ -->
+  <section class="page rvt-flow" id="page-eng-open" aria-labelledby="h-eng-open" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Engineering Consultation</p>
+    <h1 id="h-eng-open" class="rvt-ts-36">Open items</h1>
+    <p class="rvt-ts-20">Four questions remain before build. Decisions already made are listed below them.</p>
+
+    <h2 class="rvt-ts-26">Still open</h2>
+    <ul class="rvt-list">
+      <li>Who are the escalation contacts in the University Information Security Office and University Compliance?</li>
+      <li>What is the intake assignment group called?</li>
+      <li>Should consultation outcomes create a demand or project record automatically?</li>
+      <li>Is the preferred-tools list complete, and who keeps it current?</li>
+    </ul>
+
+    <h2 class="rvt-ts-26">Decided</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-dec">
+      <table class="rvt-table-compact">
+        <caption id="cap-dec" class="rvt-sr-only">Decisions</caption>
+        <thead><tr><th scope="col">Question</th><th scope="col">Decision</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">When does the 5-day meeting target start?</th><td>At submission</td></tr>
+          <tr><th scope="row">Who can request?</th><td>IU faculty, staff, and researchers</td></tr>
+          <tr><th scope="row">Item owner</th><td>Clinton Roeth-McKay</td></tr>
+          <tr><th scope="row">Preferred AI tools</th><td>Copilot, Gemini, ChatGPT Edu, Copilot Studio, Foundry, Chat AIU, REALLMS</td></tr>
+          <tr><th scope="row">Delivery mechanism names</th><td>Keep as written; “Not sure, recommend one” covers anyone unfamiliar</td></tr>
+          <tr><th scope="row">Does sensitive data pause the meeting SLA?</th><td>No. The meeting covers the approval steps.</td></tr>
+          <tr><th scope="row">Business-hours schedule</th><td>Not a concern for now</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="rvt-ts-26">Before launch</h2>
+    <ul class="rvt-list">
+      <li>Build in dev and add an Automated Test Framework test for each UI policy.</li>
+      <li>Pilot with two or three departments.</li>
+      <li>Publish a “Which AI request is right for me?” KB article once all three items exist.</li>
+      <li>Build a dashboard: volume by department, data classification, tools, delivery mechanism, SLA results, survey results.</li>
+    </ul>
+  </section>
+
+
+  <!-- ============ TOOL: OVERVIEW ============ -->
+  <section class="page rvt-flow" id="page-tool-overview" aria-labelledby="h-tool-overview" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Tool or Productivity Consultation</p>
+    <h1 id="h-tool-overview" class="rvt-ts-36">Overview</h1>
+    <p class="rvt-ts-20">Individuals or groups book a session with UITS AI Innovation for practical help using IU's AI tools in their work. Every request gets a response within 2 business days, and we aim to hold the session within 2 weeks.</p>
+    <dl class="rvt-list-description">
+      <dt>Who can request</dt><dd>IU faculty, staff, and researchers, for themselves or a group</dd>
+      <dt>Not available to</dt><dd>Students, external users, guests</dd>
+      <dt>Item owner</dt><dd>Clinton Roeth-McKay, Deputy Chief AI Innovation Officer, UITS</dd>
+      <dt>Fulfilled by</dt><dd>AI Innovation intake group, with consultants from AI Engineering &amp; Enablement</dd>
+      <dt>Response target</dt><dd>2 business days</dd>
+      <dt>Session target</dt><dd>Within 2 weeks (10 business days) of submission, when possible</dd>
+      <dt>Format</dt><dd>In person or virtual; 30 minutes or 1 hour</dd>
+      <dt>Review</dt><dd>Light intake check only; no security or privacy triage</dd>
+    </dl>
+    <h2 class="rvt-ts-26">What requesters see in the portal</h2>
+    <p>The catalog item page as it will appear in the IU Service Portal.</p>
+    <div class="frame-wrap">
+    <figure class="sn-frame sn-frame--with-cta" aria-label="Service Portal preview: AI Tool or Productivity Consultation item page">
+      <div class="sn-frame__bar" aria-hidden="true"><span class="sn-frame__dots"><i></i><i></i><i></i></span><span class="sn-frame__url">servicenow.iu.edu/sp?id=sc_cat_item&amp;sys_id=…</span></div>
+      <iframe src="sn-tool-item.html" title="Service Portal preview: AI Tool or Productivity Consultation item page" loading="lazy"></iframe>
+    </figure>
+    <div class="frame-cta is-off">
+      <a class="rvt-button" href="#tool-form"><span>Try the request form preview</span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.586 7 7.293 3.707 8.707 2.293 14.414 8l-5.707 5.707-1.414-1.414L10.586 9H2V7h8.586Z"/></svg></a>
+    </div>
+    </div>
+    <h2 class="rvt-ts-26">Related knowledge</h2>
+    <ul class="rvt-list">
+      <li><a href="https://uits.iu.edu/ai">AI at IU</a> – UITS overview of AI services, training, and secure use</li>
+      <li><a href="https://datamanagement.iu.edu/faq/genai.html">What generative AI tools are available at IU?</a> – approved tools and the most sensitive data each may use</li>
+      <li><a href="https://kb.iu.edu/d/avqg">About institutional data at IU</a> – IU KB article on data classification levels</li>
+    </ul>
+  </section>
+
+  <!-- ============ TOOL: FORM ============ -->
+  <section class="page rvt-flow" id="page-tool-form" aria-labelledby="h-tool-form" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Tool or Productivity Consultation</p>
+    <h1 id="h-tool-form" class="rvt-ts-36">Request form preview</h1>
+    <p class="rvt-ts-20">A working preview of the request form in the IU Service Portal. Conditional questions, the Required information list, and submit behave as they will in ServiceNow. Nothing is submitted.</p>
+    <p>Try choosing <strong>A group or team</strong>, or <strong>In person</strong> for the meeting format.</p>
+    <figure class="sn-frame" aria-label="Service Portal preview: AI Tool or Productivity Consultation request form">
+      <div class="sn-frame__bar" aria-hidden="true"><span class="sn-frame__dots"><i></i><i></i><i></i></span><span class="sn-frame__url">servicenow.iu.edu/sp?id=sc_cat_item&amp;sys_id=…</span></div>
+      <iframe src="sn-tool-form.html" title="Service Portal preview: AI Tool or Productivity Consultation request form" loading="lazy"></iframe>
+    </figure>
+  </section>
+
+  <!-- ============ TOOL: WORKFLOW ============ -->
+  <section class="page rvt-flow" id="page-tool-workflow" aria-labelledby="h-tool-workflow" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Tool or Productivity Consultation</p>
+    <h1 id="h-tool-workflow" class="rvt-ts-36">Workflow</h1>
+    <p class="rvt-ts-20">A lighter process than the engineering consultation: a quick intake check, a session within 2 weeks when possible, and the same post-close survey.</p>
+    <div class="wf-diagram rvt-border-all rvt-border-radius rvt-p-all-md">
+<pre class="mermaid">
+flowchart TD
+  A([Requester submits form]) --> B["Intake check<br/><i>respond within 2 business days</i>"]
+  B -->|Wants to build something| R[Redirect to AI Engineering<br/>Consultation]
+  B -->|Ready| C[Assign consultant and<br/>send booking link]
+  C --> P[Consultant reviews advance<br/>questions and tools]
+  P --> D["Session held, in person or virtual<br/><i>within 2 weeks when possible</i>"]
+  D --> E[Record outcome and<br/>close request]
+  E --> F[Satisfaction survey sent]
+  F -->|Low rating or unclear next steps| G[Owner follow-up task]
+  R --> X([Closed, no survey])
+  class B,D sla
+  class F survey
+  classDef sla fill:#F7EBEB,stroke:#990000,stroke-width:2px,color:#191919
+  classDef survey fill:#EEF7FC,stroke:#006298,stroke-width:2px,color:#191919
+</pre>
+    </div>
+    <p class="rvt-ts-14 rvt-color-black-500">Red boxes are where the two SLAs stop. Blue box is the post-close survey.</p>
+    <h2 class="rvt-ts-26">Steps</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-t-steps">
+      <table class="rvt-table-compact"><caption id="cap-t-steps" class="rvt-sr-only">Fulfillment steps</caption><thead><tr><th scope="col">Step</th><th scope="col">Who</th><th scope="col">In ServiceNow</th><th scope="col">Target</th></tr></thead><tbody><tr><th scope="row">1. Submit</th><td>Requester</td><td>REQ and RITM created; confirmation email</td><td>—</td></tr><tr><th scope="row">2. Intake check</th><td>AI Innovation intake group</td><td>Catalog task; sets <code>intake_result</code>; assigns consultant</td><td>2 business days</td></tr><tr><th scope="row">3. Schedule</th><td>Assigned consultant</td><td>Booking link or invite (Teams or room); sets <code>meeting_datetime</code></td><td>—</td></tr><tr><th scope="row">4. Prepare</th><td>Assigned consultant</td><td>Reviews advance questions, tools, and experience level</td><td>—</td></tr><tr><th scope="row">5. Session</th><td>Consultant and attendees</td><td>Sets <code>consultation_outcome</code>; closes task</td><td>10 business days from submission</td></tr><tr><th scope="row">6. Close and survey</th><td>Flow and requester</td><td>RITM Closed Complete; summary email; survey sent</td><td>Survey expires after 14 days</td></tr></tbody></table>
+    </div>
+    <p><strong>RITM stages:</strong> Waiting for review → Scheduling → Scheduled → Completed (or Redirected)</p>
+  </section>
+
+  <!-- ============ TOOL: BUILD ============ -->
+  <section class="page rvt-flow" id="page-tool-build" aria-labelledby="h-tool-build" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Tool or Productivity Consultation · ServiceNow build</p>
+    <h1 id="h-tool-build" class="rvt-ts-36">Catalog item and variables</h1>
+    <p class="rvt-ts-20">Record settings and every variable on the form. This item reuses the Requester variable set. It does not use the Data set; it asks one data classification question instead.</p>
+    <h2 class="rvt-ts-26">Catalog item record (sc_cat_item)</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-t-rec">
+      <table class="rvt-table-compact"><caption id="cap-t-rec" class="rvt-sr-only">Catalog item record fields</caption><thead><tr><th scope="col">Field</th><th scope="col">Value</th></tr></thead><tbody><tr><th scope="row">Name</th><td>AI Tool or Productivity Consultation</td></tr><tr><th scope="row">Short description</th><td>Get help using AI tools like Copilot, Gemini, or ChatGPT Edu in your work.</td></tr><tr><th scope="row">Catalog and category</th><td>Service Catalog › Artificial Intelligence; Employee Center topic Technology › Artificial Intelligence</td></tr><tr><th scope="row">Owner</th><td>Clinton Roeth-McKay</td></tr><tr><th scope="row">Fulfillment group</th><td>AI Innovation intake group (name to be confirmed)</td></tr><tr><th scope="row">Execution</th><td>Flow Designer: AI Tool or Productivity Consultation – Fulfillment</td></tr><tr><th scope="row">Delivery time</th><td>10 days</td></tr><tr><th scope="row">Cart</th><td>No price; hide quantity and Add to cart; single Submit button</td></tr><tr><th scope="row">Available for</th><td>IU faculty, staff, and researchers</td></tr><tr><th scope="row">Not available for</th><td>Students, external users, guests</td></tr><tr><th scope="row">Portals</th><td>Employee Center and Service Portal, desktop and mobile</td></tr><tr><th scope="row">Meta keywords</th><td>AI, Copilot, Gemini, ChatGPT, NotebookLM, prompt, productivity, training, help, how to, workshop, team</td></tr><tr><th scope="row">Related knowledge</th><td>Links listed on the Overview page</td></tr></tbody></table>
+    </div>
+    <h2 class="rvt-ts-26">Variables</h2>
+    <p>M = mandatory. C = mandatory only when shown (see Rules and routing).</p>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-t-vars">
+      <table class="rvt-table-compact"><caption id="cap-t-vars" class="rvt-sr-only">Form variables</caption><thead><tr><th scope="col">Variable name</th><th scope="col">Label</th><th scope="col">Type</th><th scope="col">Req.</th><th scope="col">Choices or notes</th></tr></thead><tbody><tr><th scope="row" colspan="5" class="rvt-bg-black-000">Container: Requester (VS: AI Request – Requester)</th></tr><tr><td><code>requested_for</code></td><td>Who is this request for?</td><td>Reference (sys_user)</td><td>M</td><td>Defaults to current user</td></tr><tr><td><code>department</code></td><td>Department or unit</td><td>Reference (cmn_department)</td><td>M</td><td>Auto-filled from requested_for</td></tr><tr><th scope="row" colspan="5" class="rvt-bg-black-000">Container: Who is attending</th></tr><tr><td><code>consult_for</code></td><td>Who is this consultation for?</td><td>Multiple choice</td><td>M</td><td>Just me · A group or team</td></tr><tr><td><code>group_name</code></td><td>Group or team name</td><td>Single line text</td><td>C</td><td></td></tr><tr><td><code>group_size</code></td><td>About how many people?</td><td>Select box</td><td>C</td><td>2–5 · 6–15 · 16–30 · More than 30</td></tr><tr><td><code>group_roles</code></td><td>Who is in the group?</td><td>Checkboxes</td><td>C</td><td>Faculty · Staff · Researchers · Managers or leaders</td></tr><tr><td><code>attendee_background</code></td><td>Background of the people attending</td><td>Multi-line text</td><td>M</td><td>Roles, kind of work, current AI use</td></tr><tr><td><code>experience_level</code></td><td>AI experience level</td><td>Select box</td><td>M</td><td>New to AI tools · Some experience · Comfortable, want advanced tips · Mixed levels</td></tr><tr><th scope="row" colspan="5" class="rvt-bg-black-000">Container: What you want help with</th></tr><tr><td><code>consult_goal</code></td><td>What do you want to get out of this consultation?</td><td>Multi-line text</td><td>M</td><td></td></tr><tr><td><code>tools_of_interest</code></td><td>Which tools are you interested in?</td><td>Checkboxes</td><td></td><td>Microsoft 365 Copilot · Microsoft Copilot Chat · Microsoft Copilot Studio · Google Gemini · Google NotebookLM · ChatGPT Edu · Adobe Firefly · Chat AIU · Not sure, recommend one · Other</td></tr><tr><td><code>tools_other</code></td><td>Other tools</td><td>Single line text</td><td>C</td><td></td></tr><tr><td><code>work_tasks</code></td><td>What kinds of work do you want help with?</td><td>Checkboxes</td><td></td><td>Writing and editing · Email and meetings · Research and summarizing · Data analysis · Teaching and course design · Presentations · Automating routine tasks</td></tr><tr><td><code>advance_questions</code></td><td>Questions we can prepare for in advance</td><td>Multi-line text</td><td></td><td></td></tr><tr><td><code>supporting_docs</code></td><td>Examples or supporting documents</td><td>Attachment</td><td></td><td>Allow .pdf .docx .pptx .xlsx .png .jpg .txt .md</td></tr><tr><td><code>data_classification</code></td><td>Most sensitive data you would use with these tools</td><td>Select box</td><td>M</td><td>Public · University-internal · Restricted · Critical · Not sure (standalone variable, same name and choices as the Data set)</td></tr><tr><th scope="row" colspan="5" class="rvt-bg-black-000">Container: Scheduling</th></tr><tr><td><code>meeting_format</code></td><td>Would you like to meet in person or virtually?</td><td>Multiple choice</td><td>M</td><td>In person · Virtual (Microsoft Teams) · Either works</td></tr><tr><td><code>campus</code></td><td>Campus</td><td>Select box</td><td>C</td><td>IU Bloomington · IU Indianapolis · IU Columbus · IU East · IU Fort Wayne · IU Kokomo · IU Northwest · IU South Bend · IU Southeast · Other</td></tr><tr><td><code>meeting_location</code></td><td>Building and room, if you have one</td><td>Single line text</td><td></td><td></td></tr><tr><td><code>session_length</code></td><td>How long should the session be?</td><td>Multiple choice</td><td>M</td><td>30 minutes · 1 hour · Not sure</td></tr><tr><td><code>needed_by</code></td><td>Is there a date this needs to happen by?</td><td>Date</td><td></td><td></td></tr><tr><td><code>availability</code></td><td>Times that work for you</td><td>Multi-line text</td><td></td><td></td></tr><tr><td><code>anything_else</code></td><td>Anything else we should know?</td><td>Multi-line text</td><td></td><td></td></tr></tbody></table>
+    </div>
+  </section>
+
+  <!-- ============ TOOL: RULES ============ -->
+  <section class="page rvt-flow" id="page-tool-rules" aria-labelledby="h-tool-rules" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Tool or Productivity Consultation · ServiceNow build</p>
+    <h1 id="h-tool-rules" class="rvt-ts-36">Rules and routing</h1>
+    <p class="rvt-ts-20">Four UI policies and a short intake check. There is no security or privacy triage for this item.</p>
+    <h2 class="rvt-ts-26">Catalog UI policies</h2>
+    <p>Apply each policy to the catalog item, RITM, and catalog task views.</p>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-t-ui">
+      <table class="rvt-table-compact"><caption id="cap-t-ui" class="rvt-sr-only">Catalog UI policies</caption><thead><tr><th scope="col">When</th><th scope="col">Then</th></tr></thead><tbody><tr><td><code>consult_for</code> is A group or team</td><td>Show <code>group_name</code>, <code>group_size</code>, and <code>group_roles</code>, all mandatory</td></tr><tr><td><code>tools_of_interest</code> includes Other</td><td>Show <code>tools_other</code>, mandatory</td></tr><tr><td><code>data_classification</code> is Restricted or Critical</td><td>Show message: “We'll cover which IU tools are approved for that kind of data during your session.”</td></tr><tr><td><code>meeting_format</code> is In person</td><td>Show <code>campus</code> (mandatory) and <code>meeting_location</code></td></tr><tr><td>View is RITM or catalog task</td><td>Requester variables read-only for fulfillers</td></tr></tbody></table>
+    </div>
+    <h2 class="rvt-ts-26">Fulfiller-only variables</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-t-ful">
+      <table class="rvt-table-compact"><caption id="cap-t-ful" class="rvt-sr-only">Fulfiller-only variables</caption><thead><tr><th scope="col">Variable name</th><th scope="col">Type</th><th scope="col">Choices</th><th scope="col">Set during</th></tr></thead><tbody><tr><td><code>intake_result</code></td><td>Select box</td><td>Ready · Redirect</td><td>Intake check</td></tr><tr><td><code>assigned_consultant</code></td><td>Reference (sys_user)</td><td>Members of AI Engineering &amp; Enablement</td><td>Intake check</td></tr><tr><td><code>meeting_datetime</code></td><td>Date/time</td><td></td><td>Scheduling</td></tr><tr><td><code>consultation_outcome</code></td><td>Select box</td><td>No further action · Follow-up session · Refer to training or workshop · Submit AI Engineering Consultation · Submit AI Service or Integration Request · Request tool access or license</td><td>Session</td></tr></tbody></table>
+    </div>
+    <h2 class="rvt-ts-26">Intake check</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-t-int">
+      <table class="rvt-table-compact"><caption id="cap-t-int" class="rvt-sr-only">Intake check</caption><thead><tr><th scope="col">Signal on the form</th><th scope="col">Intake result</th><th scope="col">Action</th></tr></thead><tbody><tr><td>Wants to build a tool, agent, or integration</td><td><span class="rvt-badge rvt-badge--info-secondary">Redirect</span></td><td>Send to AI Engineering Consultation</td></tr><tr><td>Needs a license or new service provisioned</td><td><span class="rvt-badge rvt-badge--info-secondary">Redirect</span></td><td>Send to AI Service or Integration Request</td></tr><tr><td>Group of more than 30 people</td><td><span class="rvt-badge rvt-badge--success-secondary">Ready</span></td><td>Consider a workshop format; confirm room and length</td></tr><tr><td>Restricted or Critical data</td><td><span class="rvt-badge rvt-badge--success-secondary">Ready</span></td><td>Cover which tools are approved for that data</td></tr><tr><td>Everything else</td><td><span class="rvt-badge rvt-badge--success-secondary">Ready</span></td><td>Assign consultant and schedule</td></tr></tbody></table>
+    </div>
+  </section>
+
+  <!-- ============ TOOL: SLA ============ -->
+  <section class="page rvt-flow" id="page-tool-sla" aria-labelledby="h-tool-sla" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Tool or Productivity Consultation · ServiceNow build</p>
+    <h1 id="h-tool-sla" class="rvt-ts-36">SLAs and notifications</h1>
+    <p class="rvt-ts-20">Two SLA definitions on the RITM table, on IU business hours (8 a.m.–5 p.m. Eastern, Monday–Friday, excluding IU holidays).</p>
+    <h2 class="rvt-ts-26">SLA definitions</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-t-sla">
+      <table class="rvt-table-compact"><caption id="cap-t-sla" class="rvt-sr-only">SLA definitions</caption><thead><tr><th scope="col">SLA</th><th scope="col">Starts</th><th scope="col">Pauses</th><th scope="col">Stops</th><th scope="col">Target</th><th scope="col">Alerts</th></tr></thead><tbody><tr><th scope="row">AI Tool Consult – Initial response</th><td>RITM created</td><td>Awaiting user info</td><td>Intake task closed with a customer-visible comment</td><td>2 business days</td><td>75% to intake group; breach to AI Innovation leadership</td></tr><tr><th scope="row">AI Tool Consult – Session held</th><td>RITM created</td><td>Awaiting user info; requester asks for a later date or sets a later <code>needed_by</code></td><td>Scheduling task closed with <code>meeting_datetime</code> in the past</td><td>10 business days</td><td>Breach to intake group and item owner</td></tr></tbody></table>
+    </div>
+    <p>The 2-week target is a goal, not a commitment. A breach prompts a check-in, not an escalation.</p>
+    <h2 class="rvt-ts-26">Notifications</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-t-notif">
+      <table class="rvt-table-compact"><caption id="cap-t-notif" class="rvt-sr-only">Notifications</caption><thead><tr><th scope="col">Event</th><th scope="col">To</th><th scope="col">Says</th></tr></thead><tbody><tr><th scope="row">Submitted</th><td>Requester</td><td>RITM number, next steps, 2-day response promise</td></tr><tr><th scope="row">Ready</th><td>Requester</td><td>Assigned consultant and booking link; Teams link or room once set</td></tr><tr><th scope="row">Awaiting user info</th><td>Requester</td><td>The question; reminders at 3 and 5 business days; auto-close at 10</td></tr><tr><th scope="row">Session scheduled</th><td>Requester, consultant</td><td>Invite with RITM link, advance questions, and tools of interest</td></tr><tr><th scope="row">Redirected</th><td>Requester</td><td>Reason and link to the right catalog item</td></tr><tr><th scope="row">Closed complete</th><td>Requester</td><td>Summary, resource links, and next steps; survey follows</td></tr><tr><th scope="row">SLA warning or breach</th><td>Intake group, item owner</td><td>RITM link and time remaining</td></tr></tbody></table>
+    </div>
+  </section>
+
+  <!-- ============ TOOL: SURVEY ============ -->
+  <section class="page rvt-flow" id="page-tool-survey" aria-labelledby="h-tool-survey" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Tool or Productivity Consultation · ServiceNow build</p>
+    <h1 id="h-tool-survey" class="rvt-ts-36">Post-close survey</h1>
+    <p class="rvt-ts-20">Uses the same survey as the AI Engineering Consultation: five questions, sent once when the request closes complete.</p>
+    <h2 class="rvt-ts-26">What requesters see</h2>
+    <p>Answer with a low rating to see the follow-up rule.</p>
+    <figure class="sn-frame" aria-label="Service Portal preview: Consultation Feedback survey for a tool consultation">
+      <div class="sn-frame__bar" aria-hidden="true"><span class="sn-frame__dots"><i></i><i></i><i></i></span><span class="sn-frame__url">servicenow.iu.edu/sp?id=take_survey&amp;instance_id=…</span></div>
+      <iframe src="sn-survey-tool.html" title="Service Portal preview: Consultation Feedback survey for a tool consultation" loading="lazy"></iframe>
+    </figure>
+    <h2 class="rvt-ts-26">Build notes</h2>
+    <ul class="rvt-list">
+      <li>Add this item to the existing survey trigger condition. No new survey is needed.</li>
+      <li>For group requests, the survey goes to <code>requested_for</code> only. Attendees don't receive it.</li>
+      <li>Same follow-up rule: a 1–2 rating on question 1, or No on question 4, creates a task for the item owner.</li>
+      <li>See the <a href="#eng-survey">engineering consultation survey page</a> for the full question list and settings.</li>
+    </ul>
+  </section>
+
+  <!-- ============ TOOL: OPEN ============ -->
+  <section class="page rvt-flow" id="page-tool-open" aria-labelledby="h-tool-open" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Tool or Productivity Consultation</p>
+    <h1 id="h-tool-open" class="rvt-ts-36">Open items</h1>
+    <p class="rvt-ts-20">Five questions to settle before build. Decisions already made are listed below them.</p>
+    <h2 class="rvt-ts-26">Still open</h2>
+    <ul class="rvt-list">
+      <li>Who can request: same audience as the engineering consultation (faculty, staff, researchers), or also students?</li>
+      <li>Who covers in-person sessions on regional campuses?</li>
+      <li>Should groups larger than 30 go to a separate workshop or training request instead?</li>
+      <li>Should attendees in a group session also get the survey, or just the requester?</li>
+      <li>Is the tools-of-interest list complete, and does it share an owner with the engineering consultation's preferred-tools list?</li>
+    </ul>
+    <h2 class="rvt-ts-26">Decided</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-t-dec">
+      <table class="rvt-table-compact"><caption id="cap-t-dec" class="rvt-sr-only">Decisions</caption><thead><tr><th scope="col">Question</th><th scope="col">Decision</th></tr></thead><tbody><tr><th scope="row">Response target</th><td>2 business days</td></tr><tr><th scope="row">Session target</th><td>Within 2 weeks when possible</td></tr><tr><th scope="row">Review process</th><td>Light intake check only; no security or privacy triage</td></tr><tr><th scope="row">Survey</th><td>Same post-close survey as the engineering consultation</td></tr><tr><th scope="row">Meeting format</th><td>Requester chooses in person or virtual</td></tr></tbody></table>
+    </div>
+  </section>
+
+
+  <!-- ============ SVC: OVERVIEW ============ -->
+  <section class="page rvt-flow" id="page-svc-overview" aria-labelledby="h-svc-overview" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Service or Integration Request</p>
+    <h1 id="h-svc-overview" class="rvt-ts-36">Overview</h1>
+    <p class="rvt-ts-20">Requesters ask UITS for a new AI tool, a disabled feature in an enterprise AI tool, a configuration change, or an integration. Every request starts with the problem being solved, so we can check whether a tool IU already supports can do the job.</p>
+    <dl class="rvt-list-description">
+      <dt>Who can request</dt><dd>IU faculty, staff, and researchers</dd>
+      <dt>Not available to</dt><dd>Students, external users, guests</dd>
+      <dt>Item owner</dt><dd>Clinton Roeth-McKay, Deputy Chief AI Innovation Officer, UITS</dd>
+      <dt>Reviewed by</dt><dd>AI Innovation intake group, then IU's executive AI governance group for new tools, features, and approval changes</dd>
+      <dt>Implemented by</dt><dd>Enterprise Academic &amp; AI Apps team, for tools UITS administers</dd>
+      <dt>Response target</dt><dd>2 business days</dd>
+      <dt>Decision target</dt><dd>15 business days, not counting time in SSSP (proposed)</dd>
+    </dl>
+    <h2 class="rvt-ts-26">What requesters see in the portal</h2>
+    <p>The catalog item page as it will appear in the IU Service Portal.</p>
+    <div class="frame-wrap">
+    <figure class="sn-frame sn-frame--with-cta" aria-label="Service Portal preview: AI Service or Integration Request item page">
+      <div class="sn-frame__bar" aria-hidden="true"><span class="sn-frame__dots"><i></i><i></i><i></i></span><span class="sn-frame__url">servicenow.iu.edu/sp?id=sc_cat_item&amp;sys_id=…</span></div>
+      <iframe src="sn-svc-item.html" title="Service Portal preview: AI Service or Integration Request item page" loading="lazy"></iframe>
+    </figure>
+    <div class="frame-cta is-off">
+      <a class="rvt-button" href="#svc-form"><span>Try the request form preview</span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.586 7 7.293 3.707 8.707 2.293 14.414 8l-5.707 5.707-1.414-1.414L10.586 9H2V7h8.586Z"/></svg></a>
+    </div>
+    </div>
+    <h2 class="rvt-ts-26">Related knowledge</h2>
+    <ul class="rvt-list">
+      <li><a href="https://kb.iu.edu/d/aoyl">About the Software and Services Selection Process (SSSP)</a> – IU KB article; IU login required</li>
+      <li><a href="https://datamanagement.iu.edu/faq/genai.html">What generative AI tools are available at IU?</a> – approved tools and the most sensitive data each may use</li>
+      <li><a href="https://kb.iu.edu/d/avqg">About institutional data at IU</a> – IU KB article on data classification levels</li>
+    </ul>
+  </section>
+
+  <!-- ============ SVC: FORM ============ -->
+  <section class="page rvt-flow" id="page-svc-form" aria-labelledby="h-svc-form" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Service or Integration Request</p>
+    <h1 id="h-svc-form" class="rvt-ts-36">Request form preview</h1>
+    <p class="rvt-ts-20">A working preview of the request form in the IU Service Portal. Conditional questions, the Required information list, and submit behave as they will in ServiceNow. Nothing is submitted.</p>
+    <p>Try each option under <strong>What are you requesting?</strong>, or choose <strong>My department or unit</strong> for who will pay.</p>
+    <figure class="sn-frame" aria-label="Service Portal preview: AI Service or Integration Request form">
+      <div class="sn-frame__bar" aria-hidden="true"><span class="sn-frame__dots"><i></i><i></i><i></i></span><span class="sn-frame__url">servicenow.iu.edu/sp?id=sc_cat_item&amp;sys_id=…</span></div>
+      <iframe src="sn-svc-form.html" title="Service Portal preview: AI Service or Integration Request form" loading="lazy"></iframe>
+    </figure>
+  </section>
+
+  <!-- ============ SVC: WORKFLOW ============ -->
+  <section class="page rvt-flow" id="page-svc-workflow" aria-labelledby="h-svc-workflow" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Service or Integration Request</p>
+    <h1 id="h-svc-workflow" class="rvt-ts-36">Workflow</h1>
+    <p class="rvt-ts-20">Intake checks for an existing tool first. Anything new goes to AI governance, with data review when an approval would change and SSSP when there's a purchase.</p>
+    <div class="wf-diagram rvt-border-all rvt-border-radius rvt-p-all-md">
+<pre class="mermaid">
+flowchart TD
+  A([Requester submits form]) --> B["Intake review<br/><i>respond within 2 business days</i>"]
+  B -->|An existing IU tool can do this| T[Offer AI Tool or<br/>Productivity Consultation]
+  B -->|New tool| S{SSSP complete?}
+  B -->|Feature, configuration,<br/>or integration| D{Data approval<br/>change needed?}
+  S -->|No| S2[Requester completes SSSP<br/>with AI Innovation's input]
+  S -->|Yes| D
+  S2 --> D
+  D -->|Yes| U[Data review: security, policy,<br/>and data stewards]
+  D -->|No| G
+  U --> G["AI governance decision<br/><i>within 15 business days</i>"]
+  G -->|Approved| I[Implement or purchase<br/>Enterprise Academic and AI Apps]
+  G -->|Declined| N[Close with reasons<br/>and alternatives]
+  I --> E[Close request]
+  N --> E
+  E --> F[Satisfaction survey sent]
+  F -->|Low rating or unclear decision| O[Owner follow-up task]
+  T --> X([Closed as Redirected, no survey])
+  class B,G sla
+  class F survey
+  classDef sla fill:#F7EBEB,stroke:#990000,stroke-width:2px,color:#191919
+  classDef survey fill:#EEF7FC,stroke:#006298,stroke-width:2px,color:#191919
+</pre>
+    </div>
+    <p class="rvt-ts-14 rvt-color-black-500">Red boxes are where the two SLAs stop. Blue box is the post-close survey.</p>
+    <h2 class="rvt-ts-26">Steps</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-s-steps">
+      <table class="rvt-table-compact"><caption id="cap-s-steps" class="rvt-sr-only">Fulfillment steps</caption><thead><tr><th scope="col">Step</th><th scope="col">Who</th><th scope="col">In ServiceNow</th><th scope="col">Target</th></tr></thead><tbody><tr><th scope="row">1. Submit</th><td>Requester</td><td>REQ and RITM created; confirmation email</td><td>—</td></tr><tr><th scope="row">2. Intake review</th><td>AI Innovation intake group</td><td>Catalog task; sets <code>existing_tool_fit</code> and <code>review_path</code>; customer-visible comment</td><td>2 business days</td></tr><tr><th scope="row">3. SSSP (new tools)</th><td>Requester, SSSP team</td><td>Linked by SSSP RITM number; SLA paused while open</td><td>Set by SSSP</td></tr><tr><th scope="row">4. Data review (if needed)</th><td>University Information Security Office, University Information Policy Office, data stewards</td><td>Catalog task per reviewer; findings attached</td><td>Part of decision target</td></tr><tr><th scope="row">5. Governance decision</th><td>Executive AI governance group</td><td>Approval record; sets <code>governance_decision</code> and <code>decision_notes</code></td><td>15 business days from submission</td></tr><tr><th scope="row">6. Implement</th><td>Enterprise Academic &amp; AI Apps team</td><td>Catalog task; purchase, enable, configure, or connect</td><td>Prioritized by needed-by date</td></tr><tr><th scope="row">7. Close and survey</th><td>Flow and requester</td><td>RITM closed; decision summary email; survey sent</td><td>Survey expires after 14 days</td></tr></tbody></table>
+    </div>
+    <p><strong>RITM stages:</strong> Waiting for review → Under review → Governance review → Implementing → Completed (or Redirected / Declined)</p>
+    <p>Governance is a formal approval step here, unlike the two consultation items, because it decides whether IU allows the tool or change.</p>
+  </section>
+
+  <!-- ============ SVC: BUILD ============ -->
+  <section class="page rvt-flow" id="page-svc-build" aria-labelledby="h-svc-build" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Service or Integration Request · ServiceNow build</p>
+    <h1 id="h-svc-build" class="rvt-ts-36">Catalog item and variables</h1>
+    <p class="rvt-ts-20">Record settings and every variable on the form. This item reuses the Requester and Data variable sets, and reuses <code>intended_users</code> and <code>user_count</code> from the engineering consultation.</p>
+    <h2 class="rvt-ts-26">Catalog item record (sc_cat_item)</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-s-rec">
+      <table class="rvt-table-compact"><caption id="cap-s-rec" class="rvt-sr-only">Catalog item record fields</caption><thead><tr><th scope="col">Field</th><th scope="col">Value</th></tr></thead><tbody><tr><th scope="row">Name</th><td>AI Service or Integration Request</td></tr><tr><th scope="row">Short description</th><td>Request a new AI tool, a disabled feature, a configuration change, or an integration.</td></tr><tr><th scope="row">Catalog and category</th><td>Service Catalog › Artificial Intelligence; Employee Center topic Technology › Artificial Intelligence</td></tr><tr><th scope="row">Owner</th><td>Clinton Roeth-McKay</td></tr><tr><th scope="row">Fulfillment group</th><td>AI Innovation intake group (name to be confirmed); implementation tasks to Enterprise Academic &amp; AI Apps</td></tr><tr><th scope="row">Execution</th><td>Flow Designer: AI Service or Integration Request – Fulfillment</td></tr><tr><th scope="row">Delivery time</th><td>15 days</td></tr><tr><th scope="row">Cart</th><td>No price; hide quantity and Add to cart; single Submit button</td></tr><tr><th scope="row">Available for</th><td>IU faculty, staff, and researchers</td></tr><tr><th scope="row">Not available for</th><td>Students, external users, guests</td></tr><tr><th scope="row">Portals</th><td>Employee Center and Service Portal, desktop and mobile</td></tr><tr><th scope="row">Meta keywords</th><td>AI, purchase, license, buy, feature, enable, turn on, ChatGPT, Gemini, Copilot, configuration, integration, connector, SSSP</td></tr><tr><th scope="row">Related knowledge</th><td>Links listed on the Overview page</td></tr></tbody></table>
+    </div>
+    <h2 class="rvt-ts-26">Variables</h2>
+    <p>M = mandatory. C = mandatory only when shown (see Rules and review).</p>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-s-vars">
+      <table class="rvt-table-compact"><caption id="cap-s-vars" class="rvt-sr-only">Form variables</caption><thead><tr><th scope="col">Variable name</th><th scope="col">Label</th><th scope="col">Type</th><th scope="col">Req.</th><th scope="col">Choices or notes</th></tr></thead><tbody><tr><th scope="row" colspan="5" class="rvt-bg-black-000">Container: Requester (VS: AI Request – Requester)</th></tr><tr><td><code>requested_for</code></td><td>Who is this request for?</td><td>Reference (sys_user)</td><td>M</td><td>Defaults to current user</td></tr><tr><td><code>department</code></td><td>Department or unit</td><td>Reference (cmn_department)</td><td>M</td><td>Auto-filled from requested_for</td></tr><tr><td><code>additional_contacts</code></td><td>Other people to include</td><td>List collector (sys_user)</td><td></td><td></td></tr><tr><th scope="row" colspan="5" class="rvt-bg-black-000">Container: What you're requesting</th></tr><tr><td><code>request_type</code></td><td>What are you requesting?</td><td>Multiple choice</td><td>M</td><td>Purchase or license a new AI tool · Turn on a feature that is disabled in an existing IU AI tool · Change the configuration or management of a UITS-supported AI tool · Connect an AI tool to another IU system</td></tr><tr><td><code>product_name</code></td><td>Product name and vendor</td><td>Single line text</td><td>C</td><td>New tool only</td></tr><tr><td><code>product_url</code></td><td>Product website</td><td>URL</td><td></td><td>New tool only</td></tr><tr><td><code>sssp_status</code></td><td>Have you completed the SSSP for this product?</td><td>Multiple choice</td><td>C</td><td>Yes, it is complete · It is in progress · Not yet · I'm not sure what this is. Help text links to <a href="https://kb.iu.edu/d/aoyl">About the Software and Services Selection Process (SSSP)</a></td></tr><tr><td><code>sssp_ritm</code></td><td>SSSP request number (RITM)</td><td>Single line text</td><td>C</td><td>When SSSP is complete or in progress</td></tr><tr><td><code>existing_tool</code></td><td>Which IU AI tool?</td><td>Select box</td><td>C</td><td>Microsoft 365 Copilot · Microsoft Copilot Chat · Microsoft Copilot Studio · Microsoft Foundry · Google Gemini · Google NotebookLM · ChatGPT Edu · Adobe Firefly · Chat AIU · REALLMS · Other</td></tr><tr><td><code>existing_tool_other</code></td><td>Other tool</td><td>Single line text</td><td>C</td><td></td></tr><tr><td><code>feature_requested</code></td><td>Which feature do you need turned on?</td><td>Multi-line text</td><td>C</td><td>Feature type only</td></tr><tr><td><code>config_change</code></td><td>What configuration or management change are you requesting?</td><td>Multi-line text</td><td>C</td><td>Configuration type only</td></tr><tr><td><code>integration_systems</code></td><td>Which IU systems should it connect to?</td><td>Checkboxes</td><td>C</td><td>Canvas · Student Information System · Microsoft 365 or Teams · ServiceNow · Kuali · Data warehouse or reporting · Other</td></tr><tr><td><code>integration_details</code></td><td>Describe the connection you need</td><td>Multi-line text</td><td>C</td><td>Integration type only</td></tr><tr><th scope="row" colspan="5" class="rvt-bg-black-000">Container: The problem you're solving</th></tr><tr><td><code>problem_statement</code></td><td>What problem are you trying to solve?</td><td>Multi-line text</td><td>M</td><td>Used to check for an existing tool</td></tr><tr><td><code>tools_tried</code></td><td>Which IU AI tools have you already tried for this?</td><td>Checkboxes</td><td></td><td>Microsoft Copilot · Google Gemini · ChatGPT Edu · Chat AIU · None yet</td></tr><tr><td><code>intended_users</code></td><td>Who will use it?</td><td>Checkboxes</td><td>M</td><td>Students · Faculty · Staff · Researchers · Public or external users (same as engineering consultation)</td></tr><tr><td><code>user_count</code></td><td>About how many users?</td><td>Select box</td><td>M</td><td>Fewer than 50 · 50–500 · 500–5,000 · More than 5,000 · Not sure</td></tr><tr><th scope="row" colspan="5" class="rvt-bg-black-000">Container: Data (VS: AI Request – Data, plus two item variables)</th></tr><tr><td><code>data_classification</code></td><td>Highest classification of data</td><td>Select box</td><td>M</td><td>Public · University-internal · Restricted · Critical · Not sure</td></tr><tr><td><code>data_types</code></td><td>Which kinds of data are involved?</td><td>Checkboxes</td><td>C</td><td>Same as engineering consultation</td></tr><tr><td><code>data_steward_consulted</code></td><td>Has the data steward approved this use?</td><td>Select box</td><td></td><td></td></tr><tr><td><code>data_leaves_iu</code></td><td>Sent to an outside AI service or vendor?</td><td>Multiple choice</td><td>M</td><td>Yes · No · Not sure</td></tr><tr><td><code>approval_change_needed</code></td><td>Would any tool’s current data classification approval need to change?</td><td>Multiple choice</td><td>M</td><td>Yes · No · Not sure</td></tr><tr><td><code>approval_change_details</code></td><td>What approval change is needed?</td><td>Multi-line text</td><td>C</td><td></td></tr><tr><th scope="row" colspan="5" class="rvt-bg-black-000">Container: Timing and funding</th></tr><tr><td><code>needed_by</code></td><td>When do you need this by?</td><td>Date</td><td>M</td><td></td></tr><tr><td><code>needed_by_reason</code></td><td>What's driving that date?</td><td>Single line text</td><td></td><td></td></tr><tr><td><code>who_pays</code></td><td>Who will pay for this?</td><td>Multiple choice</td><td>M</td><td>My department or unit · I am asking UITS to pay · Shared cost · No cost expected · Not sure</td></tr><tr><td><code>funding_secured</code></td><td>Has funding been secured?</td><td>Select box</td><td>C</td><td>Yes · No · Pending, for example a grant · Not sure</td></tr><tr><td><code>estimated_cost</code></td><td>Estimated annual cost, if known</td><td>Single line text</td><td></td><td></td></tr><tr><td><code>supporting_docs</code></td><td>Supporting documents</td><td>Attachment</td><td></td><td>Quotes, vendor docs, HECVAT</td></tr><tr><td><code>anything_else</code></td><td>Anything else we should know?</td><td>Multi-line text</td><td></td><td></td></tr><tr><td><code>request_acknowledgment</code></td><td>Submitting does not approve a purchase or change; purchases also need SSSP</td><td>Checkbox</td><td>M</td><td>Item variable</td></tr></tbody></table>
+    </div>
+  </section>
+
+  <!-- ============ SVC: RULES ============ -->
+  <section class="page rvt-flow" id="page-svc-rules" aria-labelledby="h-svc-rules" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Service or Integration Request · ServiceNow build</p>
+    <h1 id="h-svc-rules" class="rvt-ts-36">Rules and review</h1>
+    <p class="rvt-ts-20">The request type drives the form. Intake decides the review path; governance makes the decision.</p>
+    <h2 class="rvt-ts-26">Catalog UI policies</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-s-ui">
+      <table class="rvt-table-compact"><caption id="cap-s-ui" class="rvt-sr-only">Catalog UI policies</caption><thead><tr><th scope="col">When</th><th scope="col">Then</th></tr></thead><tbody><tr><td><code>request_type</code> is Purchase or license a new AI tool</td><td>Show <code>product_name</code> (M), <code>product_url</code>, <code>sssp_status</code> (M)</td></tr><tr><td><code>sssp_status</code> is Yes or In progress</td><td>Show <code>sssp_ritm</code>, mandatory</td></tr><tr><td><code>request_type</code> is Turn on a feature, Change the configuration, or Connect</td><td>Show <code>existing_tool</code>, mandatory</td></tr><tr><td><code>existing_tool</code> is Other</td><td>Show <code>existing_tool_other</code>, mandatory</td></tr><tr><td><code>request_type</code> is Turn on a feature</td><td>Show <code>feature_requested</code>, mandatory</td></tr><tr><td><code>request_type</code> is Change the configuration</td><td>Show <code>config_change</code>, mandatory</td></tr><tr><td><code>request_type</code> is Connect</td><td>Show <code>integration_systems</code> and <code>integration_details</code>, mandatory</td></tr><tr><td><code>data_classification</code> is Restricted, Critical, or Not sure</td><td>Show <code>data_types</code> (M) and <code>data_steward_consulted</code></td></tr><tr><td><code>approval_change_needed</code> is Yes</td><td>Show <code>approval_change_details</code>, mandatory</td></tr><tr><td><code>who_pays</code> is My department or Shared cost</td><td>Show <code>funding_secured</code>, mandatory</td></tr><tr><td><code>needed_by</code> is less than 21 days away</td><td>Show message that the date may not be possible (catalog client script)</td></tr></tbody></table>
+    </div>
+    <h2 class="rvt-ts-26">Fulfiller-only variables</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-s-ful">
+      <table class="rvt-table-compact"><caption id="cap-s-ful" class="rvt-sr-only">Fulfiller-only variables</caption><thead><tr><th scope="col">Variable name</th><th scope="col">Type</th><th scope="col">Choices</th><th scope="col">Set during</th></tr></thead><tbody><tr><td><code>existing_tool_fit</code></td><td>Select box</td><td>Existing tool meets the need · Partly · No</td><td>Intake</td></tr><tr><td><code>review_path</code></td><td>Checkboxes</td><td>Governance · Data review · SSSP · Redirect to tool consultation</td><td>Intake</td></tr><tr><td><code>governance_decision</code></td><td>Select box</td><td>Approved · Approved with conditions · Declined</td><td>Governance</td></tr><tr><td><code>decision_notes</code></td><td>Multi-line text</td><td>Shared with requester</td><td>Governance</td></tr><tr><td><code>funding_source</code></td><td>Select box</td><td>Requester · UITS · Shared</td><td>Governance</td></tr></tbody></table>
+    </div>
+    <h2 class="rvt-ts-26">Intake checklist</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-s-int">
+      <table class="rvt-table-compact"><caption id="cap-s-int" class="rvt-sr-only">Intake checklist</caption><thead><tr><th scope="col">Signal on the form</th><th scope="col">Review path</th></tr></thead><tbody><tr><td>An existing IU tool can solve the problem</td><td>Redirect to AI Tool or Productivity Consultation</td></tr><tr><td>New tool, SSSP not complete</td><td>SSSP, then governance</td></tr><tr><td>Feature or configuration change in an enterprise tool</td><td>Governance</td></tr><tr><td>Data approval change needed, or Restricted or Critical data</td><td>Data review, then governance</td></tr><tr><td>Integration with an IU system</td><td>Governance; include the system owner</td></tr><tr><td>Asking UITS to pay</td><td>Governance; flag for budget discussion</td></tr><tr><td>Students or public users</td><td>Governance; include accessibility and terms-of-use review</td></tr></tbody></table>
+    </div>
+  </section>
+
+  <!-- ============ SVC: SLA ============ -->
+  <section class="page rvt-flow" id="page-svc-sla" aria-labelledby="h-svc-sla" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Service or Integration Request · ServiceNow build</p>
+    <h1 id="h-svc-sla" class="rvt-ts-36">SLAs and notifications</h1>
+    <p class="rvt-ts-20">Two SLA definitions on the RITM table, on IU business hours. Implementation has no SLA; the needed-by date sets priority.</p>
+    <h2 class="rvt-ts-26">SLA definitions</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-s-sla">
+      <table class="rvt-table-compact"><caption id="cap-s-sla" class="rvt-sr-only">SLA definitions</caption><thead><tr><th scope="col">SLA</th><th scope="col">Starts</th><th scope="col">Pauses</th><th scope="col">Stops</th><th scope="col">Target</th><th scope="col">Alerts</th></tr></thead><tbody><tr><th scope="row">AI Service – Initial response</th><td>RITM created</td><td>Awaiting user info</td><td>Intake task closed with a customer-visible comment</td><td>2 business days</td><td>75% to intake group; breach to AI Innovation leadership</td></tr><tr><th scope="row">AI Service – Decision (proposed)</th><td>RITM created</td><td>Awaiting user info; SSSP in progress</td><td><code>governance_decision</code> set</td><td>15 business days</td><td>75% and breach to AI Innovation leadership</td></tr></tbody></table>
+    </div>
+    <h2 class="rvt-ts-26">Notifications</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-s-notif">
+      <table class="rvt-table-compact"><caption id="cap-s-notif" class="rvt-sr-only">Notifications</caption><thead><tr><th scope="col">Event</th><th scope="col">To</th><th scope="col">Says</th></tr></thead><tbody><tr><th scope="row">Submitted</th><td>Requester, contacts</td><td>RITM number, next steps, 2-day response promise</td></tr><tr><th scope="row">Existing tool can help</th><td>Requester</td><td>Which tool and a link to request a tool consultation</td></tr><tr><th scope="row">SSSP needed</th><td>Requester</td><td>What SSSP is, link to <a href="https://kb.iu.edu/d/aoyl">About the Software and Services Selection Process (SSSP)</a>, and that review continues once it is submitted</td></tr><tr><th scope="row">In governance or data review</th><td>Requester</td><td>Who is reviewing and the decision target</td></tr><tr><th scope="row">Decision made</th><td>Requester, contacts</td><td>Approved, approved with conditions, or declined, with reasons and alternatives</td></tr><tr><th scope="row">Implemented</th><td>Requester</td><td>What changed and how to use it; survey follows</td></tr><tr><th scope="row">SLA warning or breach</th><td>Intake group, AI Innovation leadership</td><td>RITM link and time remaining</td></tr></tbody></table>
+    </div>
+  </section>
+
+  <!-- ============ SVC: SURVEY ============ -->
+  <section class="page rvt-flow" id="page-svc-survey" aria-labelledby="h-svc-survey" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Service or Integration Request · ServiceNow build</p>
+    <h1 id="h-svc-survey" class="rvt-ts-36">Post-close survey</h1>
+    <p class="rvt-ts-20">A shorter, request-focused survey: four questions, sent once when the request closes complete or declined.</p>
+    <h2 class="rvt-ts-26">What requesters see</h2>
+    <p>Answer with a low rating to see the follow-up rule.</p>
+    <figure class="sn-frame" aria-label="Service Portal preview: Service Request Feedback survey">
+      <div class="sn-frame__bar" aria-hidden="true"><span class="sn-frame__dots"><i></i><i></i><i></i></span><span class="sn-frame__url">servicenow.iu.edu/sp?id=take_survey&amp;instance_id=…</span></div>
+      <iframe src="sn-survey-svc.html" title="Service Portal preview: Service Request Feedback survey" loading="lazy"></iframe>
+    </figure>
+    <h2 class="rvt-ts-26">Survey settings</h2>
+    <dl class="rvt-list-description">
+      <dt>Survey name</dt><dd>AI Innovation – Service Request Feedback</dd>
+      <dt>Trigger</dt><dd>sc_req_item State changes to Closed Complete or Closed Incomplete with a governance decision, Item is AI Service or Integration Request</dd>
+      <dt>Not sent when</dt><dd>Redirected to a tool consultation</dd>
+      <dt>Recipient</dt><dd><code>requested_for</code></dd>
+      <dt>Frequency limit</dt><dd>One AI Innovation survey per person per 30 days, across all three items</dd>
+      <dt>Reminder and expiration</dt><dd>One reminder after 3 days; expires after 14 days</dd>
+      <dt>Follow-up rule</dt><dd>A 1–2 rating on question 1, or No on question 3, creates a task for the item owner</dd>
+    </dl>
+    <p>Declined requests get the survey too, because how a “no” is explained matters as much as a “yes.”</p>
+  </section>
+
+  <!-- ============ SVC: OPEN ============ -->
+  <section class="page rvt-flow" id="page-svc-open" aria-labelledby="h-svc-open" hidden>
+    <p class="rvt-ts-14 rvt-text-bold rvt-text-uppercase rvt-color-crimson-500">AI Service or Integration Request</p>
+    <h1 id="h-svc-open" class="rvt-ts-36">Open items</h1>
+    <p class="rvt-ts-20">Six questions to settle before build. Several are proposals that need your confirmation.</p>
+    <h2 class="rvt-ts-26">Still open</h2>
+    <ul class="rvt-list">
+      <li>Is a 15-business-day decision target right, and should it pause during SSSP?</li>
+      <li>Which body decides: the current executive AI governance group, or the proposed AI Software and Services Steering Committee once it is chartered?</li>
+      <li>Keep “Connect an AI tool to another IU system” as a request type, or route integrations elsewhere?</li>
+      <li>Should the survey go to declined requests (currently yes)?</li>
+      <li>Who can request: same audience as the other two items, or also IT Pros acting for a unit?</li>
+      <li>What is the implementation assignment group called?</li>
+    </ul>
+    <h2 class="rvt-ts-26">Decided</h2>
+    <div role="region" tabindex="0" class="rvt-table-responsive" aria-labelledby="cap-s-dec">
+      <table class="rvt-table-compact"><caption id="cap-s-dec" class="rvt-sr-only">Decisions</caption><thead><tr><th scope="col">Question</th><th scope="col">Decision</th></tr></thead><tbody><tr><th scope="row">Request types</th><td>New tool, disabled feature, configuration or management change (plus integration, proposed)</td></tr><tr><th scope="row">First question for every request</th><td>The problem being solved, to check for an existing tool</td></tr><tr><th scope="row">Data questions</th><td>Highest classification, plus whether any tool approval would need to change</td></tr><tr><th scope="row">Purchases</th><td>Ask SSSP status and link to the SSSP KB article</td></tr><tr><th scope="row">Funding</th><td>Ask who pays and whether funding is secured</td></tr><tr><th scope="row">Users</th><td>Same “Who will use it?” and user count questions as the engineering consultation</td></tr></tbody></table>
+    </div>
+  </section>
+
+  </div>
+</main>
+
+<footer class="rvt-footer-base">
+  <div class="rvt-container-xl">
+    <div class="rvt-footer-base__inner">
+      <div class="rvt-footer-base__logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="25" viewBox="0 0 28 34" aria-hidden="true">
+          <path d="M-3.34344e-05 4.70897H8.83308V7.174H7.1897V21.1426H10.6134V2.72321H8.83308V0.121224H18.214V2.65476H16.2283V21.1426H19.7889V7.174H18.214V4.64047H27.0471V7.174H25.0614V23.6761L21.7746 26.8944H16.2967V30.455H18.214V33.8787H8.76463V30.592H10.6819V26.8259H5.20403L1.91726 23.6077V7.174H-3.34344e-05V4.70897Z" fill="currentColor"></path>
+        </svg>
+      </div>
+      <ul class="rvt-footer-base__list">
+        <li class="rvt-footer-base__item"><a class="rvt-footer-base__link" href="https://accessibility.iu.edu/assistance">Accessibility</a></li>
+        <li class="rvt-footer-base__item"><a class="rvt-footer-base__link" href="https://www.iu.edu/privacy">Privacy notice</a></li>
+        <li class="rvt-footer-base__item"><a class="rvt-footer-base__link" href="https://www.iu.edu/copyright/index.html">Copyright © 2026 The Trustees of Indiana University</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+</div>
+
+<script src="rivet.min.js"></script>
+<script src="mermaid.min.js"></script>
+<script>
+(function () {
+  Rivet.init();
+  mermaid.initialize({
+    startOnLoad: false,
+    securityLevel: 'loose',
+    theme: 'base',
+    themeVariables: {
+      fontFamily: 'BentonSans, Helvetica Neue, Arial, sans-serif',
+      fontSize: '15px',
+      primaryColor: '#FFFFFF',
+      primaryBorderColor: '#4A4A4A',
+      primaryTextColor: '#191919',
+      lineColor: '#4A4A4A',
+      edgeLabelBackground: '#FFFFFF'
+    },
+    flowchart: { htmlLabels: true, curve: 'basis' }
+  });
+
+  // ---------- Routing ----------
+  var pages = Array.prototype.slice.call(document.querySelectorAll('.page'));
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('.rvt-sidenav__link'));
+  var parentOf = { 'eng-overview': 'eng', 'eng-form': 'eng', 'eng-workflow': 'eng', 'eng-build': 'eng', 'eng-rules': 'eng', 'eng-sla': 'eng', 'eng-survey': 'eng', 'eng-open': 'eng' };
+  var titles = {
+    'home': 'UITS AI Request Catalog',
+    'eng-overview': 'Overview – AI Engineering Consultation',
+    'eng-form': 'Request form preview – AI Engineering Consultation',
+    'eng-workflow': 'Workflow – AI Engineering Consultation',
+    'eng-build': 'Catalog item and variables – AI Engineering Consultation',
+    'eng-rules': 'Rules and triage – AI Engineering Consultation',
+    'eng-sla': 'SLAs and notifications – AI Engineering Consultation',
+    'eng-survey': 'Post-close survey – AI Engineering Consultation',
+    'eng-open': 'Open items – AI Engineering Consultation',
+
+    'tool-overview': 'Overview – AI Tool or Productivity Consultation',
+    'tool-form': 'Request form preview – AI Tool or Productivity Consultation',
+    'tool-workflow': 'Workflow – AI Tool or Productivity Consultation',
+    'tool-build': 'Catalog item and variables – AI Tool or Productivity Consultation',
+    'tool-rules': 'Rules and routing – AI Tool or Productivity Consultation',
+    'tool-sla': 'SLAs and notifications – AI Tool or Productivity Consultation',
+    'tool-survey': 'Post-close survey – AI Tool or Productivity Consultation',
+    'tool-open': 'Open items – AI Tool or Productivity Consultation',
+
+    'svc-overview': 'Overview – AI Service or Integration Request',
+    'svc-form': 'Request form preview – AI Service or Integration Request',
+    'svc-workflow': 'Workflow – AI Service or Integration Request',
+    'svc-build': 'Catalog item and variables – AI Service or Integration Request',
+    'svc-rules': 'Rules and review – AI Service or Integration Request',
+    'svc-sla': 'SLAs and notifications – AI Service or Integration Request',
+    'svc-survey': 'Post-close survey – AI Service or Integration Request',
+    'svc-open': 'Open items – AI Service or Integration Request'
+  };
+
+  function route() {
+    var id = (location.hash || '').replace('#', '');
+    if (!document.getElementById('page-' + id)) id = 'home';
+    pages.forEach(function (p) { p.hidden = p.id !== 'page-' + id; });
+    navLinks.forEach(function (a) {
+      var target = a.getAttribute('href').slice(1);
+      // The section-level link only marks current on the overview when it has no child link.
+      var isChildList = a.closest('[data-rvt-sidenav-list]');
+      var isParentLink = a.parentElement.classList.contains('rvt-sidenav__item-wrapper');
+      if (target === id && (isChildList || !isParentLink)) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
+    });
+    document.title = titles[id] || titles.home;
+    var page = document.getElementById('page-' + id);
+    var diagrams = page.querySelectorAll('.mermaid:not([data-processed])');
+    if (diagrams.length) mermaid.run({ nodes: diagrams });
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', route);
+  route();
+
+  // ---------- Floating CTA: only show while the preview frame is well in view ----------
+  function ctaCheck() {
+    document.querySelectorAll('.frame-wrap').forEach(function (w) {
+      var r = w.querySelector('.sn-frame').getBoundingClientRect();
+      w.querySelector('.frame-cta').classList.toggle('is-off', !(r.top < innerHeight - 200 && r.bottom > 200));
+    });
+  }
+  window.addEventListener('scroll', ctaCheck, { passive: true });
+  window.addEventListener('resize', ctaCheck);
+  window.addEventListener('hashchange', function () { setTimeout(ctaCheck, 50); });
+  setTimeout(ctaCheck, 50);
+
+  // ---------- Preview frames: size each iframe to its content ----------
+  window.addEventListener('message', function (e) {
+    if (!e.data || !e.data.height) return;
+    document.querySelectorAll('.sn-frame iframe').forEach(function (f) {
+      if (f.contentWindow === e.source) f.style.height = e.data.height + 'px';
+    });
+  });
+})();
+</script>
+</body>
+</html>

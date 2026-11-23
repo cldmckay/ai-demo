@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Service or Integration Request - IU Service Management</title><link rel="stylesheet" href="sn.css"></head>
+<body>
+<div class="sn-navbar"><div class="sn-container">
+  <div class="sn-brand"><span class="tab"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 34" aria-hidden="true"><path d="M-3.34344e-05 4.70897H8.83308V7.174H7.1897V21.1426H10.6134V2.72321H8.83308V0.121224H18.214V2.65476H16.2283V21.1426H19.7889V7.174H18.214V4.64047H27.0471V7.174H25.0614V23.6761L21.7746 26.8944H16.2967V30.455H18.214V33.8787H8.76463V30.592H10.6819V26.8259H5.20403L1.91726 23.6077V7.174H-3.34344e-05V4.70897Z" fill="currentColor"></path></svg></span><span>INDIANA UNIVERSITY</span></div>
+  <nav class="sn-nav" aria-label="Portal"><a href="#">Knowledge Portal</a><a href="#">Service Portal</a><a href="#">System Status</a>
+  <span class="sn-user"><span class="sn-avatar">AM</span>Alex Morgan (amorgan)</span></nav>
+</div></div>
+<div class="sn-crumbs"><div class="sn-container">
+  <ol><li><a href="#">Home</a></li><li><a href="#">Service Catalog</a></li><li><a href="#">Artificial Intelligence</a></li><li>AI Service or Integration Request</li></ol>
+  <div class="sn-search" aria-hidden="true"><span>Search Catalog</span><span>&#9906;</span></div>
+</div></div>
+<div class="sn-main"><div class="sn-container"><form id="sn-form" novalidate><div class="sn-row"><div class="sn-col-main" id="main-col"><div class="sn-panel">
+<div class="sn-panel-head"><h2>AI Service or Integration Request</h2></div>
+<div class="sn-panel-body"><p class="sn-req-legend"><span class="sn-star">*</span> Indicates required</p>
+<div id="msg"></div>
+<div class="sn-desc">
+<p>Use this form to ask UITS for an AI tool or change that isn't available to you today, including:</p>
+<ul><li>Buying or licensing a new AI tool</li><li>Turning on a feature that's disabled in an IU AI tool, such as ChatGPT Edu, Google Gemini, or Microsoft Copilot</li><li>Changing how a UITS-supported AI tool is configured or managed</li><li>Connecting an AI tool to another IU system</li></ul>
+<p>Tell us the problem you're solving. We'll first check whether a tool IU already supports can do it.</p>
+</div>
+<div class="sn-field"><label class="sn-label" for="f-for"><span class="sn-star" aria-hidden="true">*</span>Who is this request for?</label><div class="sn-ref"><input class="sn-input" id="f-for" value="Alex Morgan (amorgan)" data-req="Who is this request for?"><span class="x">&#10005;</span><span class="caret">&#9662;</span></div></div>
+<div class="sn-field"><label class="sn-label" for="f-dept"><span class="sn-star" aria-hidden="true">*</span>Department or unit</label><input class="sn-input" id="f-dept" value="SCHOOL OF EDUCATION" data-req="Department or unit" readonly></div>
+
+<div class="sn-container-title">What you're requesting</div>
+<div class="sn-field" role="group" aria-labelledby="g-type-l" id="g-type" data-req="What are you requesting?" data-group><div class=sn-label id=g-type-l><span class="sn-star" aria-hidden="true">*</span>What are you requesting?</div><label class="sn-choice"><input type="radio" name="g-type" value="Purchase or license a new AI tool"> <span>Purchase or license a new AI tool</span></label><label class="sn-choice"><input type="radio" name="g-type" value="Turn on a feature that is disabled in an existing IU AI tool"> <span>Turn on a feature that is disabled in an existing IU AI tool</span></label><label class="sn-choice"><input type="radio" name="g-type" value="Change the configuration or management of a UITS-supported AI tool"> <span>Change the configuration or management of a UITS-supported AI tool</span></label><label class="sn-choice"><input type="radio" name="g-type" value="Connect an AI tool to another IU system"> <span>Connect an AI tool to another IU system</span></label></div>
+<div id="t-new" hidden>
+<div class="sn-field"><label class="sn-label" for="f-product"><span class="sn-star" aria-hidden="true">*</span>Product name and vendor</label><input class="sn-input" id="f-product" value="" data-req="Product name and vendor"></div>
+<div class="sn-field"><label class="sn-label" for="f-site">Product website</label><input class="sn-input" id="f-site" value=""></div>
+<div class="sn-field" role="group" aria-labelledby="g-sssp-l" id="g-sssp" data-req="Have you completed the Software and Services Selection Process (SSSP) for this product?" data-group><div class=sn-label id=g-sssp-l><span class="sn-star" aria-hidden="true">*</span>Have you completed the Software and Services Selection Process (SSSP) for this product?</div><label class="sn-choice"><input type="radio" name="g-sssp" value="Yes, it is complete"> <span>Yes, it is complete</span></label><label class="sn-choice"><input type="radio" name="g-sssp" value="It is in progress"> <span>It is in progress</span></label><label class="sn-choice"><input type="radio" name="g-sssp" value="Not yet"> <span>Not yet</span></label><label class="sn-choice"><input type="radio" name="g-sssp" value="I&#x27;m not sure what this is"> <span>I'm not sure what this is</span></label><div class="sn-help">See <a href="https://kb.iu.edu/d/aoyl" target="_blank" rel="noopener">About the Software and Services Selection Process (SSSP)</a>. IU login required.</div></div>
+<div id="sssp-num" hidden><div class="sn-field"><label class="sn-label" for="f-sssp"><span class="sn-star" aria-hidden="true">*</span>SSSP request number (RITM)</label><input class="sn-input" id="f-sssp" value="" data-req="SSSP request number (RITM)"></div></div>
+</div>
+<div id="t-existing" hidden>
+<div class="sn-field"><label class="sn-label" for="f-tool"><span class="sn-star" aria-hidden="true">*</span>Which IU AI tool?</label><select class="sn-select" id="f-tool" data-req="Which IU AI tool?"><option value="">-- None --</option><option>Microsoft 365 Copilot</option><option>Microsoft Copilot Chat</option><option>Microsoft Copilot Studio</option><option>Microsoft Foundry</option><option>Google Gemini</option><option>Google NotebookLM</option><option>ChatGPT Edu</option><option>Adobe Firefly</option><option>Chat AIU</option><option>REALLMS</option><option>Other</option></select></div>
+<div id="tool-other" hidden><div class="sn-field"><label class="sn-label" for="f-tool-other"><span class="sn-star" aria-hidden="true">*</span>Other tool</label><input class="sn-input" id="f-tool-other" value="" data-req="Other tool"></div></div>
+</div>
+<div id="t-feature" hidden><div class="sn-field"><label class="sn-label" for="f-feature"><span class="sn-star" aria-hidden="true">*</span>Which feature do you need turned on?</label><textarea class="sn-textarea" id="f-feature" rows="2" data-req="Which feature do you need turned on?"></textarea><div class="sn-help">For example: sharing custom GPTs outside your group, a specific connector, or an agent feature.</div></div></div>
+<div id="t-config" hidden><div class="sn-field"><label class="sn-label" for="f-config"><span class="sn-star" aria-hidden="true">*</span>What configuration or management change are you requesting?</label><textarea class="sn-textarea" id="f-config" rows="3" data-req="What configuration or management change are you requesting?"></textarea><div class="sn-help">Describe the change and who it should apply to.</div></div></div>
+<div id="t-int" hidden>
+<div class="sn-field" role="group" aria-labelledby="g-sys-l" id="g-sys" data-req="Which IU systems should it connect to?" data-group><div class=sn-label id=g-sys-l><span class="sn-star" aria-hidden="true">*</span>Which IU systems should it connect to?</div><label class="sn-choice"><input type="checkbox" name="g-sys" value="Canvas"> <span>Canvas</span></label><label class="sn-choice"><input type="checkbox" name="g-sys" value="Student Information System"> <span>Student Information System</span></label><label class="sn-choice"><input type="checkbox" name="g-sys" value="Microsoft 365 or Teams"> <span>Microsoft 365 or Teams</span></label><label class="sn-choice"><input type="checkbox" name="g-sys" value="ServiceNow"> <span>ServiceNow</span></label><label class="sn-choice"><input type="checkbox" name="g-sys" value="Kuali"> <span>Kuali</span></label><label class="sn-choice"><input type="checkbox" name="g-sys" value="Data warehouse or reporting"> <span>Data warehouse or reporting</span></label><label class="sn-choice"><input type="checkbox" name="g-sys" value="Other"> <span>Other</span></label></div>
+<div class="sn-field"><label class="sn-label" for="f-int"><span class="sn-star" aria-hidden="true">*</span>Describe the connection you need</label><textarea class="sn-textarea" id="f-int" rows="2" data-req="Describe the connection you need"></textarea></div>
+</div>
+
+<div class="sn-container-title">The problem you're solving</div>
+<div class="sn-field"><label class="sn-label" for="f-problem"><span class="sn-star" aria-hidden="true">*</span>What problem are you trying to solve?</label><textarea class="sn-textarea" id="f-problem" rows="4" data-req="What problem are you trying to solve?"></textarea><div class="sn-help">We'll use this to check whether a tool IU already supports can do what you need.</div></div>
+<div class="sn-field" role="group" aria-labelledby="g-tried-l" id="g-tried" data-group><div class=sn-label id=g-tried-l>Which IU AI tools have you already tried for this?</div><label class="sn-choice"><input type="checkbox" name="g-tried" value="Microsoft Copilot"> <span>Microsoft Copilot</span></label><label class="sn-choice"><input type="checkbox" name="g-tried" value="Google Gemini"> <span>Google Gemini</span></label><label class="sn-choice"><input type="checkbox" name="g-tried" value="ChatGPT Edu"> <span>ChatGPT Edu</span></label><label class="sn-choice"><input type="checkbox" name="g-tried" value="Chat AIU"> <span>Chat AIU</span></label><label class="sn-choice"><input type="checkbox" name="g-tried" value="None yet"> <span>None yet</span></label></div>
+<div class="sn-field" role="group" aria-labelledby="g-users-l" id="g-users" data-req="Who will use it?" data-group><div class=sn-label id=g-users-l><span class="sn-star" aria-hidden="true">*</span>Who will use it?</div><label class="sn-choice"><input type="checkbox" name="g-users" value="Students"> <span>Students</span></label><label class="sn-choice"><input type="checkbox" name="g-users" value="Faculty"> <span>Faculty</span></label><label class="sn-choice"><input type="checkbox" name="g-users" value="Staff"> <span>Staff</span></label><label class="sn-choice"><input type="checkbox" name="g-users" value="Researchers"> <span>Researchers</span></label><label class="sn-choice"><input type="checkbox" name="g-users" value="Public or external users"> <span>Public or external users</span></label></div>
+<div class="sn-field"><label class="sn-label" for="f-count"><span class="sn-star" aria-hidden="true">*</span>About how many users?</label><select class="sn-select" id="f-count" data-req="About how many users?"><option value="">-- None --</option><option>Fewer than 50</option><option>50–500</option><option>500–5,000</option><option>More than 5,000</option><option>Not sure</option></select></div>
+
+<div class="sn-container-title">Data</div>
+<div class="sn-field"><label class="sn-label" for="f-class"><span class="sn-star" aria-hidden="true">*</span>What is the highest classification of data this will use?</label><select class="sn-select" id="f-class" data-req="What is the highest classification of data this will use?"><option value="">-- None --</option><option>Public</option><option>University-internal</option><option>Restricted</option><option>Critical</option><option>Not sure</option></select><div class="sn-help">See <a href="https://kb.iu.edu/d/avqg" target="_blank" rel="noopener">About institutional data at IU</a>.</div></div>
+<div id="data-detail" hidden>
+<div class="sn-field" role="group" aria-labelledby="g-types-l" id="g-types" data-req="Which kinds of data are involved?" data-group><div class=sn-label id=g-types-l><span class="sn-star" aria-hidden="true">*</span>Which kinds of data are involved?</div><label class="sn-choice"><input type="checkbox" name="g-types" value="Student records (FERPA)"> <span>Student records (FERPA)</span></label><label class="sn-choice"><input type="checkbox" name="g-types" value="Health information (HIPAA)"> <span>Health information (HIPAA)</span></label><label class="sn-choice"><input type="checkbox" name="g-types" value="Payment card data"> <span>Payment card data</span></label><label class="sn-choice"><input type="checkbox" name="g-types" value="Employee or HR data"> <span>Employee or HR data</span></label><label class="sn-choice"><input type="checkbox" name="g-types" value="Research data"> <span>Research data</span></label><label class="sn-choice"><input type="checkbox" name="g-types" value="SSNs or ID numbers"> <span>SSNs or ID numbers</span></label><label class="sn-choice"><input type="checkbox" name="g-types" value="Export-controlled data"> <span>Export-controlled data</span></label><label class="sn-choice"><input type="checkbox" name="g-types" value="None of these"> <span>None of these</span></label></div>
+<div class="sn-field"><label class="sn-label" for="f-steward">Has the data steward approved this use?</label><select class="sn-select" id="f-steward"><option value="">-- None --</option><option>Yes</option><option>No</option><option>In progress</option><option>I don't know who that is</option></select></div>
+</div>
+<div class="sn-field" role="group" aria-labelledby="g-leaves-l" id="g-leaves" data-req="Will data be sent to an outside AI service or vendor?" data-group><div class=sn-label id=g-leaves-l><span class="sn-star" aria-hidden="true">*</span>Will data be sent to an outside AI service or vendor?</div><label class="sn-choice"><input type="radio" name="g-leaves" value="Yes"> <span>Yes</span></label><label class="sn-choice"><input type="radio" name="g-leaves" value="No"> <span>No</span></label><label class="sn-choice"><input type="radio" name="g-leaves" value="Not sure"> <span>Not sure</span></label></div>
+<div class="sn-field" role="group" aria-labelledby="g-appr-l" id="g-appr" data-req="Would any tool’s current data classification approval need to change for this to work?" data-group><div class=sn-label id=g-appr-l><span class="sn-star" aria-hidden="true">*</span>Would any tool’s current data classification approval need to change for this to work?</div><label class="sn-choice"><input type="radio" name="g-appr" value="Yes"> <span>Yes</span></label><label class="sn-choice"><input type="radio" name="g-appr" value="No"> <span>No</span></label><label class="sn-choice"><input type="radio" name="g-appr" value="Not sure"> <span>Not sure</span></label><div class="sn-help">Check <a href="https://datamanagement.iu.edu/faq/genai.html" target="_blank" rel="noopener">which data each IU AI tool is approved for</a>.</div></div>
+<div id="appr-detail" hidden><div class="sn-field"><label class="sn-label" for="f-appr"><span class="sn-star" aria-hidden="true">*</span>What approval change is needed?</label><textarea class="sn-textarea" id="f-appr" rows="2" data-req="What approval change is needed?"></textarea><div class="sn-help">For example: using Restricted data in a tool approved only for University-internal data.</div></div></div>
+
+<div class="sn-container-title">Timing and funding</div>
+<div class="sn-field"><label class="sn-label" for="f-date"><span class="sn-star" aria-hidden="true">*</span>When do you need this by?</label><input type="date" class="sn-input" id="f-date" style="max-width:220px" data-req="When do you need this by?"></div>
+<div class="sn-alert sn-alert-info" id="date-msg" hidden>Requests needed in less than 3 weeks may not be possible, especially if they need SSSP or governance review.</div>
+<div class="sn-field"><label class="sn-label" for="f-why-date">What's driving that date?</label><input class="sn-input" id="f-why-date" value=""></div>
+<div class="sn-field" role="group" aria-labelledby="g-pay-l" id="g-pay" data-req="Who will pay for this?" data-group><div class=sn-label id=g-pay-l><span class="sn-star" aria-hidden="true">*</span>Who will pay for this?</div><label class="sn-choice"><input type="radio" name="g-pay" value="My department or unit"> <span>My department or unit</span></label><label class="sn-choice"><input type="radio" name="g-pay" value="I am asking UITS to pay"> <span>I am asking UITS to pay</span></label><label class="sn-choice"><input type="radio" name="g-pay" value="Shared cost"> <span>Shared cost</span></label><label class="sn-choice"><input type="radio" name="g-pay" value="No cost expected"> <span>No cost expected</span></label><label class="sn-choice"><input type="radio" name="g-pay" value="Not sure"> <span>Not sure</span></label></div>
+<div id="funding" hidden><div class="sn-field"><label class="sn-label" for="f-fund"><span class="sn-star" aria-hidden="true">*</span>Has funding been secured?</label><select class="sn-select" id="f-fund" data-req="Has funding been secured?"><option value="">-- None --</option><option>Yes</option><option>No</option><option>Pending, for example a grant</option><option>Not sure</option></select></div></div>
+<div class="sn-field"><label class="sn-label" for="f-cost">Estimated annual cost, if known</label><input class="sn-input" id="f-cost" value=""></div>
+<div class="sn-field"><div class="sn-label">Supporting documents</div><div class="sn-attach"><label class="sn-btn sn-btn-default" style="width:auto;margin:0;display:inline-flex;align-items:center" for="f-docs">&#128206;&nbsp; Add attachments</label><input type="file" id="f-docs" multiple hidden accept=".pdf,.docx,.pptx,.xlsx,.png,.jpg,.txt,.md"><span id="f-docs-name">No files attached</span></div><div class="sn-help">Quotes, vendor documentation, or security documents such as a HECVAT. Don't attach Restricted or Critical data.</div></div>
+<div class="sn-field"><label class="sn-label" for="f-else">Anything else we should know?</label><textarea class="sn-textarea" id="f-else" rows="2"></textarea></div>
+<div class="sn-field" id="g-ack" data-group data-req="Acknowledgment"><label class="sn-choice"><input type="checkbox" name="g-ack"> <span><span class="sn-star" aria-hidden="true">*</span>I understand that submitting this request does not approve a purchase or change. New purchases also require SSSP approval.</span></label></div>
+<hr class="sn-hr"><div class="sn-note">
+<p>Please note</p>
+<p>UITS AI Innovation will respond within 2 business days. Requests for new tools or features are reviewed by IU's AI governance group and may need security, privacy, or data steward review.</p>
+<p>New purchases also require the Software and Services Selection Process. See <a href="https://kb.iu.edu/d/aoyl" target="_blank" rel="noopener">About the Software and Services Selection Process (SSSP)</a>.</p>
+<p>Not sure what you need yet? Try an <a href="#">AI Tool or Productivity Consultation</a> first.</p>
+</div>
+</div></div></div>
+<div class="sn-col-side"><div class="sn-side-panel">
+<button type="button" class="sn-btn sn-btn-default">&#128190;&nbsp; Save as Draft</button>
+<button type="submit" class="sn-btn sn-btn-primary" >Submit</button>
+</div>
+<div class="sn-reqinfo" id="reqinfo"><div>Required information</div><div id="pills"></div></div></div></div></form></div></div>
+<div class="sn-footer"><div class="sn-container"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 34" aria-hidden="true"><path d="M-3.34344e-05 4.70897H8.83308V7.174H7.1897V21.1426H10.6134V2.72321H8.83308V0.121224H18.214V2.65476H16.2283V21.1426H19.7889V7.174H18.214V4.64047H27.0471V7.174H25.0614V23.6761L21.7746 26.8944H16.2967V30.455H18.214V33.8787H8.76463V30.592H10.6819V26.8259H5.20403L1.91726 23.6077V7.174H-3.34344e-05V4.70897Z" fill="currentColor"></path></svg><span>INDIANA UNIVERSITY</span></div></div>
+<script>
+(function(){
+  function post(){ parent.postMessage({snFrame: document.title, height: Math.ceil(document.body.getBoundingClientRect().height)}, '*'); }
+  new ResizeObserver(post).observe(document.body); window.addEventListener('load', post); post();
+  document.querySelectorAll('a[href="#"]').forEach(function(a){ a.addEventListener('click', function(e){ e.preventDefault(); }); });
+})();
+</script>
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var form = $('sn-form');
+  function visible(el){ return !el.closest('[hidden]'); }
+  function filled(el){
+    if (el.hasAttribute('data-group')) return !!el.querySelector('input:checked');
+    return String(el.value).trim() !== '';
+  }
+  function reqEls(){ return Array.prototype.filter.call(form.querySelectorAll('[data-req]'), visible); }
+  function refresh(){
+    var missing = [];
+    reqEls().forEach(function(el){
+      var ok = filled(el);
+      var field = el.closest('.sn-field');
+      var st = field && field.querySelector('.sn-star'); if (st) st.classList.toggle('ok', ok);
+      if (ok) { el.classList.remove('sn-invalid'); var fe = field.querySelector('.sn-field-error'); if (fe) fe.remove(); }
+      else missing.push(el);
+    });
+    var pills = $('pills'); pills.innerHTML = '';
+    missing.forEach(function(el){
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'sn-pill'; b.textContent = el.getAttribute('data-req');
+      b.addEventListener('click', function(){ var f = el.hasAttribute('data-group') ? el.querySelector('input') : el; f.scrollIntoView({block:'center'}); f.focus(); });
+      pills.appendChild(b); pills.appendChild(document.createTextNode(' '));
+    });
+    $('reqinfo').hidden = missing.length === 0;
+    return missing;
+  }
+  function show(id, on){
+    var w = $(id); w.hidden = !on;
+    if (!on) w.querySelectorAll('input,select,textarea').forEach(function(i){ if (i.type==='checkbox'||i.type==='radio') i.checked=false; else if (i.tagName==='SELECT') i.selectedIndex=0; else i.value=''; });
+  }
+  function radio(name){ var r = form.querySelector('input[name="'+name+'"]:checked'); return r ? r.value : ''; }
+  function onRadio(name, fn){ form.querySelectorAll('input[name="'+name+'"]').forEach(function(r){ r.addEventListener('change', fn); }); }
+  onRadio('g-type', function(){
+    var t = radio('g-type');
+    show('t-new', t.indexOf('Purchase')===0);
+    show('t-existing', t.indexOf('Turn on')===0 || t.indexOf('Change')===0 || t.indexOf('Connect')===0);
+    show('t-feature', t.indexOf('Turn on')===0);
+    show('t-config', t.indexOf('Change')===0);
+    show('t-int', t.indexOf('Connect')===0);
+  });
+  onRadio('g-sssp', function(){ var v = radio('g-sssp'); show('sssp-num', v.indexOf('Yes')===0 || v.indexOf('It is in')===0); });
+  $('f-tool').addEventListener('change', function(){ show('tool-other', this.value==='Other'); });
+  $('f-class').addEventListener('change', function(){ var v=this.value; show('data-detail', v==='Restricted'||v==='Critical'||v==='Not sure'); });
+  form.querySelectorAll('input[name="g-types"]').forEach(function(c){
+    c.addEventListener('change', function(){
+      if (c.value !== 'None of these') return;
+      form.querySelectorAll('input[name="g-types"]').forEach(function(o){ if (o!==c){ if (c.checked) o.checked=false; o.disabled=c.checked; } });
+    });
+  });
+  onRadio('g-appr', function(){ show('appr-detail', radio('g-appr')==='Yes'); });
+  onRadio('g-pay', function(){ var v = radio('g-pay'); show('funding', v==='My department or unit' || v==='Shared cost'); });
+  $('f-date').addEventListener('change', function(){ var d = new Date(this.value), days = (d - new Date())/864e5; $('date-msg').hidden = !(this.value && days < 21); });
+  $('f-docs').addEventListener('change', function(){ var n=this.files.length; $('f-docs-name').textContent = n ? n+' file'+(n>1?'s':'')+' attached' : 'No files attached'; });
+  form.addEventListener('input', refresh); form.addEventListener('change', refresh);
+  refresh();
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var missing = refresh();
+    form.querySelectorAll('.sn-field-error').forEach(function(x){ x.remove(); });
+    if (missing.length){
+      missing.forEach(function(el){
+        if (!el.hasAttribute('data-group')) el.classList.add('sn-invalid');
+        var d = document.createElement('div'); d.className='sn-field-error'; d.textContent='Required'; el.closest('.sn-field').appendChild(d);
+      });
+      $('msg').innerHTML = '<div class="sn-alert sn-alert-danger" role="alert">The following mandatory fields are not filled in: ' + missing.map(function(m){ return m.getAttribute('data-req'); }).join(', ') + '</div>';
+      window.scrollTo(0,0);
+      return;
+    }
+    var n = Math.floor(100000 + Math.random()*899999);
+    $('main-col').innerHTML = '<div class="sn-panel"><div class="sn-panel-body sn-success" role="status"><h2>Thank you, your request has been submitted</h2>' +
+      '<p>Request number: <a href="#">REQ0' + n + '</a></p>' +
+      '<p>UITS AI Innovation will respond within 2 business days. We\'ll let you know if your request needs governance, security, or SSSP review.</p>' +
+      '<table class="sn-table"><thead><tr><th>Number</th><th>Item</th><th>Stage</th></tr></thead><tbody><tr><td><a href="#">RITM0' + (n+1) + '</a></td><td>AI Service or Integration Request</td><td>Waiting for review</td></tr></tbody></table>' +
+      '<p style="margin-top:16px"><a href="#" id="again">Start a new request</a></p></div></div>';
+    document.querySelector('.sn-col-side').hidden = true;
+    $('again').addEventListener('click', function(ev){ ev.preventDefault(); location.reload(); });
+    window.scrollTo(0,0);
+  });
+})();
+</script>
+</body></html>
