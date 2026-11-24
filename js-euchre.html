@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Euchre Trick Evaluator — JavaScript Walkthrough</title>
+<style>
+  :root {
+    --ink: #1f2328; --muted: #6b7280; --line: #e5e7eb; --soft: #f7f8fa;
+    --accent: #2563eb; --accent-soft: #eaf1ff; --red: #c8102e;
+    --green: #15803d; --green-soft: #e8f7ee; --amber: #b45309; --amber-soft: #fff7e0;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fff; color: var(--ink);
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  header { padding: 16px 28px 12px; border-bottom: 1px solid var(--line); display: flex;
+    align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  header h1 { font-size: 19px; margin: 0; font-weight: 650; letter-spacing: -0.01em; }
+  header p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+  .controls { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  button { font: inherit; border: 1px solid var(--line); background: #fff; color: var(--ink);
+    padding: 7px 14px; border-radius: 8px; cursor: pointer; }
+  button:hover:not(:disabled) { border-color: #c7ccd4; background: var(--soft); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  label.small { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  select { font: inherit; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+
+  .pipeline { display: flex; gap: 6px; padding: 11px 28px; border-bottom: 1px solid var(--line);
+    overflow-x: auto; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+  .pipeline .step { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; transition: all .2s; }
+  .pipeline .step.done { color: var(--green); border-color: #bfe5cc; background: var(--green-soft); }
+  .pipeline .step.active { color: #fff; background: var(--accent); border-color: var(--accent); }
+  .pipeline .arrow { color: #c3c8cf; align-self: center; }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 440px; }
+  main { padding: 18px 28px 40px; min-width: 0; }
+  aside { border-left: 1px solid var(--line); background: #fcfcfd; padding: 18px 22px 40px;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  @media (max-width: 1180px) { .layout { grid-template-columns: 1fr; } aside { position: static; height: auto; border-left: 0; border-top: 1px solid var(--line); } }
+
+  .status { padding: 10px 14px; border-radius: 10px; background: var(--soft); border: 1px solid var(--line); margin-bottom: 14px; }
+  .trump-picker { display: none; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap;
+    padding: 12px 14px; border: 1px solid #bcd0fb; background: var(--accent-soft); border-radius: 10px; }
+  .trump-picker.show { display: flex; }
+  .trump-picker button { font-size: 15px; padding: 8px 16px; }
+  .trump-picker .red { color: var(--red); }
+
+  /* ---------- table ---------- */
+  .table { display: grid; grid-template-columns: 1fr 1.25fr 1fr; grid-template-rows: auto 300px auto;
+    grid-template-areas: "north north north" "west center east" "south south south"; gap: 12px; align-items: center;
+    border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+  .seat { text-align: center; }
+  .seat.north { grid-area: north; } .seat.south { grid-area: south; }
+  .seat.west { grid-area: west; } .seat.east { grid-area: east; }
+  .seat-name { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+  .seat.turn .seat-name { color: var(--accent); }
+  .seat.turn .seat-name::before { content: "▶ "; }
+  .seat-row { display: flex; align-items: center; justify-content: center; gap: 18px; }
+  .seat.west .seat-row, .seat.east .seat-row { flex-direction: column; gap: 10px; }
+  .hand { display: flex; justify-content: center; gap: 4px; min-height: 58px; }
+  .hand .card { width: 42px; }
+  .seat.south .hand .card { width: 72px; }
+  .seat.south .hand .card.playable { cursor: pointer; transition: transform .15s; }
+  .seat.south .hand .card.playable:hover { transform: translateY(-8px); }
+  .seat.south .hand .card.illegal { opacity: .35; }
+  .seat.south .hand.awaiting .card.playable svg rect.face { stroke: var(--accent); stroke-width: 2.5; }
+
+  .pile-wrap { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .pile { position: relative; width: 96px; height: 58px; }
+  .pile.empty { border: 1.5px dashed #d6dbe3; border-radius: 8px; width: 40px; }
+  .pile .stack { position: absolute; top: 4px; width: 36px; height: 50px; }
+  .pile .mini { position: absolute; width: 36px; }
+  .pile .mini svg { width: 100%; display: block; }
+  .pile-label { font-size: 11px; color: var(--muted); }
+  .pile-label b { color: var(--ink); }
+
+  .center { grid-area: center; position: relative; height: 300px; border-radius: 12px; background: var(--soft); border: 1px dashed #dde1e7; }
+  .slot { position: absolute; width: 60px; }
+  .slot.North { left: 50%; top: 8px; transform: translateX(-50%); }
+  .slot.South { left: 50%; bottom: 8px; transform: translateX(-50%); }
+  .slot.West { left: 12%; top: 50%; transform: translateY(-50%); }
+  .slot.East { right: 12%; top: 50%; transform: translateY(-50%); }
+  .slot .who { font-size: 10px; color: var(--muted); text-align: center; }
+  .slot.winner svg rect.face { stroke: var(--green); stroke-width: 3; }
+  .slot.winner .who { color: var(--green); font-weight: 700; }
+  .slot.out { opacity: .4; }
+  .center .trump-chip { position: absolute; left: 10px; bottom: 8px; font-size: 12px; color: var(--muted); }
+  .center .trump-chip b { color: var(--ink); }
+  .flyer { position: fixed; z-index: 50; pointer-events: none; }
+  .flyer svg { width: 100%; display: block; }
+
+  .card { position: relative; }
+  .card svg { width: 100%; height: auto; display: block; }
+  .card.flash { animation: flash 1s ease; }
+  @keyframes flash { 0% { transform: scale(1); } 30% { transform: scale(1.18); } 100% { transform: scale(1); } }
+  .bump { position: absolute; top: -8px; right: -6px; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700;
+    padding: 1px 6px; border-radius: 999px; animation: rise 1.6s ease forwards; pointer-events: none; }
+  @keyframes rise { 0% { opacity: 0; transform: translateY(6px); } 20% { opacity: 1; transform: none; } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-10px); } }
+
+  /* ---------- deck: grid + array side by side ---------- */
+  .panel { margin-top: 18px; border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+  .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+  .panel-head h2 { font-size: 15px; margin: 0; font-weight: 600; }
+  .panel-sub { color: var(--muted); font-size: 12.5px; margin: 0 0 12px; }
+  .tabs { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .tabs button { border: 0; border-radius: 0; padding: 5px 11px; font-size: 12.5px; }
+  .tabs button.on { background: var(--ink); color: #fff; }
+  .deck-split { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+  .split-col { min-width: 0; }
+  .split-col h3 { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 6px; font-weight: 600; }
+  .split-col.arr { flex: 1 1 400px; }
+  .deck-grid { display: grid; grid-template-columns: repeat(6, 52px); gap: 8px 6px; }
+  .deck-cell { text-align: center; font-size: 10px; color: var(--muted); border-radius: 6px; padding: 2px 1px; cursor: default; }
+  .deck-cell .loc { display: inline-block; padding: 0 4px; border-radius: 4px; background: var(--soft); }
+  .deck-cell .loc.me { background: var(--accent-soft); color: var(--accent); }
+  .deck-cell .loc { white-space: nowrap; font-size: 9.5px; }
+  .deck-cell.gone .card { opacity: .3; }
+  .deck-cell.focus .card svg rect.face { stroke: var(--accent); stroke-width: 3.5; }
+  .deck-cell.hover { background: #fff1c2; }
+  .array-view { font: 11.5px/1.65 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--soft);
+    border: 1px solid var(--line); border-radius: 10px; padding: 8px 6px; height: 418px; overflow: auto; white-space: pre; }
+  .array-view .row { padding: 0 6px; border-radius: 4px; cursor: default; }
+  .array-view .row.changed { box-shadow: inset 3px 0 #f0b429; }
+  .array-view .row.focus { background: var(--accent-soft); }
+  .array-view .row.gone { opacity: .45; }
+  .array-view .row.hover { background: #fff1c2; opacity: 1; }
+  .array-view .k { color: #8250df; } .array-view .s { color: #0a7c55; } .array-view .n { color: #c2410c; } .array-view .c { color: #9ca3af; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-top: 10px; }
+  .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; background: var(--c); border: 1px solid rgba(0,0,0,.06); }
+
+  /* ---------- inspector ---------- */
+  aside h2 { font-size: 11.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
+  .now { border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: #fff; margin-bottom: 18px; }
+  .now .stepno { font-size: 11.5px; color: var(--muted); display: flex; justify-content: space-between; }
+  .now .sig { font: 600 14.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--accent); word-break: break-word; margin-top: 4px; }
+  .now .sig.user { color: var(--amber); }
+  .now h4 { margin: 12px 0 3px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+  .now p { margin: 0; color: #374151; }
+  .now .result { margin-top: 4px; padding: 8px 10px; border-radius: 8px; background: var(--green-soft); color: #14532d; font-size: 13px; }
+  .now .result.waiting { background: var(--amber-soft); color: #7c2d12; }
+  .running { color: var(--muted); font-style: italic; }
+  #nextBtn { width: 100%; margin-top: 14px; padding: 10px; font-weight: 600; font-size: 14.5px; background: var(--accent); border-color: var(--accent); color: #fff; }
+  #nextBtn:hover:not(:disabled) { background: #1d4ed8; }
+  #nextBtn:disabled { background: #f1f3f5; color: var(--muted); border-color: var(--line); opacity: 1; }
+  .hint { font-size: 11.5px; color: var(--muted); text-align: center; margin-top: 6px; }
+  pre.code { margin: 0 0 18px; font: 11.5px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #fff;
+    border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; color: #24292f; white-space: pre-wrap; word-break: break-word; }
+  pre.code .kw { color: #cf222e; } pre.code .str { color: #0a3069; } pre.code .num { color: #0550ae; } pre.code .cm { color: #6e7781; font-style: italic; }
+  .log { list-style: none; margin: 0; padding: 0; font-size: 12.5px; }
+  .log li { padding: 6px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 28px 1fr; gap: 6px; }
+  .log li .i { color: #9ca3af; font-family: ui-monospace, Menlo, monospace; font-size: 11px; padding-top: 1px; }
+  .log li code { color: var(--accent); font-weight: 600; font-size: 12px; }
+  .log li.user code { color: var(--amber); }
+  .log li.nested > span:last-child { padding-left: 14px; border-left: 2px solid var(--line); }
+  .now .inside { font: 11.5px ui-monospace, Menlo, monospace; color: var(--muted); margin-top: 4px; }
+  .now .inside:empty { display: none; }
+  .odds { display: block; margin-top: 4px; font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+  .log li .d { color: var(--muted); display: block; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Euchre Trick Evaluator</h1>
+    <p>Step through the JavaScript functions that build the deck, score it for trump, and decide who wins each trick.</p>
+  </div>
+  <div class="controls">
+    <label class="small">Animation
+      <select id="speed"><option value="1.8">Slow</option><option value="1" selected>Normal</option><option value="0.45">Fast</option></select>
+    </label>
+    <label class="small"><input type="checkbox" id="auto"> Auto-advance</label>
+    <label class="small"><input type="checkbox" id="reveal"> Show other hands</label>
+  </div>
+</header>
+
+<div class="pipeline" id="pipeline"></div>
+
+<div class="layout">
+  <main>
+    <div class="status" id="status"></div>
+
+    <div class="trump-picker" id="trumpPicker">
+      <span><b>Your call — pick the trump suit:</b></span>
+      <button data-suit="S">♠ Spades</button>
+      <button data-suit="C">♣ Clubs</button>
+      <button data-suit="H" class="red">♥ Hearts</button>
+      <button data-suit="D" class="red">♦ Diamonds</button>
+    </div>
+
+    <div class="table">
+      <div class="seat north" id="seat-North"></div>
+      <div class="seat west" id="seat-West"></div>
+      <div class="center" id="center"></div>
+      <div class="seat east" id="seat-East"></div>
+      <div class="seat south" id="seat-South"></div>
+    </div>
+
+    <div class="panel" id="deckPanel">
+      <div class="panel-head">
+        <h2>The deck: what you see vs. what JavaScript sees</h2>
+        <div class="tabs" id="sortTabs">
+          <button data-s="index" class="on">Array order</button><button data-s="score">Sorted by score</button>
+        </div>
+      </div>
+      <p class="panel-sub">Each card on the left is one object in the <code>deck</code> array on the right. Hover either side to see its match.</p>
+      <div class="deck-split">
+        <div class="split-col"><h3>Visual grid</h3><div id="deckGrid"></div></div>
+        <div class="split-col arr"><h3>JavaScript array</h3><div id="deckArray" class="array-view"></div></div>
+      </div>
+      <div class="legend">
+        <span style="--c:#eceff3">base score (9=1 … A=6)</span>
+        <span style="--c:#dbe7ff">trump (+6)</span>
+        <span style="--c:#ece3ff">left bower (+10)</span>
+        <span style="--c:#ffe9b8">right bower (+11)</span>
+        <span style="--c:#eaf1ff">used by the current step</span>
+        <span style="--c:#f0b429">score changed by applyTrump()</span>
+      </div>
+    </div>
+  </main>
+
+  <aside>
+    <h2>Current function call</h2>
+    <div class="now">
+      <div class="stepno"><span id="stepNo">Step 0</span><span id="trickNo"></span></div>
+      <div class="inside" id="inside"></div><div class="sig" id="nowSig"></div>
+      <h4 id="whyHead">Why it’s being called now</h4>
+      <p id="nowWhy"></p>
+      <h4 id="whatHead">What it does</h4>
+      <p id="nowWhat"></p>
+      <h4>Result</h4>
+      <div class="result" id="nowResult"></div>
+      <button id="nextBtn" disabled>Next step →</button>
+      <div class="hint">Tip: press the → key to advance</div>
+    </div>
+    <h2>Source</h2>
+    <pre class="code" id="nowCode"></pre>
+    <h2>Call log</h2>
+    <ol class="log" id="log"></ol>
+  </aside>
+</div>
+
+<script>
+/* =========================================================
+   GAME DATA
+   Fixed lists the whole program uses. They never change.
+   ========================================================= */
+
+// The four suits. `key` is a one-letter code used in card ids (like 'JH').
+const SUITS = [
+  { key: 'S', name: 'Spades',   sym: '♠', color: 'black' },
+  { key: 'C', name: 'Clubs',    sym: '♣', color: 'black' },
+  { key: 'H', name: 'Hearts',   sym: '♥', color: 'red'   },
+  { key: 'D', name: 'Diamonds', sym: '♦', color: 'red'   }
+];
+
+// The six ranks used in Euchre, each with its starting (base) score.
+const RANKS = [
+  { rank: '9',  base: 1 },
+  { rank: '10', base: 2 },
+  { rank: 'J',  base: 3 },
+  { rank: 'Q',  base: 4 },
+  { rank: 'K',  base: 5 },
+  { rank: 'A',  base: 6 }
+];
+
+// The seats in the order cards are dealt and played (clockwise around the table).
+const SEATS = ['South', 'West', 'North', 'East'];
+
+// Quick lookups from a suit code to its symbol or name, e.g. SYM['H'] is '♥'.
+const SYM = { S: '♠', C: '♣', H: '♥', D: '♦' };
+const SUIT_NAME = { S: 'Spades', C: 'Clubs', H: 'Hearts', D: 'Diamonds' };
+
+/* =========================================================
+   THE FUNCTIONS BEING DEMONSTRATED
+   These are the functions shown in the "Source" panel. They are
+   written to be easy to read: plain for-loops, if/else, and lots
+   of comments. Each one does a single job.
+   ========================================================= */
+
+// createDeck()
+// Builds a brand-new deck of 24 Euchre cards and returns it as an array.
+function createDeck() {
+  // Start with an empty array. We will add one card at a time.
+  let deck = [];
+
+  // Loop through each of the 4 suits...
+  for (let s = 0; s < SUITS.length; s++) {
+    let suit = SUITS[s];
+
+    // ...and, inside that, loop through each of the 6 ranks (9 to Ace).
+    for (let r = 0; r < RANKS.length; r++) {
+      let rank = RANKS[r];
+
+      // An object that describes one card.
+      let card = {
+        id: rank.rank + suit.key,  // short name, like 'JH' = Jack of Hearts
+        rank: rank.rank,           // '9', '10', 'J', 'Q', 'K' or 'A'
+        suit: suit.key,            // 'S', 'C', 'H' or 'D'
+        color: suit.color,         // 'black' or 'red'
+        base: rank.base,           // starting score: 9=1, 10=2, J=3, Q=4, K=5, A=6
+        score: rank.base,          // current score (changes when trump is picked)
+        effSuit: suit.key          // the suit this card COUNTS AS (the left bower changes this)
+      };
+
+      // Add the card to the end of the array.
+      deck.push(card);
+    }
+  }
+
+  // 4 suits x 6 ranks = 24 cards.
+  return deck;
+}
+
+// shuffleDeck(deck)
+// Mixes the cards into a random order (the "Fisher-Yates" shuffle).
+function shuffleDeck(deck) {
+  // Start at the LAST position and walk backward toward the front.
+  for (let i = deck.length - 1; i > 0; i--) {
+    // Pick a random position j somewhere from 0 up to i.
+    let j = Math.floor(Math.random() * (i + 1));
+
+    // Swap the cards at positions i and j.
+    // We need a temporary variable so we don't lose one of them.
+    let temp = deck[i];
+    deck[i] = deck[j];
+    deck[j] = temp;
+  }
+
+  // The same array, now in a random order.
+  return deck;
+}
+
+// dealCards(deck)
+// Gives each player 5 cards, one card at a time, going around the table.
+// East is the dealer, so the first card goes to South (the dealer's left).
+function dealCards(deck) {
+  // Each player starts with an empty hand.
+  let hands = { South: [], West: [], North: [], East: [] };
+
+  // The position in the deck of the next card to hand out.
+  let nextCard = 0;
+
+  // Go around the table 5 times...
+  for (let round = 1; round <= 5; round++) {
+    // ...giving one card to each seat, in order: South, West, North, East.
+    for (let p = 0; p < SEATS.length; p++) {
+      let seat = SEATS[p];
+      hands[seat].push(deck[nextCard]);
+      nextCard = nextCard + 1;
+    }
+  }
+
+  // The 4 cards nobody got (positions 20 to 23) are the kitty.
+  let kitty = [];
+  for (let i = nextCard; i < deck.length; i++) {
+    kitty.push(deck[i]);
+  }
+
+  // Return both things together in one object.
+  return { hands: hands, kitty: kitty };
+}
+
+// applyTrump(deck, trump)
+// Changes every card's score now that we know the trump suit.
+function applyTrump(deck, trump) {
+  // Look up the color of the trump suit ('red' or 'black').
+  let trumpColor = '';
+  for (let s = 0; s < SUITS.length; s++) {
+    if (SUITS[s].key === trump) {
+      trumpColor = SUITS[s].color;
+    }
+  }
+
+  // How much to add to each kind of trump card.
+  let TRUMP_BONUS = 6;                          // 9 of trump: 1 + 6 = 7, beats any non-trump Ace (6)
+  let aceOfTrump = 6 + TRUMP_BONUS;             // Ace of trump: 6 + 6 = 12
+  let RIGHT_BONUS = (aceOfTrump + 2) - 3;       // Jack of trump: 3 + 11 = 14 (2 more than the Ace)
+  let LEFT_BONUS = RIGHT_BONUS - 1;             // Other same-color Jack: 3 + 10 = 13
+
+  // Look at every card in the deck, one at a time.
+  for (let i = 0; i < deck.length; i++) {
+    let card = deck[i];
+
+    // Reset the card before deciding what it gets.
+    card.effSuit = card.suit;
+    card.role = null;
+    card.added = 0;
+
+    if (card.rank === 'J' && card.suit === trump) {
+      // The Jack of the trump suit: the "right bower", the highest card.
+      card.added = RIGHT_BONUS;
+      card.role = 'right';
+    } else if (card.rank === 'J' && card.color === trumpColor) {
+      // The other Jack of the same color: the "left bower", second highest.
+      card.added = LEFT_BONUS;
+      card.role = 'left';
+      card.effSuit = trump;   // it now counts as a trump card!
+    } else if (card.suit === trump) {
+      // Any other card of the trump suit.
+      card.added = TRUMP_BONUS;
+      card.role = 'trump';
+    }
+
+    // New score = starting score + whatever bonus it got (0 for non-trump).
+    card.score = card.base + card.added;
+  }
+
+  return deck;
+}
+
+// legalPlays(hand, ledSuit)
+// Returns the cards in a hand that a player is ALLOWED to play.
+// Rule: if you have a card of the suit that was led, you must play one.
+function legalPlays(hand, ledSuit) {
+  // Nobody has led yet, so this player is leading: any card is allowed.
+  // (.slice() makes a copy of the array.)
+  if (ledSuit === null) {
+    return hand.slice();
+  }
+
+  // Collect the cards that match the led suit.
+  let matching = [];
+  for (let i = 0; i < hand.length; i++) {
+    if (hand[i].effSuit === ledSuit) {
+      matching.push(hand[i]);
+    }
+  }
+
+  // If we found some, those are the only legal cards.
+  if (matching.length > 0) {
+    return matching;
+  }
+
+  // Otherwise the player can't follow suit, so any card is allowed.
+  return hand.slice();
+}
+
+// chooseBestCard(hand, ledSuit)
+// Used when a computer player LEADS: play the highest-scoring legal card.
+function chooseBestCard(hand, ledSuit) {
+  let options = legalPlays(hand, ledSuit);
+
+  // Start by assuming the first card is the best, then look for a better one.
+  let best = options[0];
+  for (let i = 1; i < options.length; i++) {
+    if (options[i].score > best.score) {
+      best = options[i];
+    }
+  }
+  return best;
+}
+
+// choosePlay(hand, trick, ledSuit, trump, deck, playedIds)
+// Used when a computer player FOLLOWS (someone else already led).
+// It decides whether to try to win the trick, and with which card.
+function choosePlay(hand, trick, ledSuit, trump, deck, playedIds) {
+  // 1. Which cards am I allowed to play?
+  let legal = legalPlays(hand, ledSuit);
+
+  // 2. Which card is winning the trick right now? That's the card to beat.
+  let winning = evaluateTrick(trick, ledSuit, trump);
+
+  // 3. Which of my legal cards would beat it?
+  let beaters = findBeatingCards(legal, winning.card, ledSuit, trump);
+
+  // 4. Nothing I have can beat it, so I can't win. Play my worst legal card.
+  if (beaters.length === 0) {
+    return worstCard(legal);
+  }
+
+  // 5. I'm the last to play (3 cards already down), so nobody can top me.
+  //    Win with the cheapest card that still beats the table.
+  if (trick.length === 3) {
+    return worstCard(beaters);
+  }
+
+  // 6. Other players still have to play after me. Find my strongest card...
+  let best = beaters[0];
+  for (let i = 1; i < beaters.length; i++) {
+    if (beaters[i].score > best.score) {
+      best = beaters[i];
+    }
+  }
+
+  // ...and estimate how likely it is to survive the players after me.
+  let playersBehind = 3 - trick.length;
+  let odds = winProbability(best, hand, deck, playedIds, playersBehind, ledSuit, trump);
+
+  // 7. Better than 75%? Go for the trick, but don't waste a bower.
+  if (odds > 0.75) {
+    return topRunCard(legal, winning.card, deck, playedIds, ledSuit, trump);
+  }
+
+  // 8. 75% or less: not worth the risk. Play my worst legal card.
+  return worstCard(legal);
+}
+
+// findBeatingCards(cards, toBeat, ledSuit, trump)
+// Returns the cards from a list that would beat the card `toBeat`.
+function findBeatingCards(cards, toBeat, ledSuit, trump) {
+  let result = [];
+  for (let i = 0; i < cards.length; i++) {
+    let card = cards[i];
+
+    // Only trump or the led suit can win a trick.
+    let canWin = (card.effSuit === trump || card.effSuit === ledSuit);
+
+    // Trump always scores 7 or more and other suits score 1 to 6,
+    // so comparing the scores is all we need to do.
+    if (canWin && card.score > toBeat.score) {
+      result.push(card);
+    }
+  }
+  return result;
+}
+
+// winProbability(card, hand, deck, playedIds, playersBehind, ledSuit, trump)
+// Estimates the chance (0 to 1) that `card` wins the trick.
+// We can't see the other hands, so we GUESS them many times and count.
+function winProbability(card, hand, deck, playedIds, playersBehind, ledSuit, trump) {
+  let TRIALS = 2000;   // how many pretend deals to try
+
+  // Step 1: make a list of the cards this player hasn't seen yet.
+  // (Not in their own hand, and not already played.)
+  let unseen = [];
+  for (let i = 0; i < deck.length; i++) {
+    let c = deck[i];
+    let alreadyPlayed = playedIds.includes(c.id);
+    let inMyHand = hand.includes(c);
+    if (!alreadyPlayed && !inMyHand) {
+      unseen.push(c);
+    }
+  }
+
+  // Step 2: deal pretend hands to the players after me, many times.
+  let timesWon = 0;
+  for (let t = 0; t < TRIALS; t++) {
+    // Shuffle a COPY of the unseen cards: one random guess at who holds what.
+    let pool = shuffleDeck(unseen.slice());
+
+    let someoneBeatsMe = false;
+    for (let p = 0; p < playersBehind; p++) {
+      // Give this pretend player the next few cards from the pool.
+      let start = p * hand.length;
+      let theirHand = pool.slice(start, start + hand.length);
+
+      // Could they LEGALLY play a card that beats mine?
+      let theirLegal = legalPlays(theirHand, ledSuit);
+      let theirBeaters = findBeatingCards(theirLegal, card, ledSuit, trump);
+      if (theirBeaters.length > 0) {
+        someoneBeatsMe = true;
+      }
+    }
+
+    if (someoneBeatsMe === false) {
+      timesWon = timesWon + 1;
+    }
+  }
+
+  // Step 3: the fraction of pretend deals where my card held up.
+  return timesWon / TRIALS;
+}
+
+// topRunCard(legal, toBeat, deck, playedIds, ledSuit, trump)
+// When a player has decided to win, pick WHICH winning card to use.
+// If they hold several of the highest cards left (like right bower, left
+// bower and Ace), any of them wins, so play the LOWEST of that run.
+function topRunCard(legal, toBeat, deck, playedIds, ledSuit, trump) {
+  // Step 1: list every card not yet played that could beat `toBeat`.
+  let live = [];
+  for (let i = 0; i < deck.length; i++) {
+    let c = deck[i];
+    let alreadyPlayed = playedIds.includes(c.id);
+    let canWin = (c.effSuit === trump || c.effSuit === ledSuit);
+    if (!alreadyPlayed && canWin && c.score > toBeat.score) {
+      live.push(c);
+    }
+  }
+
+  // Step 2: sort that list from highest score to lowest.
+  live.sort(function (a, b) {
+    return b.score - a.score;   // a positive number puts b first
+  });
+
+  // Step 3: walk down from the top while the card is in MY legal cards.
+  let pick = null;
+  for (let i = 0; i < live.length; i++) {
+    if (legal.includes(live[i])) {
+      pick = live[i];   // still part of my unbroken run from the top
+    } else {
+      break;            // someone else might hold this one: the run ends here
+    }
+  }
+
+  // Step 4: if I don't hold the very top card, just play my highest card.
+  if (pick === null) {
+    pick = legal[0];
+    for (let i = 1; i < legal.length; i++) {
+      if (legal[i].score > pick.score) {
+        pick = legal[i];
+      }
+    }
+  }
+  return pick;
+}
+
+// worstCard(cards)
+// Returns the card with the lowest score in a list.
+function worstCard(cards) {
+  // Assume the first card is the worst, then look for a lower one.
+  let worst = cards[0];
+  for (let i = 1; i < cards.length; i++) {
+    if (cards[i].score < worst.score) {
+      worst = cards[i];
+    }
+  }
+  return worst;
+}
+
+// evaluateTrick(trick, ledSuit, trump)
+// Decides who is winning a trick. `trick` is a list of { seat, card } objects.
+// Different suits share the same scores (every non-trump Ace is 6), so
+// cards that are not trump and not the led suit are skipped. They can't win.
+function evaluateTrick(trick, ledSuit, trump) {
+  let winner = null;
+
+  for (let i = 0; i < trick.length; i++) {
+    let play = trick[i];         // for example { seat: 'West', card: ... }
+    let card = play.card;
+    let canWin = (card.effSuit === trump || card.effSuit === ledSuit);
+
+    if (canWin) {
+      // Keep this play if it's the first contender, or if it scores higher.
+      if (winner === null || card.score > winner.card.score) {
+        winner = play;
+      }
+    }
+  }
+  return winner;
+}
+
+// collectTrick(trick, winner, piles)
+// Moves the 4 played cards into the winner's pile of won tricks.
+function collectTrick(trick, winner, piles) {
+  // Gather just the card objects from the trick.
+  let cards = [];
+  for (let i = 0; i < trick.length; i++) {
+    cards.push(trick[i].card);
+  }
+
+  // Add them to the winner's pile as one stack.
+  piles[winner.seat].push(cards);
+
+  // The winner leads the next trick, so return their seat.
+  return winner.seat;
+}
+
+/* =========================================================
+   PAGE CODE
+   Everything below this line runs the web page itself: drawing
+   cards, the Next button, animations and the step-by-step panel.
+   It uses a few more advanced features (async/await and Promises,
+   so the code can pause until you click), but every part is
+   commented so you can follow it.
+   ========================================================= */
+
+/* ---------- plain-English descriptions for the "What it does" box ----------
+   `fn` is the function itself; fn.toString() gives us its source code,
+   which is how the Source panel shows the real code that runs. */
+const FUNCS = {
+  createDeck:     { fn: createDeck,
+    what: 'Uses one for-loop inside another (4 suits × 6 ranks) to push 24 card objects into an array. Each card gets a base score by rank: 9 = 1, 10 = 2, J = 3, Q = 4, K = 5, A = 6. With no trump yet, four cards tie at every score.' },
+  shuffleDeck:    { fn: shuffleDeck,
+    what: 'A Fisher–Yates shuffle. Starting at the last position, each card swaps places with a random card at or before it, using a temporary variable to hold one card during the swap. Every ordering is equally likely.' },
+  dealCards:      { fn: dealCards,
+    what: 'Takes cards from the front of the array one at a time and hands them out clockwise (South, West, North, East), five times around. 20 cards are dealt; the 4 left over are the kitty. The function runs instantly; the page then replays the deal one card at a time so you can watch.' },
+  applyTrump:     { fn: applyTrump,
+    what: 'Re-scores every card. Trump gets +6, so the 9 of trump (7) beats any non-trump ace (6). The jack of trump (right bower) gets enough to beat the trump ace by 2 (→ 14). The same-color jack (left bower) gets one less (→ 13) and its effSuit becomes trump.' },
+  legalPlays:     { fn: legalPlays,
+    what: 'Filters a hand down to the cards that are allowed. If a suit was led and the player has a card whose effSuit matches, they must play one of those. Otherwise any card is legal.' },
+  chooseBestCard: { fn: chooseBestCard,
+    what: 'Used when a computer player leads. It gets the legal cards from legalPlays() (all of them, when leading), then a for-loop finds the card with the highest score. That card is led.' },
+  choosePlay:     { fn: choosePlay,
+    what: 'The follower’s decision. It calls smaller helper functions to find what is winning, which of its cards could beat it, and how risky trying would be. Then an if-statement picks one of four plays: can’t win → worst legal card; last to play → cheapest winning card; odds above 75% → lowest card of its top run; otherwise → worst legal card.' },
+  findBeatingCards: { fn: findBeatingCards,
+    what: 'Keeps only cards that are trump or the led suit AND score higher than the card currently winning. Because every trump scores 7+ and every non-trump scores 1–6, a simple “score >” comparison is enough.' },
+  winProbability: { fn: winProbability,
+    what: 'A quick simulation. The player can’t see the other hands, so it takes every card it hasn’t seen (not in its hand, not played yet), shuffles them, and deals pretend hands to the players still to act. For each pretend hand it reuses legalPlays() and findBeatingCards() to ask, “could they legally beat me?” It repeats this 2,000 times; the fraction of times nobody could is the probability.' },
+  topRunCard:     { fn: topRunCard,
+    what: 'Ranks every unplayed card that can beat the table, high to low. Walking down from the top, it keeps going while the player holds the card. The last card in that unbroken run is played: it’s just as unbeatable as the bigger ones, so the bowers are saved for later.' },
+  worstCard:      { fn: worstCard,
+    what: 'Returns the lowest-scoring card from a list. It assumes the first card is the worst, then a for-loop checks each other card and keeps any that scores lower.' },
+  evaluateTrick:  { fn: evaluateTrick,
+    what: 'First filters the trick to cards that are trump or follow the led suit (an off-suit ace scores 6 but can’t win). Among the cards left, a for-loop keeps whichever has the highest score. Every score in that group is different, so there’s never a tie.' },
+  collectTrick:   { fn: collectTrick,
+    what: 'Takes the four card objects from the trick and pushes them as one stack onto the winner’s pile. It returns the winner’s seat, because the winner leads the next trick.' },
+};
+
+/* ---------- everything the page needs to remember ---------- */
+const state = {
+  deck: [], hands: { South: [], West: [], North: [], East: [] }, kitty: [],
+  piles: { South: [], West: [], North: [], East: [] },
+  trump: null, ledSuit: null, trick: [], winner: null, turn: null,
+  location: {}, changed: new Set(), focus: new Set(), playedIds: [],
+  awaitingHuman: null, sort: 'index', trickNum: 0, handNum: 0,
+};
+// deck: the 24-card array      hands/piles: cards held / tricks won by each seat
+// trump, ledSuit: suit codes    trick: the { seat, card } plays on the table right now
+// location: where each card is (for the deck panel)   playedIds: ids of every card played this hand
+// changed/focus: which cards to highlight in the deck panel
+
+/* ---------- small helper functions ---------- */
+// $('x') is a shortcut for document.getElementById('x').
+const $ = id => document.getElementById(id);
+const speed = () => parseFloat($('speed').value);      // animation speed multiplier
+// sleep(ms) pauses an async function for a while (used for animations).
+const sleep = ms => new Promise(r => setTimeout(r, ms * speed()));
+const cardLabel = c => `${c.rank}${SYM[c.suit]}`;     // e.g. 'J♥'
+const q = s => (s ? `'${s}'` : 'null');
+const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+
+// The strip of function names along the top of the page.
+const PIPE = ['createDeck', 'shuffleDeck', 'dealCards', 'applyTrump', 'legalPlays', 'chooseBestCard', 'choosePlay', 'findBeatingCards', 'winProbability', 'topRunCard', 'worstCard', 'evaluateTrick', 'collectTrick'];
+const visited = new Set();
+function renderPipeline(active) {
+  $('pipeline').innerHTML = PIPE.map((p, i) =>
+    `${i ? '<span class="arrow">→</span>' : ''}<span class="step ${p === active ? 'active' : visited.has(p) ? 'done' : ''}">${p}()</span>`).join('');
+}
+
+// Adds simple colors (keywords, strings, numbers, comments) to source code text.
+function highlightJS(src) {
+  const esc = src.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return esc.replace(/(\/\/[^\n]*)|('[^']*'|`[^`]*`)|\b(function|async|await|const|let|for|of|if|else|return|new|break|null|true|false)\b|\b(\d+)\b/g,
+    (m, cm, str, kw, num) => cm ? `<span class="cm">${cm}</span>` : str ? `<span class="str">${str}</span>`
+      : kw ? `<span class="kw">${kw}</span>` : `<span class="num">${num}</span>`);
+}
+function setStatus(html) { $('status').innerHTML = html; }
+function setResult(html, waiting = false) { $('nowResult').innerHTML = html; $('nowResult').classList.toggle('waiting', waiting); }
+
+// Adds one line to the "Call log" list.
+let stepNo = 0;
+function addLog(name, args, note, user = false, nested = false) {
+  const li = document.createElement('li');
+  li.className = (user ? 'user ' : '') + (nested ? 'nested' : '');
+  li.innerHTML = `<span class="i">${stepNo}</span><span><code>${name}${user ? '' : `(${args})`}</code><span class="d">${note}</span></span>`;
+  $('log').prepend(li);
+}
+
+/* ---------- the Next button ----------
+   waitNext() returns a Promise: a value that "finishes later". The game code
+   writes `await waitNext()` and stops right there until advance() is called
+   by a click (or the auto-advance timer), which finishes the Promise. */
+let nextResolver = null, autoTimer = null;
+function waitNext(label = 'Next step →') {
+  return new Promise(resolve => {
+    nextResolver = resolve;
+    $('nextBtn').disabled = false;
+    $('nextBtn').textContent = label;
+    armAuto();
+  });
+}
+function advance() {
+  if (!nextResolver) return;
+  clearTimeout(autoTimer);
+  const r = nextResolver; nextResolver = null;
+  $('nextBtn').disabled = true;
+  r();
+}
+function armAuto() {
+  clearTimeout(autoTimer);
+  if ($('auto').checked && nextResolver) autoTimer = setTimeout(advance, 2400 * speed());
+}
+function blockNext(label) { $('nextBtn').disabled = true; $('nextBtn').textContent = label; }
+
+/* ---------- one function call = one step ----------
+   step() shows a function's name, arguments, reason and source code, runs it
+   with run(), shows the result, adds it to the log, then waits for Next. */
+async function step(name, { args = '', why, run, result, pause = true, inside = '' }) {
+  stepNo++;
+  const f = FUNCS[name];
+  renderPipeline(name);
+  $('stepNo').textContent = `Step ${stepNo}`;
+  $('trickNo').textContent = state.trickNum ? `Trick ${state.trickNum} of 5` : '';
+  $('inside').textContent = inside ? `↳ called inside ${inside}` : '';
+  $('nowSig').className = 'sig';
+  $('nowSig').textContent = `${name}(${args})`;
+  $('whyHead').textContent = 'Why it’s being called now'; $('whatHead').textContent = 'What it does';
+  $('nowWhy').innerHTML = why;
+  $('nowWhat').textContent = f.what;
+  $('nowCode').innerHTML = highlightJS(f.fn.toString());
+  setResult('<span class="running">Running…</span>');
+  blockNext('Running…');
+  const value = await run();
+  visited.add(name);
+  const res = typeof result === 'function' ? result(value) : result;
+  setResult(res);
+  addLog(name, args, res.replace(/<br>/g, ' ').replace(/<[^>]+>/g, ''), false, !!inside);
+  renderAll();
+  if (pause) await waitNext();
+  return value;
+}
+
+// A pause where the user, not the code, has to act.
+function userMoment(title, why, waitingText, btnLabel) {
+  stepNo++;
+  renderPipeline(null);
+  $('stepNo').textContent = `Step ${stepNo}`;
+  $('trickNo').textContent = state.trickNum ? `Trick ${state.trickNum} of 5` : '';
+  $('inside').textContent = '';
+  $('nowSig').className = 'sig user';
+  $('nowSig').textContent = title;
+  $('whyHead').textContent = 'What’s happening'; $('whatHead').textContent = 'What the code is doing';
+  $('nowWhy').innerHTML = why;
+  $('nowWhat').textContent = title === 'Hand complete' ? 'Nothing is running. Clicking below starts the loop again, beginning with createDeck().' : 'Nothing is running. The code is waiting on a Promise that your click resolves, and your choice becomes an argument to the next call.';
+  setResult(waitingText, true);
+  blockNext(btnLabel);
+}
+
+/* ---------- drawing cards as SVG pictures ----------
+   SVG is a way to draw shapes and text with markup, like HTML for pictures. */
+const BACK = `<svg viewBox="0 0 70 100" aria-label="face-down card">
+  <defs><pattern id="cb" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <line x1="0" y1="0" x2="0" y2="6" stroke="#c9d3e3" stroke-width="2"/></pattern></defs>
+  <rect class="face" x="1" y="1" width="68" height="98" rx="7" fill="#fff" stroke="#cfd4dc"/>
+  <rect x="6" y="6" width="58" height="88" rx="4" fill="url(#cb)" stroke="#d8dde5"/></svg>`;
+
+// Returns the SVG markup for one card: rank and suit in the corner, a big suit
+// symbol in the middle, and a colored score badge at the bottom.
+function cardSVG(card, { faceDown = false, score } = {}) {
+  if (faceDown) return BACK;
+  const col = card.color === 'red' ? '#c8102e' : '#1f2328';
+  const s = SYM[card.suit];
+  const val = score ?? card.score;
+  const role = state.trump && val !== card.base ? card.role : null;
+  const badge = { right: ['#ffe9b8', '#8a5a00', 'RIGHT'], left: ['#ece3ff', '#5b21b6', 'LEFT'], trump: ['#dbe7ff', '#1d4ed8', 'TRUMP'] }[role]
+    || ['#eceff3', '#4b5563', ''];
+  return `<svg viewBox="0 0 70 100" aria-label="${card.rank} of ${SUIT_NAME[card.suit]}, score ${val}">
+    <rect class="face" x="1" y="1" width="68" height="98" rx="7" fill="#fff" stroke="#cfd4dc"/>
+    <text x="7" y="17" font-family="Georgia, serif" font-size="14" font-weight="700" fill="${col}">${card.rank}</text>
+    <text x="7.5" y="31" font-size="13" fill="${col}">${s}</text>
+    ${badge[2] ? `<text x="63" y="13" text-anchor="end" font-family="Arial" font-size="6.5" font-weight="700" fill="${badge[1]}">${badge[2]}</text>` : ''}
+    <text x="38" y="66" text-anchor="middle" font-size="32" fill="${col}">${s}</text>
+    <rect x="7" y="78" width="56" height="16" rx="8" fill="${badge[0]}"/>
+    <text x="35" y="90" text-anchor="middle" font-family="Arial" font-size="10" font-weight="700" fill="${badge[1]}">score ${val}</text>
+  </svg>`;
+}
+
+/* ---------- drawing the page ----------
+   Each render function rebuilds one part of the page from `state`. */
+
+// A seat's pile of won tricks: one small face-down stack per trick.
+function pileHTML(seat) {
+  const tricks = state.piles[seat];
+  const stacks = tricks.map((t, k) =>
+    `<div class="stack" style="left:${k * 13}px; transform: rotate(${k % 2 ? 5 : -4}deg)">${
+      t.map((c, j) => `<div class="mini" style="top:${-j * 1.5}px; left:${j * 1.5}px">${BACK}</div>`).join('')}</div>`).join('');
+  return `<div class="pile-wrap"><div class="pile ${tricks.length ? '' : 'empty'}" id="pile-${seat}">${stacks}</div>
+    <div class="pile-label"><b>${tricks.length}</b> ${tricks.length === 1 ? 'trick' : 'tricks'}</div></div>`;
+}
+
+// Draws all four players' hands (and their trick piles).
+function renderSeats() {
+  for (const seat of SEATS) {
+    const el = $('seat-' + seat);
+    const hand = state.hands[seat];
+    const reveal = seat === 'South' || $('reveal').checked;
+    let legal = null;
+    if (seat === 'South' && state.awaitingHuman) legal = new Set(legalPlays(hand, state.ledSuit).map(c => c.id));
+    const team = seat === 'North' || seat === 'South' ? 'N/S' : 'E/W';
+    el.className = `seat ${seat.toLowerCase()} ${state.turn === seat ? 'turn' : ''}`;
+    const handHTML = `<div class="hand ${seat === 'South' && state.awaitingHuman ? 'awaiting' : ''}">${hand.map(c => {
+      const cls = legal ? (legal.has(c.id) ? 'playable' : 'illegal') : '';
+      return `<div class="card ${cls}" data-id="${c.id}">${cardSVG(c, { faceDown: !reveal, score: c.displayScore })}</div>`;
+    }).join('')}</div>`;
+    el.innerHTML = `<div class="seat-name">${seat}${seat === 'South' ? ' (you)' : ''} · ${team}</div>
+      <div class="seat-row">${handHTML}${pileHTML(seat)}</div>`;
+  }
+}
+
+// Draws the cards played to the middle of the table.
+function renderCenter() {
+  let html = state.trump ? `<div class="trump-chip">Trump: <b style="color:${['H', 'D'].includes(state.trump) ? '#c8102e' : '#1f2328'}">${SYM[state.trump]} ${SUIT_NAME[state.trump]}</b>${state.ledSuit ? ` · Led: <b>${SYM[state.ledSuit]}</b>` : ''}</div>` : '';
+  for (const p of state.trick) {
+    const contender = !state.winner || p.card.effSuit === state.trump || p.card.effSuit === state.ledSuit;
+    const won = state.winner && state.winner.seat === p.seat;
+    html += `<div class="slot ${p.seat} ${won ? 'winner' : ''} ${contender ? '' : 'out'}" data-seat="${p.seat}">
+      <div class="card">${cardSVG(p.card)}</div><div class="who">${p.seat}${won ? ' wins' : ''}</div></div>`;
+  }
+  $('center').innerHTML = html;
+}
+
+// Draws the deck panel: the visual grid on the left and the array text on the right.
+function renderDeck() {
+  let list = state.deck.map((c, i) => ({ c, i }));
+  const sc = c => c.displayScore ?? c.score;
+  if (state.sort === 'score') list.sort((a, b) => sc(b.c) - sc(a.c));
+  const gone = id => /pile|table/.test(state.location[id] || '');
+  const shortLoc = l => !l ? '' : l === 'kitty' ? 'kitty' : l === 'table' ? 'table' : l.endsWith(' pile') ? l[0] + ' pile' : l;
+
+  $('deckGrid').innerHTML = `<div class="deck-grid">${list.map(({ c, i }) => {
+    const l = state.location[c.id];
+    return `<div class="deck-cell ${gone(c.id) ? 'gone' : ''} ${state.focus.has(c.id) ? 'focus' : ''}" data-id="${c.id}">
+      <div class="card">${cardSVG(c, { score: c.displayScore })}</div>
+      <span class="mono">[${i}]</span><br><span class="loc ${l === 'South' || l === 'South pile' ? 'me' : ''}">${l ? shortLoc(l) : '&nbsp;'}</span></div>`;
+  }).join('')}</div>`;
+
+  const rows = list.map(({ c, i }) => {
+    const l = state.location[c.id];
+    const cls = [state.changed.has(c.id) && 'changed', state.focus.has(c.id) && 'focus', gone(c.id) && 'gone'].filter(Boolean).join(' ');
+    return `<div class="row ${cls}" data-id="${c.id}"><span class="c">/*${String(i).padStart(2)} */</span> { <span class="k">id</span>: <span class="s">${("'" + c.id + "',").padEnd(6)}</span> <span class="k">base</span>: <span class="n">${c.base}</span>, <span class="k">score</span>: <span class="n">${String(sc(c)).padStart(2)}</span>, <span class="k">effSuit</span>: <span class="s">'${c.effSuit}'</span>${l ? `, <span class="k">at</span>: <span class="s">'${l}'</span>` : ''} },</div>`;
+  }).join('');
+  $('deckArray').innerHTML = `<div class="row">const deck = [</div>${rows}<div class="row">];</div>`;
+}
+
+// Redraw everything.
+function renderAll() { renderSeats(); renderCenter(); renderDeck(); }
+
+// Makes a card pop and shows a little "+6" style label on it.
+function flashCard(id, text) {
+  document.querySelectorAll(`.deck-cell[data-id="${id}"] .card, .hand .card[data-id="${id}"]`).forEach(el => {
+    el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+    if (text) { const b = document.createElement('span'); b.className = 'bump'; b.textContent = text; el.appendChild(b); }
+  });
+}
+
+// Fly the four trick cards from the table to the winner's pile.
+async function animateCollect(seat) {
+  const pile = $('pile-' + seat).getBoundingClientRect();
+  const tx = pile.left + (pile.width ? Math.min(pile.width, 40) / 2 + state.piles[seat].length * 13 : 20);
+  const ty = pile.top + pile.height / 2;
+  const flyers = [...document.querySelectorAll('#center .slot .card')].map(el => {
+    const r = el.getBoundingClientRect();
+    const f = document.createElement('div');
+    f.className = 'flyer';
+    f.innerHTML = el.innerHTML;
+    Object.assign(f.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px',
+      transition: `transform ${700 * speed()}ms cubic-bezier(.5,0,.3,1), opacity ${700 * speed()}ms` });
+    document.body.appendChild(f);
+    return { f, r };
+  });
+  state.trick = []; renderCenter();
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  flyers.forEach(({ f, r }, k) => {
+    const dx = tx - (r.left + r.width / 2), dy = ty - (r.top + r.height / 2);
+    f.style.transform = `translate(${dx}px, ${dy}px) scale(.6) rotate(${(k - 1.5) * 6}deg)`;
+  });
+  await sleep(720);
+  flyers.forEach(({ f }) => f.remove());
+}
+
+/* ---------- the game itself ----------
+   playHand() runs one full hand: build, shuffle, deal, pick trump, play 5 tricks.
+   Every demonstrated function is run through step(), so it pauses for Next. */
+async function playHand() {
+  state.handNum++;
+  Object.assign(state, { hands: { South: [], West: [], North: [], East: [] }, kitty: [],
+    piles: { South: [], West: [], North: [], East: [] }, trump: null, ledSuit: null, trick: [], winner: null,
+    turn: null, location: {}, changed: new Set(), focus: new Set(), playedIds: [], trickNum: 0 });
+  visited.clear();
+  setStatus(state.handNum === 1 ? 'Welcome! Use <b>Next step</b> (right) to run each function one at a time.' : `Hand ${state.handNum}: starting over with a fresh deck.`);
+
+  // 1. createDeck
+  await step('createDeck', {
+    why: state.handNum === 1
+      ? 'Nothing can happen without cards. This is the first call: it builds the deck array the rest of the program works on.'
+      : 'A new hand needs a fresh deck, so every card goes back to its base score.',
+    run: () => { state.deck = createDeck(); state.deck.forEach(c => { c.displayScore = c.score; }); renderAll(); return state.deck; },
+    result: d => `Returned an array of <b>${d.length}</b> card objects in suit order. Scores are 1–6, so four cards tie at each score.`,
+  });
+
+  // 2. shuffleDeck
+  await step('shuffleDeck', {
+    args: 'deck',
+    why: 'The deck is still sorted by suit and rank. Dealing it now would give everyone predictable hands, so it gets randomized first.',
+    run: async () => {
+      setStatus('Shuffling: watch both the grid and the array reorder.');
+      for (let k = 0; k < 4; k++) {
+        state.deck = shuffleDeck(createDeck()); state.deck.forEach(c => { c.displayScore = c.score; });
+        renderDeck(); await sleep(150);
+      }
+      state.deck = createDeck(); state.deck.forEach(c => { c.displayScore = c.score; });
+      shuffleDeck(state.deck); renderDeck();
+      return state.deck;
+    },
+    result: d => `Same 24 objects, new order. <b>deck[0]</b> is now <b>${cardLabel(d[0])}</b> and <b>deck[23]</b> is <b>${cardLabel(d[23])}</b>.`,
+  });
+
+  // 3. dealCards
+  await step('dealCards', {
+    args: 'deck',
+    why: 'The deck is shuffled. Each player needs 5 cards before anyone can call trump. East is the dealer, so South (you) gets the first card.',
+    run: async () => {
+      setStatus('Dealing one card at a time: South → West → North → East, five times around.');
+      // The real deal happens instantly...
+      const res = dealCards(state.deck);
+      // ...then we replay it one card at a time, in the same order, so you can watch.
+      for (let n = 0; n < 20; n++) {
+        const seat = SEATS[n % 4];          // South, West, North, East, South, ...
+        const card = state.deck[n];
+        state.hands[seat].push(card);
+        state.location[card.id] = seat;
+        state.turn = seat;
+        state.focus = new Set([card.id]);
+        setResult(`Card <b>${n + 1} of 20</b>: <span class="mono">deck[${n}]</span> → <b>${seat}</b>${seat === 'South' ? ` (${cardLabel(card)})` : ''}`);
+        renderSeats(); renderDeck();
+        await sleep(170);
+      }
+      state.hands = res.hands; state.kitty = res.kitty; state.turn = null; state.focus = new Set();
+      res.kitty.forEach(c => { state.location[c.id] = 'kitty'; });
+      return res;
+    },
+    result: r => `Returned <span class="mono">{ hands, kitty }</span>. Each player holds 5 cards. Kitty (unused): ${r.kitty.map(cardLabel).join(', ')}.`,
+  });
+
+  // 4. user picks trump
+  setStatus('Look at your hand, then <b>pick a trump suit</b> above the table.');
+  userMoment('Your turn: choose trump',
+    'Every card still has its base score, so nothing can be ranked until trump is known.',
+    'Waiting for you to pick a suit above the table…', 'Pick a trump suit ↖');
+  $('trumpPicker').classList.add('show');
+  const trump = await new Promise(r => { state.pickTrump = r; });
+  $('trumpPicker').classList.remove('show');
+  addLog(`You chose ${SYM[trump]} ${SUIT_NAME[trump]}`, '', 'Passed as the trump argument to applyTrump()', true);
+
+  // 5. applyTrump
+  await step('applyTrump', {
+    args: `deck, '${trump}'`,
+    why: `You picked <b>${SYM[trump]} ${SUIT_NAME[trump]}</b>. The scores have to change so ${SUIT_NAME[trump].toLowerCase()} beat every other suit and the two jacks move to the top.`,
+    run: async () => {
+      const before = Object.fromEntries(state.deck.map(c => [c.id, c.score]));
+      state.trump = trump;
+      applyTrump(state.deck, trump);                 // final scores computed; reveal them one at a time
+      state.deck.forEach(c => { c.displayScore = before[c.id]; });
+      setStatus(`<code>applyTrump()</code> is looping over all 24 cards. Only the 7 trump cards change.`);
+      renderAll(); await sleep(500);
+      const order = state.deck.filter(c => c.added > 0).sort((a, b) => a.added - b.added || a.base - b.base);
+      for (const c of order) {
+        c.displayScore = c.score; state.changed.add(c.id); state.focus = new Set([c.id]);
+        setResult(c.role === 'right' ? `${cardLabel(c)}: right bower, base 3 + 11 = <b>14</b> (2 above the trump ace)`
+          : c.role === 'left' ? `${cardLabel(c)}: left bower, base 3 + 10 = <b>13</b>, and effSuit '${c.suit}' → '${trump}'`
+          : `${cardLabel(c)}: trump, base ${c.base} + 6 = <b>${c.score}</b>`);
+        renderAll(); flashCard(c.id, '+' + c.added);
+        await sleep(c.role === 'trump' ? 500 : 1200);
+      }
+      state.focus = new Set();
+      return state.deck;
+    },
+    result: () => {
+      const ladder = state.deck.filter(c => c.effSuit === trump).sort((a, b) => b.score - a.score);
+      return `Trump ranking: ${ladder.map(c => `${cardLabel(c)} ${c.score}`).join(' › ')}. Every other card keeps its 1–6 score.`;
+    },
+  });
+
+  // 6. five tricks
+  let leader = 'South';
+  for (let t = 1; t <= 5; t++) {
+    state.trickNum = t;
+    leader = await playTrick(leader, t);
+  }
+
+  // 7. hand over
+  const ns = state.piles.North.length + state.piles.South.length;
+  const ew = state.piles.East.length + state.piles.West.length;
+  state.trickNum = 0;
+  setStatus(`<b>Hand over.</b> North/South took ${plural(ns, 'trick')}, East/West took ${plural(ew, 'trick')}. ${ns > ew ? 'Your team wins the hand!' : 'East/West win the hand.'}`);
+  userMoment('Hand complete', `All 5 tricks have been played. North/South: <b>${ns}</b> · East/West: <b>${ew}</b>.`,
+    ns > ew ? 'Your team wins the hand.' : 'East/West win the hand.', '');
+  await waitNext('Deal a new hand →');
+}
+
+// Plays one trick: four players in turn, starting with `leader`.
+// Returns the seat that won, because they lead the next trick.
+async function playTrick(leader, num) {
+  state.trick = []; state.ledSuit = null; state.winner = null;
+  renderCenter();
+  let seat = leader;
+  for (let n = 0; n < 4; n++) {
+    state.turn = seat; renderSeats();
+    const ctx = state.ledSuit
+      ? `${state.trick[0].seat} led ${SYM[state.ledSuit]}, so ${seat === 'South' ? 'you' : seat} must follow ${SYM[state.ledSuit]} if possible.`
+      : `${seat === 'South' ? 'You' : seat} ${num === 1 ? 'lead the first trick' : 'won the last trick and lead'}, so any card is allowed.`;
+
+    if (seat === 'South') {
+      // ---- YOUR turn: show your legal cards, then wait for your click
+      const legal = await step('legalPlays', {
+        args: `hands.South, ${q(state.ledSuit)}`,
+        why: `It’s your turn. ${ctx} Before you can click, the page needs to know which of your cards to enable.`,
+        run: () => { const l = legalPlays(state.hands.South, state.ledSuit); state.focus = new Set(l.map(c => c.id)); return l; },
+        result: l => `${plural(l.length, 'legal card')}: ${l.map(cardLabel).join(', ')}. ${l.length < state.hands.South.length ? 'The rest are dimmed.' : ''}`,
+        pause: false,
+      });
+      setStatus(`Trick ${num}: <b>your turn.</b> Click one of the highlighted cards in your hand.`);
+      blockNext('Click a card in your hand ↓');
+      setResult($('nowResult').innerHTML + '<br><b>Now click a highlighted card in your hand.</b>', true);
+      const card = await new Promise(r => { state.awaitingHuman = r; renderSeats(); });
+      playCard('South', card);
+      addLog(`You played ${cardLabel(card)}`, '', `score ${card.score}`, true);
+      state.focus = new Set([card.id]);
+      renderAll();
+      await sleep(250);
+    } else if (state.trick.length > 0) {
+      // ---- computer FOLLOWING: run the choosePlay() decision tree, one helper per step
+      setStatus(`Trick ${num}: <b>${seat}</b> is deciding how to follow.`);
+      const pos = ['', 'second', 'third', 'last'][state.trick.length];
+      await step('choosePlay', {
+        args: `hands.${seat}, trick, '${state.ledSuit}', '${state.trump}', deck, playedIds`,
+        why: `${state.trick[0].seat} led, so ${seat} is following (playing ${pos}). Instead of just playing its best card, ${seat} checks whether it can actually win, and how cheaply.`,
+        run: () => { state.focus = new Set(); return null; },
+        result: `Entering choosePlay(). The next steps make the same helper calls choosePlay() makes, one at a time, so you can follow the if-statements in the source below.`,
+      });
+      const card = await stepThroughChoosePlay(seat);
+      setStatus(`Trick ${num}: <b>${seat}</b> played <b>${cardLabel(card)}</b>.`);
+    } else {
+      // ---- computer LEADING: just lead the highest card
+      setStatus(`Trick ${num}: <b>${seat}</b>’s turn.`);
+      const legal = await step('legalPlays', {
+        args: `hands.${seat}, ${q(state.ledSuit)}`,
+        why: `It’s ${seat}’s turn. ${ctx} The computer first works out its allowed cards.`,
+        run: () => { const l = legalPlays(state.hands[seat], state.ledSuit); state.focus = new Set(l.map(c => c.id)); return l; },
+        result: l => `${seat} has ${plural(l.length, 'legal card')}: ${l.map(c => `${cardLabel(c)} (${c.score})`).join(', ')}.`,
+      });
+      await step('chooseBestCard', {
+        args: `hands.${seat}, ${q(state.ledSuit)}`,
+        why: `${seat} has ${plural(legal.length, 'legal option')}. When a computer player leads, it simply leads its highest-scoring card.`,
+        run: () => { const c = chooseBestCard(state.hands[seat], state.ledSuit); playCard(seat, c); state.focus = new Set([c.id]); return c; },
+        result: c => `Highest legal score is <b>${cardLabel(c)} (${c.score})</b>. ${seat} plays it to the table.`,
+      });
+    }
+    // Move to the next seat clockwise (% 4 wraps from East back to South).
+    seat = SEATS[(SEATS.indexOf(seat) + 1) % 4];
+  }
+  state.turn = null;
+
+  // evaluateTrick
+  setStatus(`Trick ${num}: all four cards are down. Who wins?`);
+  const winner = await step('evaluateTrick', {
+    args: `trick, '${state.ledSuit}', '${state.trump}'`,
+    why: 'All four players have played. The trick array now holds four { seat, card } objects, and one of them has to be named the winner.',
+    run: () => {
+      const w = evaluateTrick(state.trick, state.ledSuit, state.trump);
+      state.winner = w; state.focus = new Set([w.card.id]);
+      return w;
+    },
+    result: w => {
+      const dropped = state.trick.filter(p => p.card.effSuit !== state.trump && p.card.effSuit !== state.ledSuit);
+      return `${dropped.length ? `Dropped as off-suit: ${dropped.map(p => `${cardLabel(p.card)} (${p.card.score})`).join(', ')}. ` : 'All four cards are trump or the led suit. '}Highest remaining: <b>${cardLabel(w.card)} (${w.card.score})</b>, so <b>${w.seat}</b> wins the trick.`;
+    },
+  });
+  setStatus(`Trick ${num}: <b>${winner.seat}</b> wins with <b>${cardLabel(winner.card)}</b> (score ${winner.card.score}).`);
+
+  // collectTrick
+  const nextLeader = await step('collectTrick', {
+    args: `trick, ${winner.seat}, piles`,
+    why: `${winner.seat} won, so the four cards leave the table and go into ${winner.seat}’s pile. The returned seat tells the program who leads next.`,
+    run: async () => {
+      const trickCopy = state.trick.slice();
+      await animateCollect(winner.seat);
+      const lead = collectTrick(trickCopy, winner, state.piles);
+      trickCopy.forEach(p => { state.location[p.card.id] = `${winner.seat} pile`; });
+      state.winner = null; state.focus = new Set(); state.ledSuit = null;
+      renderAll();
+      return lead;
+    },
+    result: lead => `${winner.seat} now has ${plural(state.piles[winner.seat].length, 'trick')}. Returned <b>'${lead}'</b>: ${num < 5 ? (lead === 'South' ? 'you lead the next trick.' : `${lead} leads the next trick.`) : 'that was the last trick.'}`,
+  });
+  return nextLeader;
+}
+
+/* ---------- stepping through choosePlay() ----------
+   choosePlay() (in the demonstrated functions above) makes its decision in one go.
+   To let you watch, stepThroughChoosePlay() follows exactly the same if-statements
+   and makes exactly the same helper calls, but each call goes through makeCaller(),
+   which shows it as a step and waits for Next. */
+async function stepThroughChoosePlay(seat) {
+  const call = makeCaller(seat);
+  const hand = state.hands[seat];
+  const trick = state.trick;
+
+  const legal = await call('legalPlays', hand, state.ledSuit);
+  const winning = await call('evaluateTrick', trick, state.ledSuit, state.trump);
+  const beaters = await call('findBeatingCards', legal, winning.card, state.ledSuit, state.trump);
+
+  if (beaters.length === 0) return call('worstCard', legal);    // can't win
+  if (trick.length === 3) return call('worstCard', beaters);     // last to play
+
+  let best = beaters[0];                                         // strongest winner
+  for (let i = 1; i < beaters.length; i++) {
+    if (beaters[i].score > best.score) best = beaters[i];
+  }
+  const odds = await call('winProbability', best, hand, state.deck, state.playedIds,
+    3 - trick.length, state.ledSuit, state.trump);
+
+  if (odds > 0.75) {
+    return call('topRunCard', legal, winning.card, state.deck, state.playedIds, state.ledSuit, state.trump);
+  }
+  return call('worstCard', legal);                               // not worth the risk
+}
+
+// Turns a function argument into short readable text for the step header.
+function fmtArg(v, seat) {
+  if (v === state.deck) return 'deck';
+  if (v === state.playedIds) return `playedIds /* ${v.length} played */`;
+  if (v === state.trick) return 'trick';
+  if (v === state.hands[seat]) return `hands.${seat}`;
+  if (Array.isArray(v)) return `[${v.map(c => cardLabel(c)).join(', ')}]`;
+  if (v && v.rank) return cardLabel(v);
+  if (typeof v === 'string') return `'${v}'`;
+  return String(v);
+}
+const cardList = cs => cs.length ? cs.map(c => `${cardLabel(c)} (${c.score})`).join(', ') : 'none';
+const pct = p => `${Math.round(p * 100)}%`;
+
+// makeCaller(seat) returns a `call` function. call('worstCard', cards) runs the
+// real worstCard(cards), but first writes a "why" message that fits the situation,
+// and shows the whole thing as a step.
+function makeCaller(seat) {
+  const memo = {};           // remembers earlier results so later steps can explain the branch taken
+  const led = SYM[state.ledSuit];
+  const behind = 3 - state.trick.length;
+  return async (name, ...args) => {
+    let why = '', result;
+    const terminal = name === 'worstCard' || name === 'topRunCard';   // these return the card to play
+    switch (name) {
+      case 'legalPlays':
+        why = `First, which cards may ${seat} play? ${led} was led, so ${seat} must follow ${led} if it can.`;
+        result = l => `Legal: ${cardList(l)}.`;
+        break;
+      case 'evaluateTrick':
+        why = `The same function that scores a finished trick, called on the ${plural(state.trick.length, 'card')} played so far. It tells ${seat} which card it has to beat.`;
+        result = w => `Currently winning: <b>${w.seat}</b> with <b>${cardLabel(w.card)} (${w.card.score})</b>.`;
+        break;
+      case 'findBeatingCards':
+        why = `Can ${seat} beat ${cardLabel(args[1])}? Only legal cards that are trump or ${led}, with a higher score, can.`;
+        result = b => b.length ? `${seat} can beat it with: ${cardList(b)}.` : `None of ${seat}’s legal cards can beat ${cardLabel(args[1])}.`;
+        break;
+      case 'winProbability': {
+        const [best, hand, deck, played, pb, ls, tr] = args;
+        why = `${seat}’s best winner is ${cardLabel(best)}, but ${plural(behind, 'player')} still ${behind === 1 ? 'has' : 'have'} to play after it. How likely is it that ${cardLabel(best)} holds up?`;
+        result = p => {
+          const unseen = deck.filter(c => !played.includes(c.id) && !hand.includes(c));
+          const threats = unseen.filter(c => (c.effSuit === tr || c.effSuit === ls) && c.score > best.score);
+          return `Unseen cards: <b>${unseen.length}</b>. Unseen cards that could beat ${cardLabel(best)}: <b>${threats.length}</b>${threats.length ? ` (${threats.map(cardLabel).join(', ')})` : ''}. ${pb === 1 ? 'One player' : pb + ' players'} still to act, ${hand.length} cards each.
+            <span class="odds">${cardLabel(best)} survived ${Math.round(p * 2000).toLocaleString()} of 2,000 random deals = ${pct(p)} → ${p > 0.75 ? 'above 75%, go for the trick' : 'not above 75%, hold back'}</span>`;
+        };
+        break;
+      }
+      case 'topRunCard':
+        why = `Odds are ${pct(memo.winProbability)}, above 75%, so ${seat} will try to win. If it holds several of the top remaining cards, the lowest of that run wins just as surely and saves the bigger ones.`;
+        result = c => {
+          const [legal, toBeat, deck, playedNow, ls, tr] = args;
+          const played = playedNow.filter(id => id !== c.id);   // as it was before this card was played
+          const live = deck.filter(x => !played.includes(x.id) && (x.effSuit === tr || x.effSuit === ls) && x.score > toBeat.score).sort((a, b) => b.score - a.score);
+          const mine = new Set(legal.map(x => x.id));
+          const run = []; for (const x of live) { if (!mine.has(x.id)) break; run.push(x); }
+          return `Unplayed cards that beat ${cardLabel(toBeat)}, high to low: ${live.map(x => mine.has(x.id) ? `<b>${cardLabel(x)}</b>` : cardLabel(x)).join(' › ')} (${seat}’s in bold). `
+            + (run.length > 1 ? `${seat} holds the top ${run.length} in a row (${run.map(cardLabel).join(', ')}), so it plays the lowest of them: <b>${cardLabel(c)}</b>.`
+              : run.length === 1 ? `${seat} holds only the very top card: <b>${cardLabel(c)}</b>.`
+              : `${seat} doesn’t hold the top card, so it plays its best: <b>${cardLabel(c)}</b>.`);
+        };
+        break;
+      case 'worstCard':
+        if (memo.findBeatingCards && args[0] === memo.findBeatingCards)
+          why = `${seat} plays last, so nobody can respond. Any card in the beating list wins, so ${seat} uses the worst one that still wins.`;
+        else if (memo.winProbability !== undefined)
+          why = `Odds are only ${pct(memo.winProbability)}, not above 75%, so ${seat} decides not to try. It plays its worst legal card and saves the good ones.`;
+        else
+          why = `It’s clear ${seat} can’t win this trick, so there’s no reason to spend a good card. It plays its worst legal card.`;
+        result = c => `Worst card: <b>${cardLabel(c)} (${c.score})</b>.`;
+        break;
+    }
+    const value = await step(name, {
+      args: args.map(a => fmtArg(a, seat)).join(', '),
+      why, inside: `choosePlay() for ${seat}`,
+      run: () => {
+        const v = FUNCS[name].fn(...args);
+        memo[name] = v;
+        state.focus = new Set(Array.isArray(v) ? v.map(c => c.id) : v && v.card ? [v.card.id] : v && v.id ? [v.id] : []);
+        if (terminal) playCard(seat, v);
+        return v;
+      },
+      result: v => result(v) + (terminal ? `<br>choosePlay() returns <b>${cardLabel(v)}</b>, and ${seat} plays it to the table.` : ''),
+    });
+    return value;
+  };
+}
+
+// Moves a card from a player's hand to the table.
+function playCard(seat, card) {
+  state.hands[seat] = state.hands[seat].filter(c => c.id !== card.id);
+  state.playedIds.push(card.id);
+  if (!state.ledSuit) state.ledSuit = card.effSuit;
+  state.trick.push({ seat, card });
+  state.location[card.id] = 'table';
+}
+
+/* ---------- events: what happens when you click or press keys ---------- */
+$('nextBtn').onclick = advance;
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' && !['INPUT', 'SELECT'].includes(e.target.tagName)) advance();
+});
+$('auto').onchange = armAuto;
+$('trumpPicker').onclick = e => {
+  const s = e.target.closest('button')?.dataset.suit;
+  if (s && state.pickTrump) { const r = state.pickTrump; state.pickTrump = null; r(s); }
+};
+$('seat-South').onclick = e => {
+  const el = e.target.closest('.card.playable');
+  if (!el || !state.awaitingHuman) return;
+  const card = state.hands.South.find(c => c.id === el.dataset.id);
+  const resolve = state.awaitingHuman; state.awaitingHuman = null;
+  resolve(card);
+};
+$('reveal').onchange = renderSeats;
+$('sortTabs').onclick = e => {
+  const s = e.target.dataset.s; if (!s) return; state.sort = s;
+  [...$('sortTabs').children].forEach(b => b.classList.toggle('on', b.dataset.s === s)); renderDeck();
+};
+// Hover linking between grid cells and array rows
+$('deckPanel').addEventListener('mouseover', e => {
+  const t = e.target.closest('[data-id]'); if (!t) return;
+  document.querySelectorAll('#deckPanel .hover').forEach(x => x.classList.remove('hover'));
+  document.querySelectorAll(`#deckPanel [data-id="${t.dataset.id}"]`).forEach(x => x.classList.add('hover'));
+  const row = document.querySelector(`#deckArray .row[data-id="${t.dataset.id}"]`);
+  if (row && t.classList.contains('deck-cell')) row.scrollIntoView({ block: 'nearest' });
+});
+$('deckPanel').addEventListener('mouseleave', () =>
+  document.querySelectorAll('#deckPanel .hover').forEach(x => x.classList.remove('hover')));
+
+// Start: draw the function strip, then play hands forever (one after another).
+renderPipeline();
+(async () => { while (true) await playHand(); })();
+</script>
+</body>
+</html>
